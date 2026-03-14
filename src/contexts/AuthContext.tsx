@@ -18,38 +18,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user || null);
+useEffect(() => {
+  let mounted = true;
 
-        if (session?.user) {
-          const adminStatus = await checkIsAdmin(session.user.id);
-          setIsAdmin(adminStatus);
-        }
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const syncAuthState = async (session: any) => {
+    if (!mounted) return;
 
-    initAuth();
+    setIsLoading(true);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user || null);
+    try {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
 
-      if (session?.user) {
-        const adminStatus = await checkIsAdmin(session.user.id);
-        setIsAdmin(adminStatus);
+      if (currentUser) {
+        const adminStatus = await checkIsAdmin(currentUser.id);
+        if (mounted) setIsAdmin(adminStatus);
       } else {
+        if (mounted) setIsAdmin(false);
+      }
+    } catch (error) {
+      console.error('Error syncing auth state:', error);
+      if (mounted) {
+        setUser(null);
         setIsAdmin(false);
       }
-    });
+    } finally {
+      if (mounted) setIsLoading(false);
+    }
+  };
 
-    return () => subscription?.unsubscribe();
-  }, []);
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    void syncAuthState(session);
+  });
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    void syncAuthState(session);
+  });
+
+  return () => {
+    mounted = false;
+    subscription.unsubscribe();
+  };
+}, []);
 
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
