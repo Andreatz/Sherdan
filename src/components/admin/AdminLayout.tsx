@@ -42,14 +42,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage 
         </div>
 
         <nav className="flex-1 p-4 space-y-2">
-          {menuItems.map((item) => (
-            <button
-              onClick={() => navigate(item.path)}
-              className={`w-full text-left px-4 py-3 rounded transition ...`}
-            >
-              {sidebarOpen ? item.label : item.label.charAt(0)}
-            </button>
-          ))}
+          <button
+            onClick={() => navigate('/')}
+            className="w-full text-left px-4 py-3 rounded transition text-amber-100 hover:bg-slate-700"
+          >
+            {sidebarOpen ? '← Back to Site' : '←'}
+          </button>
           {menuItems.map((item) => (
             <button
               key={item.id}
