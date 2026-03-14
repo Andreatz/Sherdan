@@ -17,6 +17,21 @@ export const Login: React.FC = () => {
 
     try {
       await signIn(email, password);
+      import { useNavigate } from 'react-router-dom';
+
+      const navigate = useNavigate();
+      
+      const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+      
+        try {
+          await signIn(email, password);
+          navigate('/admin', { replace: true });
+        } catch (error: any) {
+          console.error(error);
+          setError(error.message ?? 'Login failed');
+        }
+      };
       navigate('/admin');
     } catch (err: any) {
       setError(err.message || 'Failed to sign in');
