@@ -1,0 +1,33 @@
+export const it = {
+  nav: {
+    title: 'Atlante di Sherdan',
+    campaign: 'Campagna',
+    characters: 'Personaggi',
+    sessions: 'Sessioni',
+    map: 'Mappa',
+    gallery: 'Galleria',
+    login: 'Accedi',
+    admin: 'Admin',
+    logout: 'Esci',
+  },
+  admin: {
+    panel: 'Pannello Admin',
+    dashboard: 'Dashboard',
+    characters: 'Personaggi',
+    sessions: 'Sessioni',
+    locations: 'Luoghi',
+    gallery: 'Galleria',
+    settings: 'Impostazioni Campagna',
+    backToSite: '← Torna al sito',
+  },
+  login: {
+    title: 'Diario del Capitano',
+    subtitle: 'Accedi per gestire la tua campagna',
+    email: 'Email',
+    password: 'Password',
+    submit: 'Accedi',
+    loading: 'Accesso in corso...',
+    signupPrompt: 'Non hai un account?',
+    signupAction: 'Creane uno',
+  },
+};
