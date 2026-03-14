@@ -13,8 +13,8 @@ export const it = {
   },
 
   home: {
-    defaultTitle: 'Campagna Pirata',
-    defaultTagline: 'Un’avventura ti attende in alto mare',
+    defaultTitle: 'Sherdan',
+    defaultTagline: '',
     beginAdventure: 'Inizia l’avventura',
     meetCrew: 'Conosci l’equipaggio',
     scroll: 'Scorri',
