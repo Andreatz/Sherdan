@@ -39,6 +39,7 @@ export const CharactersPage: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [filterType, setFilterType] = useState<'all' | 'pg' | 'npc'>('all');
   const [formData, setFormData] = useState(emptyForm);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
     void fetchCharacters();
@@ -65,10 +66,12 @@ export const CharactersPage: React.FC = () => {
     setFormData(emptyForm);
     setEditingId(null);
     setShowForm(false);
+    setSubmitError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
     try {
       const payload = {
         ...formData,
@@ -90,7 +93,9 @@ export const CharactersPage: React.FC = () => {
 
       resetForm();
       await fetchCharacters();
-    } catch (error) {
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : JSON.stringify(error);
+      setSubmitError(msg);
       console.error('Errore nel salvataggio del personaggio:', error);
     }
   };
@@ -110,6 +115,7 @@ export const CharactersPage: React.FC = () => {
     });
     setEditingId(character.id);
     setShowForm(true);
+    setSubmitError(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -302,6 +308,13 @@ export const CharactersPage: React.FC = () => {
                     />
                     <p className="text-slate-500 text-xs mt-1">Non visibile agli altri giocatori né agli ospiti</p>
                   </div>
+                </div>
+              )}
+
+              {/* Errore submit */}
+              {submitError && (
+                <div className="bg-red-900/40 border border-red-500/50 text-red-300 rounded-lg px-4 py-3 text-sm">
+                  ⚠️ Errore: {submitError}
                 </div>
               )}
 
