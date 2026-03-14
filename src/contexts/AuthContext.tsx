@@ -20,16 +20,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     let mounted = true;
-
+  
     const syncAuthState = async (session: Session | null) => {
       if (!mounted) return;
-
+  
       setIsLoading(true);
-
+  
       try {
         const currentUser = session?.user ?? null;
         setUser(currentUser);
-
+  
         if (currentUser) {
           const adminStatus = await checkIsAdmin(currentUser.id);
           if (mounted) setIsAdmin(adminStatus);
@@ -46,23 +46,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (mounted) setIsLoading(false);
       }
     };
-
+  
     const initialize = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-
+  
       await syncAuthState(session);
     };
-
+  
     void initialize();
-
+  
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      await syncAuthState(session);
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setTimeout(() => {
+        void syncAuthState(session);
+      }, 0);
     });
-
+  
     return () => {
       mounted = false;
       subscription.unsubscribe();
