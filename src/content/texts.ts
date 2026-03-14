@@ -7,7 +7,7 @@ export const it = {
     map: 'Mappa',
     gallery: 'Galleria',
     login: 'Accedi',
-    admin: 'Admin',
+    admin: 'Pannello Admin',
     adminDashboard: 'Pannello admin',
     logout: 'Esci',
   },
