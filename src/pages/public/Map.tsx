@@ -163,7 +163,7 @@ export const MapPage: React.FC = () => {
                 onClick={() => setSelectedLocation(null)}
                 className="mt-8 px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded transition"
               >
-                Chiudi
+                {it.mapPublic.close}
               </button>
             </div>
           </div>

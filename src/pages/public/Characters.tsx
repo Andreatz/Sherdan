@@ -71,7 +71,7 @@ export const CharactersPage: React.FC = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400">
-                      Nessun ritratto
+                      {it.charactersPublic.noPortrait}
                     </div>
                   )}
                 </div>
@@ -114,7 +114,7 @@ export const CharactersPage: React.FC = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400">
-                      Nessun ritratto
+                      {it.charactersPublic.noPortrait}
                     </div>
                   )}
                 </div>
@@ -141,7 +141,7 @@ export const CharactersPage: React.FC = () => {
                     onClick={() => setSelectedCharacter(null)}
                     className="mt-8 px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded transition"
                   >
-                    Chiudi
+                    {it.charactersPublic.close}
                   </button>
                 </div>
               </div>

@@ -109,7 +109,7 @@ export const GalleryPage: React.FC = () => {
 
                   {selectedItem.category && (
                     <p className="text-amber-200 mb-4">
-                      Categoria: {selectedItem.category}
+                      {it.galleryPublic.category}: {selectedItem.category}
                     </p>
                   )}
 
@@ -153,7 +153,7 @@ export const GalleryPage: React.FC = () => {
                     onClick={() => setSelectedIndex(null)}
                     className="mt-4 px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded transition"
                   >
-                    Chiudi
+                    {it.galleryPublic.close}
                   </button>
                 </div>
               </div>
