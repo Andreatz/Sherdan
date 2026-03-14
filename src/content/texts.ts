@@ -43,6 +43,8 @@ export const it = {
     class: 'Classe',
     race: 'Razza',
     backstory: 'Storia',
+    close: 'Chiudi',
+    noPortrait: 'Nessun ritratto',
   },
 
   sessionsPublic: {
@@ -66,6 +68,7 @@ export const it = {
     history: 'Storia',
     coordinates: 'Coordinate',
     worldMapAlt: 'Mappa del mondo',
+    close: 'Chiudi',
     locationTypes: {
       port: 'Porto',
       island: 'Isola',
@@ -86,6 +89,8 @@ export const it = {
     loading: 'Caricamento galleria...',
     empty: 'Nessuna immagine ancora. I momenti epici arriveranno presto!',
     of: 'di',
+    category: 'Categoria',
+    close: 'Chiudi',
   },
 
   admin: {
