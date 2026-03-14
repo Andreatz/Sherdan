@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+import { User } from '@supabase/supabase-js';
 import { supabase, checkIsAdmin } from '../utils/supabase';
 
 interface AuthContextType {
@@ -18,81 +18,80 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    let mounted = true;
+useEffect(() => {
+  let mounted = true;
 
-    const syncAuthState = async (session: Session | null) => {
-      if (!mounted) return;
+  const syncAuthState = async (session: any) => {
+    if (!mounted) return;
 
-      setIsLoading(true);
 
-      try {
-        const currentUser = session?.user ?? null;
-        setUser(currentUser);
 
-        if (currentUser) {
-          const adminStatus = await checkIsAdmin(currentUser.id);
-          if (mounted) setIsAdmin(adminStatus);
-        } else {
-          if (mounted) setIsAdmin(false);
-        }
-      } catch (error) {
-        console.error('Error syncing auth state:', error);
-        if (mounted) {
-          setUser(null);
-          setIsAdmin(false);
-        }
-      } finally {
-        if (mounted) setIsLoading(false);
+
+
+
+
+
+
+
+
+
+    setIsLoading(true);
+
+    try {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+
+      if (currentUser) {
+        const adminStatus = await checkIsAdmin(currentUser.id);
+        if (mounted) setIsAdmin(adminStatus);
+      } else {
+        if (mounted) setIsAdmin(false);
       }
-    };
+    } catch (error) {
+      console.error('Error syncing auth state:', error);
+      if (mounted) {
+        setUser(null);
+        setIsAdmin(false);
+      }
+    } finally {
+      if (mounted) setIsLoading(false);
+    }
+  };
 
-    const initialize = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    void syncAuthState(session);
+  });
 
-      await syncAuthState(session);
-    };
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    void syncAuthState(session);
+  });
 
-    void initialize();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      await syncAuthState(session);
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
+  return () => {
+    mounted = false;
+    subscription.unsubscribe();
+  };
+}, []);
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     return data;
   };
 
   const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
+    const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
 
     if (data.user) {
-      const { error: profileError } = await supabase.from('profiles').upsert({
-        id: data.user.id,
-        email: data.user.email,
-        is_admin: false,
-      });
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: data.user.id,
+          email: data.user.email,
+          is_admin: false,
+        });
 
       if (profileError) {
         console.error('Error creating profile:', profileError);
@@ -105,23 +104,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-
     setUser(null);
     setIsAdmin(false);
-    setIsLoading(false);
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAdmin,
-        isLoading,
-        signIn,
-        signUp,
-        signOut,
-      }}
-    >
+    <AuthContext.Provider value={{ user, isAdmin, isLoading, signIn, signUp, signOut }}>
       {children}
     </AuthContext.Provider>
   );
@@ -129,10 +117,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-
   if (context === undefined) {
     throw new Error('useAuth must be used within AuthProvider');
   }
-
   return context;
 };
