@@ -21,11 +21,11 @@ export const Footer: React.FC = () => {
               {it.footer.contactLabel}
             </p>
             <a
-              href="mailto:contact@campaign.local"
+              href="mailto:andreatz94@hotmail.it"
               className="inline-flex items-center gap-2 text-slate-300 hover:text-amber-300 transition"
             >
               <Mail size={16} />
-              contact@campaign.local
+              andreatz94@hotmail.it
             </a>
           </div>
         </div>
