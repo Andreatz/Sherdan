@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { it } from '../../content/texts';
 import { supabase } from '../../utils/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Character {
   id: string;
@@ -10,9 +12,12 @@ interface Character {
   level: number;
   backstory: string;
   portrait_url: string | null;
+  is_player_character: boolean;
 }
 
 export const CharactersPage: React.FC = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,10 +25,10 @@ export const CharactersPage: React.FC = () => {
   useEffect(() => {
     const fetchCharacters = async () => {
       setLoading(true);
-
+      // RLS restituisce automaticamente solo NPC + il proprio PG se loggato
       const { data } = await supabase
         .from('characters')
-        .select('id, name, class, race, level, backstory, portrait_url')
+        .select('id, name, class, race, level, backstory, portrait_url, is_player_character')
         .order('level', { ascending: false })
         .order('name', { ascending: true });
 
@@ -32,7 +37,17 @@ export const CharactersPage: React.FC = () => {
     };
 
     void fetchCharacters();
-  }, []);
+  }, [user]);
+
+  const handleCardClick = (character: Character) => {
+    // Se è un PG e l'utente è loggato, va alla pagina privata
+    if (character.is_player_character && user) {
+      navigate('/personaggio');
+      return;
+    }
+    // Altrimenti apre il modale pubblico
+    setSelectedCharacter(character);
+  };
 
   return (
     <section id="characters" className="py-24 px-6 bg-slate-950">
@@ -44,6 +59,14 @@ export const CharactersPage: React.FC = () => {
           <p className="text-slate-300 text-lg">
             {it.charactersPublic.subtitle}
           </p>
+          {user && (
+            <button
+              onClick={() => navigate('/personaggio')}
+              className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold transition"
+            >
+              🧙 Il mio personaggio
+            </button>
+          )}
         </div>
 
         {loading ? (
@@ -59,7 +82,7 @@ export const CharactersPage: React.FC = () => {
             {characters.map((character) => (
               <button
                 key={character.id}
-                onClick={() => setSelectedCharacter(character)}
+                onClick={() => handleCardClick(character)}
                 className="text-left rounded-2xl overflow-hidden border border-amber-700/20 bg-slate-900 hover:-translate-y-1 hover:shadow-2xl transition"
               >
                 <div className="h-72 bg-slate-800 overflow-hidden">
@@ -89,13 +112,18 @@ export const CharactersPage: React.FC = () => {
                   <p className="text-slate-200">
                     {it.charactersPublic.level}: {character.level}
                   </p>
+                  {character.is_player_character && (
+                    <span className="inline-block text-xs text-amber-500 border border-amber-700/40 rounded px-2 py-0.5 mt-1">
+                      Personaggio Giocante
+                    </span>
+                  )}
                 </div>
               </button>
             ))}
           </div>
         )}
 
-        {selectedCharacter && (
+        {selectedCharacter && !selectedCharacter.is_player_character && (
           <div
             className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4"
             onClick={() => setSelectedCharacter(null)}

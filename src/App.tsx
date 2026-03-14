@@ -17,6 +17,9 @@ import { SessionsPage } from './pages/public/Sessions';
 import { MapPage } from './pages/public/Map';
 import { GalleryPage } from './pages/public/Gallery';
 
+// Player Pages
+import { MyCharacterPage } from './pages/player/MyCharacter';
+
 // Admin Pages
 import { DashboardPage } from './pages/admin/Dashboard';
 import { CharactersPage as AdminCharactersPage } from './pages/admin/Characters';
@@ -50,6 +53,18 @@ function App() {
                 </div>
                 <Footer />
               </>
+            }
+          />
+
+          {/* Player Route - Il mio personaggio */}
+          <Route
+            path="/personaggio"
+            element={
+              <ProtectedRoute>
+                <Navigation />
+                <MyCharacterPage />
+                <Footer />
+              </ProtectedRoute>
             }
           />
 
