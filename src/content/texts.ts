@@ -296,8 +296,8 @@ export const it = {
   },
 
   footer: {
-    title: 'Campagna d’alto mare 2026',
-    subtitle: 'Dove le leggende vengono forgiate tra fuoco e furia',
+    title: 'Sherdan',
+    subtitle: 'Dove le leggende vengono forgiate tra fuoco e sangue',
     contactLabel: 'Contatto',
     chronicle: 'Cronache della campagna di D&D',
   },
