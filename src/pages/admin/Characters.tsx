@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, CreditCard as Edit2, Trash2, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { supabase } from '../../utils/supabase';
+import { it } from '../../content/texts';
 
 interface Character {
   id: string;
@@ -10,8 +11,7 @@ interface Character {
   race: string;
   level: number;
   backstory: string;
-  portrait_url?: string;
-  stats_json?: any;
+  portrait_url?: string | null;
 }
 
 export const CharactersPage: React.FC = () => {
@@ -29,7 +29,7 @@ export const CharactersPage: React.FC = () => {
   });
 
   useEffect(() => {
-    fetchCharacters();
+    void fetchCharacters();
   }, []);
 
   const fetchCharacters = async () => {
@@ -42,10 +42,23 @@ export const CharactersPage: React.FC = () => {
       if (error) throw error;
       setCharacters(data || []);
     } catch (error) {
-      console.error('Error fetching characters:', error);
+      console.error('Errore nel caricamento dei personaggi:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      class: '',
+      race: '',
+      level: 1,
+      backstory: '',
+      portrait_url: '',
+    });
+    setEditingId(null);
+    setShowForm(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -68,9 +81,9 @@ export const CharactersPage: React.FC = () => {
       }
 
       resetForm();
-      fetchCharacters();
+      await fetchCharacters();
     } catch (error) {
-      console.error('Error saving character:', error);
+      console.error('Errore nel salvataggio del personaggio:', error);
     }
   };
 
@@ -88,7 +101,7 @@ export const CharactersPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this character?')) return;
+    if (!window.confirm(it.adminCharacters.confirmDelete)) return;
 
     try {
       const { error } = await supabase
@@ -97,121 +110,105 @@ export const CharactersPage: React.FC = () => {
         .eq('id', id);
 
       if (error) throw error;
-      fetchCharacters();
+      await fetchCharacters();
     } catch (error) {
-      console.error('Error deleting character:', error);
+      console.error('Errore nell’eliminazione del personaggio:', error);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      class: '',
-      race: '',
-      level: 1,
-      backstory: '',
-      portrait_url: '',
-    });
-    setEditingId(null);
-    setShowForm(false);
-  };
-
   return (
-    <AdminLayout currentPage="characters">
+    <AdminLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-amber-400">Characters</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h1 className="text-3xl font-bold text-amber-300">
+            {it.adminCharacters.title}
+          </h1>
+
           {!showForm && (
             <button
               onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded transition"
+              className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition"
             >
-              <Plus size={20} />
-              Add Character
+              <Plus size={18} />
+              {it.adminCharacters.add}
             </button>
           )}
         </div>
 
         {showForm && (
-          <div className="bg-slate-700 border border-amber-700/30 rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-amber-400">{editingId ? 'Edit' : 'Add New'} Character</h2>
-              <button onClick={resetForm} className="text-amber-400 hover:text-amber-300">
-                <X size={24} />
-              </button>
-            </div>
+          <div className="bg-slate-800 border border-amber-700/20 rounded-xl p-6">
+            <h2 className="text-2xl font-bold text-amber-300 mb-5">
+              {editingId ? it.adminCharacters.edit : it.adminCharacters.addNew}
+            </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-4">
                 <input
                   type="text"
-                  placeholder="Name"
+                  placeholder={it.adminCharacters.fields.name}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                  className="px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+                  className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
                 />
-
                 <input
                   type="text"
-                  placeholder="Class"
+                  placeholder={it.adminCharacters.fields.class}
                   value={formData.class}
                   onChange={(e) => setFormData({ ...formData, class: e.target.value })}
                   required
-                  className="px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+                  className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
                 />
-
                 <input
                   type="text"
-                  placeholder="Race"
+                  placeholder={it.adminCharacters.fields.race}
                   value={formData.race}
                   onChange={(e) => setFormData({ ...formData, race: e.target.value })}
                   required
-                  className="px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+                  className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
                 />
-
                 <input
                   type="number"
-                  placeholder="Level"
+                  placeholder={it.adminCharacters.fields.level}
                   value={formData.level}
-                  onChange={(e) => setFormData({ ...formData, level: parseInt(e.target.value) })}
-                  min="1"
-                  max="20"
+                  onChange={(e) => setFormData({ ...formData, level: parseInt(e.target.value, 10) || 1 })}
+                  min={1}
+                  max={20}
                   required
-                  className="px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+                  className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
                 />
               </div>
 
               <textarea
-                placeholder="Backstory"
+                placeholder={it.adminCharacters.fields.backstory}
                 value={formData.backstory}
                 onChange={(e) => setFormData({ ...formData, backstory: e.target.value })}
                 required
-                rows={4}
-                className="w-full px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+                rows={5}
+                className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
               />
 
               <input
                 type="text"
-                placeholder="Portrait URL"
+                placeholder={it.adminCharacters.fields.portraitUrl}
                 value={formData.portrait_url}
                 onChange={(e) => setFormData({ ...formData, portrait_url: e.target.value })}
-                className="w-full px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+                className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
               />
 
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   type="submit"
-                  className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded transition"
+                  className="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-4 rounded transition"
                 >
-                  {editingId ? 'Update' : 'Create'} Character
+                  {editingId ? it.adminCharacters.actions.update : it.adminCharacters.actions.create}
                 </button>
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="flex-1 bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 rounded transition"
+                  className="bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded transition"
                 >
-                  Cancel
+                  {it.adminCharacters.actions.cancel}
                 </button>
               </div>
             </form>
@@ -219,21 +216,30 @@ export const CharactersPage: React.FC = () => {
         )}
 
         {isLoading ? (
-          <div className="text-center text-amber-400">Loading characters...</div>
+          <div className="text-center text-amber-300 py-8">
+            {it.adminCharacters.loading}
+          </div>
         ) : characters.length === 0 ? (
-          <div className="text-center text-amber-100 py-8">
-            <p>No characters yet. Create one to get started!</p>
+          <div className="text-center text-slate-300 py-10 bg-slate-800 rounded-xl border border-amber-700/20">
+            {it.adminCharacters.empty}
           </div>
         ) : (
           <div className="grid gap-4">
             {characters.map((character) => (
-              <div key={character.id} className="bg-slate-700 border border-amber-700/30 rounded-lg p-4 flex justify-between items-start">
+              <div
+                key={character.id}
+                className="bg-slate-800 border border-amber-700/20 rounded-xl p-5 flex flex-col md:flex-row md:items-start md:justify-between gap-4"
+              >
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-amber-400">{character.name}</h3>
-                  <p className="text-amber-100 text-sm">
-                    {character.class} • {character.race} • Level {character.level}
+                  <h3 className="text-xl font-bold text-amber-300">
+                    {character.name}
+                  </h3>
+                  <p className="text-slate-300 text-sm mt-1">
+                    {character.class} • {character.race} • {it.charactersPublic.level} {character.level}
                   </p>
-                  <p className="text-amber-900 text-sm mt-2 line-clamp-2">{character.backstory}</p>
+                  <p className="text-slate-400 text-sm mt-3 line-clamp-3">
+                    {character.backstory}
+                  </p>
                 </div>
 
                 <div className="flex gap-2">
@@ -241,7 +247,7 @@ export const CharactersPage: React.FC = () => {
                     onClick={() => handleEdit(character)}
                     className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition"
                   >
-                    <Edit2 size={18} />
+                    <Pencil size={18} />
                   </button>
                   <button
                     onClick={() => handleDelete(character.id)}

@@ -17,7 +17,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900 text-amber-400 text-xl">
-        ⚓ Loading...
+        ⚓ Caricamento...
       </div>
     );
   }

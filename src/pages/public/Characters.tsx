@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { it } from '../../content/texts';
 import { supabase } from '../../utils/supabase';
 
 interface Character {
@@ -9,145 +9,146 @@ interface Character {
   race: string;
   level: number;
   backstory: string;
-  portrait_url?: string;
+  portrait_url: string | null;
 }
 
 export const CharactersPage: React.FC = () => {
   const [characters, setCharacters] = useState<Character[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCharacters();
+    const fetchCharacters = async () => {
+      setLoading(true);
+
+      const { data } = await supabase
+        .from('characters')
+        .select('id, name, class, race, level, backstory, portrait_url')
+        .order('level', { ascending: false })
+        .order('name', { ascending: true });
+
+      setCharacters(data ?? []);
+      setLoading(false);
+    };
+
+    void fetchCharacters();
   }, []);
 
-  const fetchCharacters = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('characters')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setCharacters(data || []);
-    } catch (error) {
-      console.error('Error fetching characters:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const classEmojis: Record<string, string> = {
-    'Fighter': '⚔️',
-    'Rogue': '🗡️',
-    'Wizard': '🔮',
-    'Cleric': '✨',
-    'Ranger': '🏹',
-    'Paladin': '⚡',
-    'Bard': '🎵',
-    'Druid': '🌿',
-    'Barbarian': '💪',
-    'Monk': '🥋',
-  };
-
   return (
-    <section id="characters" className="py-16 bg-gradient-to-b from-slate-900 to-slate-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-amber-400 mb-2">The Crew</h2>
-          <p className="text-amber-100">Meet the adventurers of legend</p>
+    <section id="characters" className="py-24 px-6 bg-slate-950">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-14">
+          <h2 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4">
+            {it.charactersPublic.title}
+          </h2>
+          <p className="text-slate-300 text-lg">
+            {it.charactersPublic.subtitle}
+          </p>
         </div>
 
-        {isLoading ? (
-          <div className="text-center text-amber-400">Loading characters...</div>
+        {loading ? (
+          <p className="text-center text-slate-300 text-lg">
+            {it.charactersPublic.loading}
+          </p>
         ) : characters.length === 0 ? (
-          <div className="text-center text-amber-100 py-12">
-            <p>No characters yet. Check back soon!</p>
-          </div>
+          <p className="text-center text-slate-400 text-lg">
+            {it.charactersPublic.empty}
+          </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
             {characters.map((character) => (
               <button
                 key={character.id}
                 onClick={() => setSelectedCharacter(character)}
-                className="group bg-slate-700 border border-amber-700/30 rounded-lg overflow-hidden hover:border-amber-600 transition transform hover:scale-105 cursor-pointer text-left"
+                className="text-left rounded-2xl overflow-hidden border border-amber-700/20 bg-slate-900 hover:-translate-y-1 hover:shadow-2xl transition"
               >
-                <div className="relative h-48 bg-slate-600 overflow-hidden">
+                <div className="h-72 bg-slate-800 overflow-hidden">
                   {character.portrait_url ? (
                     <img
                       src={character.portrait_url}
                       alt={character.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+                      className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-5xl opacity-50">
-                      {classEmojis[character.class] || '⚓'}
+                    <div className="w-full h-full flex items-center justify-center text-slate-400">
+                      Nessun ritratto
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent opacity-0 group-hover:opacity-100 transition" />
                 </div>
 
-                <div className="p-4">
-                  <h3 className="text-lg font-bold text-amber-400 mb-1">{character.name}</h3>
-                  <p className="text-amber-100 text-sm mb-2">
-                    <span className="text-xl mr-1">{classEmojis[character.class] || '⚔️'}</span>
-                    {character.class} • {character.race}
+                <div className="p-6 space-y-2">
+                  <h3 className="text-2xl font-bold text-amber-300">
+                    {character.name}
+                  </h3>
+                  <p className="text-slate-200">
+                    {it.charactersPublic.class}: {character.class}
                   </p>
-                  <p className="text-amber-900 text-xs font-medium">Level {character.level}</p>
-                  <p className="text-amber-100 text-xs mt-3 line-clamp-3">{character.backstory}</p>
+                  <p className="text-slate-200">
+                    {it.charactersPublic.race}: {character.race}
+                  </p>
+                  <p className="text-slate-200">
+                    {it.charactersPublic.level}: {character.level}
+                  </p>
                 </div>
               </button>
             ))}
           </div>
         )}
-      </div>
 
-      {/* Character Detail Modal */}
-      {selectedCharacter && (
-        <div className="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-800 border border-amber-700/30 rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
-            <div className="flex justify-between items-start p-6 border-b border-amber-700/30 sticky top-0 bg-slate-800">
-              <h2 className="text-2xl font-bold text-amber-400">{selectedCharacter.name}</h2>
-              <button
-                onClick={() => setSelectedCharacter(null)}
-                className="text-amber-400 hover:text-amber-300 transition"
-              >
-                <X size={24} />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              {selectedCharacter.portrait_url && (
-                <img
-                  src={selectedCharacter.portrait_url}
-                  alt={selectedCharacter.name}
-                  className="w-full h-64 object-cover rounded-lg"
-                />
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-amber-900 text-sm font-medium">Class</p>
-                  <p className="text-amber-400 font-bold">{selectedCharacter.class}</p>
+        {selectedCharacter && (
+          <div
+            className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4"
+            onClick={() => setSelectedCharacter(null)}
+          >
+            <div
+              className="max-w-3xl w-full bg-slate-900 border border-amber-700/30 rounded-2xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="grid md:grid-cols-2">
+                <div className="bg-slate-800 min-h-[320px]">
+                  {selectedCharacter.portrait_url ? (
+                    <img
+                      src={selectedCharacter.portrait_url}
+                      alt={selectedCharacter.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400">
+                      Nessun ritratto
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <p className="text-amber-900 text-sm font-medium">Race</p>
-                  <p className="text-amber-400 font-bold">{selectedCharacter.race}</p>
-                </div>
-                <div>
-                  <p className="text-amber-900 text-sm font-medium">Level</p>
-                  <p className="text-amber-400 font-bold">{selectedCharacter.level}</p>
-                </div>
-              </div>
 
-              <div>
-                <p className="text-amber-900 text-sm font-medium mb-2">Backstory</p>
-                <p className="text-amber-100 whitespace-pre-wrap">{selectedCharacter.backstory}</p>
+                <div className="p-8">
+                  <h3 className="text-3xl font-bold text-amber-300 mb-4">
+                    {selectedCharacter.name}
+                  </h3>
+
+                  <div className="space-y-2 text-slate-200 mb-6">
+                    <p>{it.charactersPublic.class}: {selectedCharacter.class}</p>
+                    <p>{it.charactersPublic.race}: {selectedCharacter.race}</p>
+                    <p>{it.charactersPublic.level}: {selectedCharacter.level}</p>
+                  </div>
+
+                  <h4 className="text-xl font-semibold text-amber-200 mb-3">
+                    {it.charactersPublic.backstory}
+                  </h4>
+                  <p className="text-slate-300 leading-7 whitespace-pre-line">
+                    {selectedCharacter.backstory}
+                  </p>
+
+                  <button
+                    onClick={() => setSelectedCharacter(null)}
+                    className="mt-8 px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded transition"
+                  >
+                    Chiudi
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 };

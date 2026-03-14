@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { it } from '../../content/texts';
 import { supabase } from '../../utils/supabase';
 
 interface SessionLog {
@@ -9,105 +9,107 @@ interface SessionLog {
   date: string;
   summary: string;
   detailed_narrative: string;
-  featured_image_url?: string;
+  featured_image_url: string | null;
 }
 
 export const SessionsPage: React.FC = () => {
   const [sessions, setSessions] = useState<SessionLog[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [openSession, setOpenSession] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchSessions();
+    const fetchSessions = async () => {
+      setLoading(true);
+
+      const { data } = await supabase
+        .from('session_logs')
+        .select('id, session_number, title, date, summary, detailed_narrative, featured_image_url')
+        .order('session_number', { ascending: true });
+
+      setSessions(data ?? []);
+      setLoading(false);
+    };
+
+    void fetchSessions();
   }, []);
 
-  const fetchSessions = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('session_logs')
-        .select('*')
-        .order('session_number', { ascending: false });
-
-      if (error) throw error;
-      setSessions(data || []);
-    } catch (error) {
-      console.error('Error fetching sessions:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <section id="sessions" className="py-16 bg-slate-900">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-amber-400 mb-2">Session Chronicles</h2>
-          <p className="text-amber-100">Tales from the high seas</p>
+    <section id="sessions" className="py-24 px-6 bg-slate-900">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-14">
+          <h2 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4">
+            {it.sessionsPublic.title}
+          </h2>
+          <p className="text-slate-300 text-lg">
+            {it.sessionsPublic.subtitle}
+          </p>
         </div>
 
-        {isLoading ? (
-          <div className="text-center text-amber-400">Loading sessions...</div>
+        {loading ? (
+          <p className="text-center text-slate-300 text-lg">
+            {it.sessionsPublic.loading}
+          </p>
         ) : sessions.length === 0 ? (
-          <div className="text-center text-amber-100 py-12">
-            <p>No session logs yet. The story begins soon...</p>
-          </div>
+          <p className="text-center text-slate-400 text-lg">
+            {it.sessionsPublic.empty}
+          </p>
         ) : (
-          <div className="space-y-3">
-            {sessions.map((session, index) => (
-              <div key={session.id} className="relative">
-                {/* Timeline connector */}
-                {index < sessions.length - 1 && (
-                  <div className="absolute left-5 top-16 w-0.5 h-8 bg-amber-700/30" />
-                )}
+          <div className="space-y-6">
+            {sessions.map((session) => {
+              const isOpen = openSession === session.id;
 
-                {/* Timeline dot */}
-                <div className="absolute left-0 top-4 w-12 h-12 flex items-center justify-center">
-                  <div className="w-3 h-3 bg-amber-600 rounded-full ring-4 ring-slate-900" />
-                </div>
-
-                {/* Session card */}
-                <button
-                  onClick={() => setExpandedId(expandedId === session.id ? null : session.id)}
-                  className="w-full ml-16 text-left bg-slate-800 border border-amber-700/30 hover:border-amber-600 rounded-lg p-4 transition"
+              return (
+                <div
+                  key={session.id}
+                  className="border border-amber-700/20 rounded-2xl bg-slate-950 overflow-hidden shadow-lg"
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-amber-400">
-                        Session {session.session_number}: {session.title}
-                      </h3>
-                      <p className="text-amber-900 text-sm mt-1">{new Date(session.date).toLocaleDateString()}</p>
-                      <p className="text-amber-100 text-sm mt-2 line-clamp-2">{session.summary}</p>
+                  <button
+                    onClick={() => setOpenSession(isOpen ? null : session.id)}
+                    className="w-full text-left p-6 hover:bg-slate-800/40 transition"
+                  >
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                      <div>
+                        <p className="text-amber-300 font-semibold mb-1">
+                          {it.sessionsPublic.session} {session.session_number}
+                        </p>
+                        <h3 className="text-2xl font-bold text-white">
+                          {session.title}
+                        </h3>
+                      </div>
+                      <p className="text-slate-400">{session.date}</p>
                     </div>
-                    <div className="ml-4 text-amber-400">
-                      {expandedId === session.id ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
-                    </div>
-                  </div>
-                </button>
+                  </button>
 
-                {/* Expanded content */}
-                {expandedId === session.id && (
-                  <div className="ml-16 mt-2 bg-slate-700 border border-amber-700/30 rounded-lg p-6 space-y-4">
-                    {session.featured_image_url && (
-                      <img
-                        src={session.featured_image_url}
-                        alt={session.title}
-                        className="w-full h-48 object-cover rounded-lg"
-                      />
+                  <div className="px-6 pb-6">
+                    <p className="text-slate-300 leading-7 mb-4">
+                      <span className="text-amber-200 font-semibold">
+                        {it.sessionsPublic.summary}:
+                      </span>{' '}
+                      {session.summary}
+                    </p>
+
+                    {isOpen && (
+                      <div className="border-t border-amber-700/20 pt-6">
+                        {session.featured_image_url && (
+                          <img
+                            src={session.featured_image_url}
+                            alt={session.title}
+                            className="w-full h-72 object-cover rounded-xl mb-6"
+                          />
+                        )}
+
+                        <h4 className="text-xl font-semibold text-amber-200 mb-3">
+                          {it.sessionsPublic.fullAccount}
+                        </h4>
+                        <p className="text-slate-300 leading-8 whitespace-pre-line">
+                          {session.detailed_narrative}
+                        </p>
+                      </div>
                     )}
-
-                    <div>
-                      <h4 className="text-amber-400 font-bold mb-2">Summary</h4>
-                      <p className="text-amber-100">{session.summary}</p>
-                    </div>
-
-                    <div>
-                      <h4 className="text-amber-400 font-bold mb-2">Full Account</h4>
-                      <p className="text-amber-100 whitespace-pre-wrap">{session.detailed_narrative}</p>
-                    </div>
                   </div>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

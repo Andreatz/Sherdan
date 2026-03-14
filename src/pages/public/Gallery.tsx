@@ -1,144 +1,166 @@
-import React, { useState, useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { it } from '../../content/texts';
 import { supabase } from '../../utils/supabase';
 
 interface GalleryItem {
   id: string;
   image_url: string;
   title: string;
-  description?: string;
-  category: string;
+  description: string | null;
+  category: string | null;
 }
 
 export const GalleryPage: React.FC = () => {
   const [items, setItems] = useState<GalleryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [selectedItem, setSelectedItem] = useState<GalleryItem | null>(null);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchGallery();
-  }, []);
+    const fetchGallery = async () => {
+      setLoading(true);
 
-  const fetchGallery = async () => {
-    try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('gallery_items')
-        .select('*')
+        .select('id, image_url, title, description, category')
         .order('upload_date', { ascending: false });
 
-      if (error) throw error;
-      setItems(data || []);
-    } catch (error) {
-      console.error('Error fetching gallery:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      setItems(data ?? []);
+      setLoading(false);
+    };
 
-  const handleSelectItem = (item: GalleryItem, index: number) => {
-    setSelectedItem(item);
-    setSelectedIndex(index);
-  };
+    void fetchGallery();
+  }, []);
 
-  const handleNext = () => {
-    const nextIndex = (selectedIndex + 1) % items.length;
-    handleSelectItem(items[nextIndex], nextIndex);
-  };
-
-  const handlePrev = () => {
-    const prevIndex = (selectedIndex - 1 + items.length) % items.length;
-    handleSelectItem(items[prevIndex], prevIndex);
-  };
+  const selectedItem = selectedIndex !== null ? items[selectedIndex] : null;
 
   return (
-    <section id="gallery" className="py-16 bg-gradient-to-b from-slate-800 to-slate-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-amber-400 mb-2">Campaign Gallery</h2>
-          <p className="text-amber-100">Moments from the high seas</p>
+    <section id="gallery" className="py-24 px-6 bg-slate-900">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-14">
+          <h2 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4">
+            {it.galleryPublic.title}
+          </h2>
+          <p className="text-slate-300 text-lg">
+            {it.galleryPublic.subtitle}
+          </p>
         </div>
 
-        {isLoading ? (
-          <div className="text-center text-amber-400">Loading gallery...</div>
+        {loading ? (
+          <p className="text-center text-slate-300 text-lg">
+            {it.galleryPublic.loading}
+          </p>
         ) : items.length === 0 ? (
-          <div className="text-center text-amber-100 py-12">
-            <p>No gallery items yet. Epic moments coming soon!</p>
-          </div>
+          <p className="text-center text-slate-400 text-lg">
+            {it.galleryPublic.empty}
+          </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map((item, index) => (
               <button
                 key={item.id}
-                onClick={() => handleSelectItem(item, index)}
-                className="group relative overflow-hidden rounded-lg h-48 bg-slate-700 border border-amber-700/30 hover:border-amber-600 transition"
+                onClick={() => setSelectedIndex(index)}
+                className="group overflow-hidden rounded-2xl border border-amber-700/20 bg-slate-950 text-left hover:-translate-y-1 transition"
               >
-                <img
-                  src={item.image_url}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent opacity-0 group-hover:opacity-100 transition flex items-end">
-                  <div className="p-3 w-full">
-                    <p className="text-amber-400 font-bold text-sm line-clamp-1">{item.title}</p>
-                    <p className="text-amber-900 text-xs">{item.category}</p>
-                  </div>
+                <div className="h-72 overflow-hidden bg-slate-800">
+                  <img
+                    src={item.image_url}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  />
+                </div>
+
+                <div className="p-5">
+                  <h3 className="text-xl font-bold text-amber-300 mb-2">
+                    {item.title}
+                  </h3>
+                  {item.description && (
+                    <p className="text-slate-300 text-sm leading-6">
+                      {item.description}
+                    </p>
+                  )}
                 </div>
               </button>
             ))}
           </div>
         )}
-      </div>
 
-      {/* Gallery Lightbox */}
-      {selectedItem && (
-        <div className="fixed inset-0 bg-slate-900/95 z-50 flex items-center justify-center p-4">
-          <div className="relative max-w-4xl w-full">
-            {/* Close button */}
-            <button
-              onClick={() => setSelectedItem(null)}
-              className="absolute -top-10 right-0 text-amber-400 hover:text-amber-300 transition"
+        {selectedItem && (
+          <div
+            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center px-4"
+            onClick={() => setSelectedIndex(null)}
+          >
+            <div
+              className="max-w-5xl w-full bg-slate-950 border border-amber-700/20 rounded-2xl overflow-hidden shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
             >
-              <X size={32} />
-            </button>
+              <div className="grid lg:grid-cols-[1.2fr_0.8fr]">
+                <div className="bg-black">
+                  <img
+                    src={selectedItem.image_url}
+                    alt={selectedItem.title}
+                    className="w-full h-full max-h-[80vh] object-contain"
+                  />
+                </div>
 
-            {/* Image */}
-            <div className="relative bg-slate-800 rounded-lg overflow-hidden mb-4">
-              <img
-                src={selectedItem.image_url}
-                alt={selectedItem.title}
-                className="w-full h-auto max-h-screen object-contain"
-              />
+                <div className="p-8 flex flex-col">
+                  <h3 className="text-3xl font-bold text-amber-300 mb-4">
+                    {selectedItem.title}
+                  </h3>
 
-              {/* Navigation buttons */}
-              <button
-                onClick={handlePrev}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-amber-600/50 hover:bg-amber-600 text-white p-3 rounded transition"
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <button
-                onClick={handleNext}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-amber-600/50 hover:bg-amber-600 text-white p-3 rounded transition"
-              >
-                <ChevronRight size={24} />
-              </button>
-            </div>
+                  {selectedItem.category && (
+                    <p className="text-amber-200 mb-4">
+                      Categoria: {selectedItem.category}
+                    </p>
+                  )}
 
-            {/* Info */}
-            <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-4">
-              <h3 className="text-2xl font-bold text-amber-400 mb-2">{selectedItem.title}</h3>
-              {selectedItem.description && (
-                <p className="text-amber-100 mb-4">{selectedItem.description}</p>
-              )}
-              <div className="flex justify-between items-center">
-                <span className="text-amber-900 text-sm">{selectedItem.category}</span>
-                <span className="text-amber-900 text-sm">{selectedIndex + 1} of {items.length}</span>
+                  {selectedItem.description && (
+                    <p className="text-slate-300 leading-7 mb-8">
+                      {selectedItem.description}
+                    </p>
+                  )}
+
+                  <div className="mt-auto flex items-center justify-between gap-3">
+                    <button
+                      onClick={() =>
+                        setSelectedIndex((prev) =>
+                          prev === null ? prev : Math.max(prev - 1, 0)
+                        )
+                      }
+                      disabled={selectedIndex === 0}
+                      className="px-4 py-2 rounded bg-slate-800 text-white disabled:opacity-40"
+                    >
+                      ←
+                    </button>
+
+                    <p className="text-slate-400 text-sm">
+                      {selectedIndex! + 1} {it.galleryPublic.of} {items.length}
+                    </p>
+
+                    <button
+                      onClick={() =>
+                        setSelectedIndex((prev) =>
+                          prev === null ? prev : Math.min(prev + 1, items.length - 1)
+                        )
+                      }
+                      disabled={selectedIndex === items.length - 1}
+                      className="px-4 py-2 rounded bg-slate-800 text-white disabled:opacity-40"
+                    >
+                      →
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => setSelectedIndex(null)}
+                    className="mt-4 px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded transition"
+                  >
+                    Chiudi
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 };

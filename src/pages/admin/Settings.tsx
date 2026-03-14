@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { supabase } from '../../utils/supabase';
+import { it } from '../../content/texts';
 
 interface CampaignSettings {
   id: string;
@@ -10,7 +11,13 @@ interface CampaignSettings {
   main_story_arc: string;
   house_rules: string;
 }
-
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * Page for managing campaign settings.
+ *
+ * @returns {React.FC} The SettingsPage component.
+ */
+/*******  f3c9b0df-36a3-44e2-a9be-7b97db83a226  *******/
 export const SettingsPage: React.FC = () => {
   const [settings, setSettings] = useState<CampaignSettings | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,7 +25,7 @@ export const SettingsPage: React.FC = () => {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    fetchSettings();
+    void fetchSettings();
   }, []);
 
   const fetchSettings = async () => {
@@ -34,16 +41,17 @@ export const SettingsPage: React.FC = () => {
       if (data) {
         setSettings(data);
       } else {
-        // Create default settings if none exist
         const { data: newSettings, error: insertError } = await supabase
           .from('campaign_settings')
-          .insert([{
-            campaign_title: 'Pirate Campaign',
-            campaign_tagline: 'High seas adventure awaits',
-            world_lore: '',
-            main_story_arc: '',
-            house_rules: '',
-          }])
+          .insert([
+            {
+              campaign_title: it.adminSettings.defaults.title,
+              campaign_tagline: it.adminSettings.defaults.tagline,
+              world_lore: '',
+              main_story_arc: '',
+              house_rules: '',
+            },
+          ])
           .select()
           .single();
 
@@ -51,16 +59,15 @@ export const SettingsPage: React.FC = () => {
         setSettings(newSettings);
       }
     } catch (error) {
-      console.error('Error fetching settings:', error);
+      console.error('Errore nel caricamento delle impostazioni:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleChange = (field: keyof CampaignSettings, value: string) => {
-    if (settings) {
-      setSettings({ ...settings, [field]: value });
-    }
+    if (!settings) return;
+    setSettings({ ...settings, [field]: value });
   };
 
   const handleSave = async () => {
@@ -83,11 +90,11 @@ export const SettingsPage: React.FC = () => {
 
       if (error) throw error;
 
-      setMessage('Settings saved successfully!');
+      setMessage(it.adminSettings.saveSuccess);
       setTimeout(() => setMessage(''), 3000);
     } catch (error) {
-      console.error('Error saving settings:', error);
-      setMessage('Failed to save settings');
+      console.error('Errore nel salvataggio delle impostazioni:', error);
+      setMessage(it.adminSettings.saveError);
     } finally {
       setIsSaving(false);
     }
@@ -95,91 +102,107 @@ export const SettingsPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <AdminLayout currentPage="settings">
-        <div className="text-center text-amber-400">Loading settings...</div>
+      <AdminLayout>
+        <div className="text-center text-amber-300 py-10">
+          {it.adminSettings.loading}
+        </div>
       </AdminLayout>
     );
   }
 
   if (!settings) {
     return (
-      <AdminLayout currentPage="settings">
-        <div className="text-center text-amber-100">Failed to load settings</div>
+      <AdminLayout>
+        <div className="text-center text-red-300 py-10">
+          {it.adminSettings.loadError}
+        </div>
       </AdminLayout>
     );
   }
 
   return (
-    <AdminLayout currentPage="settings">
+    <AdminLayout>
       <div className="space-y-6">
-        <h1 className="text-3xl font-bold text-amber-400">Campaign Settings</h1>
+        <h1 className="text-3xl font-bold text-amber-300">
+          {it.adminSettings.title}
+        </h1>
 
         {message && (
-          <div className={`p-3 rounded ${message.includes('success') ? 'bg-green-900/30 border border-green-600 text-green-200' : 'bg-red-900/30 border border-red-600 text-red-200'}`}>
+          <div className="bg-slate-800 border border-amber-700/20 rounded-lg px-4 py-3 text-amber-200">
             {message}
           </div>
         )}
 
-        <div className="bg-slate-700 border border-amber-700/30 rounded-lg p-6 space-y-6">
+        <div className="bg-slate-800 border border-amber-700/20 rounded-xl p-6 space-y-5">
           <div>
-            <label className="block text-amber-100 text-sm font-medium mb-2">Campaign Title</label>
+            <label className="block text-amber-100 text-sm font-medium mb-2">
+              {it.adminSettings.fields.campaignTitle}
+            </label>
             <input
               type="text"
               value={settings.campaign_title}
               onChange={(e) => handleChange('campaign_title', e.target.value)}
-              className="w-full px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+              className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white"
             />
           </div>
 
           <div>
-            <label className="block text-amber-100 text-sm font-medium mb-2">Campaign Tagline</label>
+            <label className="block text-amber-100 text-sm font-medium mb-2">
+              {it.adminSettings.fields.campaignTagline}
+            </label>
             <input
               type="text"
               value={settings.campaign_tagline}
               onChange={(e) => handleChange('campaign_tagline', e.target.value)}
-              className="w-full px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+              className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white"
             />
           </div>
 
           <div>
-            <label className="block text-amber-100 text-sm font-medium mb-2">World Lore</label>
+            <label className="block text-amber-100 text-sm font-medium mb-2">
+              {it.adminSettings.fields.worldLore}
+            </label>
             <textarea
               value={settings.world_lore}
               onChange={(e) => handleChange('world_lore', e.target.value)}
-              rows={6}
-              placeholder="Describe the world and its history..."
-              className="w-full px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+              rows={7}
+              placeholder={it.adminSettings.placeholders.worldLore}
+              className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
             />
           </div>
 
           <div>
-            <label className="block text-amber-100 text-sm font-medium mb-2">Main Story Arc</label>
+            <label className="block text-amber-100 text-sm font-medium mb-2">
+              {it.adminSettings.fields.mainStoryArc}
+            </label>
             <textarea
               value={settings.main_story_arc}
               onChange={(e) => handleChange('main_story_arc', e.target.value)}
-              rows={6}
-              placeholder="Describe the main narrative..."
-              className="w-full px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+              rows={7}
+              placeholder={it.adminSettings.placeholders.mainStoryArc}
+              className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
             />
           </div>
 
           <div>
-            <label className="block text-amber-100 text-sm font-medium mb-2">House Rules</label>
+            <label className="block text-amber-100 text-sm font-medium mb-2">
+              {it.adminSettings.fields.houseRules}
+            </label>
             <textarea
               value={settings.house_rules}
               onChange={(e) => handleChange('house_rules', e.target.value)}
-              rows={6}
-              placeholder="List any special rules for this campaign..."
-              className="w-full px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+              rows={7}
+              placeholder={it.adminSettings.placeholders.houseRules}
+              className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
             />
           </div>
 
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-amber-800 text-white font-bold py-3 rounded transition"
+            className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-amber-800 text-white font-semibold py-3 rounded transition"
           >
-            {isSaving ? 'Saving...' : 'Save Campaign Settings'}
+            {isSaving ? it.adminSettings.saving : it.adminSettings.save}
           </button>
         </div>
       </div>

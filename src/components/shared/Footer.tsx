@@ -1,25 +1,38 @@
 import React from 'react';
 import { Mail } from 'lucide-react';
+import { it } from '../../content/texts';
 
 export const Footer: React.FC = () => {
   return (
-    <footer className="bg-slate-900 border-t border-amber-700/30 mt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="text-amber-100 text-sm">
-            <p>High Seas Campaign 2026</p>
-            <p className="text-xs text-amber-900 mt-1">Where legends are forged in fire and fury</p>
+    <footer className="bg-slate-950 border-t border-amber-700/20 mt-0">
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="grid md:grid-cols-2 gap-8 items-start">
+          <div>
+            <h3 className="text-2xl font-bold text-amber-300 mb-3">
+              {it.footer.title}
+            </h3>
+            <p className="text-slate-300 leading-7">
+              {it.footer.subtitle}
+            </p>
           </div>
 
-          <div className="flex gap-4">
-            <a href="mailto:contact@campaign.local" className="text-amber-400 hover:text-amber-300 transition">
-              <Mail size={20} />
+          <div className="md:text-right">
+            <p className="text-amber-200 font-semibold mb-2">
+              {it.footer.contactLabel}
+            </p>
+            <a
+              href="mailto:contact@campaign.local"
+              className="inline-flex items-center gap-2 text-slate-300 hover:text-amber-300 transition"
+            >
+              <Mail size={16} />
+              contact@campaign.local
             </a>
           </div>
+        </div>
 
-          <div className="text-amber-900 text-xs">
-            <p>D&D Campaign Chronicle</p>
-          </div>
+        <div className="mt-8 pt-6 border-t border-amber-700/10 text-sm text-slate-400 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <span>{it.footer.chronicle}</span>
+          <span>© 2026 Sherdan</span>
         </div>
       </div>
     </footer>

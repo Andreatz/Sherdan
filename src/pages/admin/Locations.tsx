@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, CreditCard as Edit2, Trash2, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { supabase } from '../../utils/supabase';
+import { it } from '../../content/texts';
 
 interface Location {
   id: string;
@@ -11,7 +12,7 @@ interface Location {
   x_coordinate: number;
   y_coordinate: number;
   control_status: 'neutral' | 'player_controlled' | 'enemy_controlled' | 'allied';
-  history?: string;
+  history?: string | null;
 }
 
 export const LocationsPage: React.FC = () => {
@@ -22,15 +23,15 @@ export const LocationsPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    location_type: 'port' as const,
+    location_type: 'port' as Location['location_type'],
     x_coordinate: 0,
     y_coordinate: 0,
-    control_status: 'neutral' as const,
+    control_status: 'neutral' as Location['control_status'],
     history: '',
   });
 
   useEffect(() => {
-    fetchLocations();
+    void fetchLocations();
   }, []);
 
   const fetchLocations = async () => {
@@ -43,10 +44,24 @@ export const LocationsPage: React.FC = () => {
       if (error) throw error;
       setLocations(data || []);
     } catch (error) {
-      console.error('Error fetching locations:', error);
+      console.error('Errore nel caricamento dei luoghi:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      description: '',
+      location_type: 'port',
+      x_coordinate: 0,
+      y_coordinate: 0,
+      control_status: 'neutral',
+      history: '',
+    });
+    setEditingId(null);
+    setShowForm(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,9 +84,9 @@ export const LocationsPage: React.FC = () => {
       }
 
       resetForm();
-      fetchLocations();
+      await fetchLocations();
     } catch (error) {
-      console.error('Error saving location:', error);
+      console.error('Errore nel salvataggio del luogo:', error);
     }
   };
 
@@ -90,7 +105,7 @@ export const LocationsPage: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this location?')) return;
+    if (!window.confirm(it.adminLocations.confirmDelete)) return;
 
     try {
       const { error } = await supabase
@@ -99,146 +114,155 @@ export const LocationsPage: React.FC = () => {
         .eq('id', id);
 
       if (error) throw error;
-      fetchLocations();
+      await fetchLocations();
     } catch (error) {
-      console.error('Error deleting location:', error);
+      console.error('Errore nell’eliminazione del luogo:', error);
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      location_type: 'port',
-      x_coordinate: 0,
-      y_coordinate: 0,
-      control_status: 'neutral',
-      history: '',
-    });
-    setEditingId(null);
-    setShowForm(false);
-  };
-
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: Location['control_status']) => {
     switch (status) {
-      case 'player_controlled': return 'text-green-400';
-      case 'enemy_controlled': return 'text-red-400';
-      case 'allied': return 'text-blue-400';
-      default: return 'text-amber-400';
+      case 'player_controlled':
+        return 'text-green-400';
+      case 'enemy_controlled':
+        return 'text-red-400';
+      case 'allied':
+        return 'text-blue-400';
+      default:
+        return 'text-amber-300';
     }
   };
 
   return (
-    <AdminLayout currentPage="locations">
+    <AdminLayout>
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-amber-400">Map Locations</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h1 className="text-3xl font-bold text-amber-300">
+            {it.adminLocations.title}
+          </h1>
+
           {!showForm && (
             <button
               onClick={() => setShowForm(true)}
-              className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded transition"
+              className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition"
             >
-              <Plus size={20} />
-              Add Location
+              <Plus size={18} />
+              {it.adminLocations.add}
             </button>
           )}
         </div>
 
         {showForm && (
-          <div className="bg-slate-700 border border-amber-700/30 rounded-lg p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-amber-400">{editingId ? 'Edit' : 'Add New'} Location</h2>
-              <button onClick={resetForm} className="text-amber-400 hover:text-amber-300">
-                <X size={24} />
-              </button>
-            </div>
+          <div className="bg-slate-800 border border-amber-700/20 rounded-xl p-6">
+            <h2 className="text-2xl font-bold text-amber-300 mb-5">
+              {editingId ? it.adminLocations.edit : it.adminLocations.addNew}
+            </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="text"
-                placeholder="Location Name"
+                placeholder={it.adminLocations.fields.name}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="w-full px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+                className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
               />
 
               <textarea
-                placeholder="Description"
+                placeholder={it.adminLocations.fields.description}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 required
-                rows={3}
-                className="w-full px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+                rows={4}
+                className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
               />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-4">
                 <select
                   value={formData.location_type}
-                  onChange={(e) => setFormData({ ...formData, location_type: e.target.value as any })}
-                  className="px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white focus:outline-none focus:border-amber-600"
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      location_type: e.target.value as Location['location_type'],
+                    })
+                  }
+                  className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white"
                 >
-                  <option value="port">Port</option>
-                  <option value="island">Island</option>
-                  <option value="territory">Territory</option>
-                  <option value="landmark">Landmark</option>
+                  <option value="port">{it.adminLocations.types.port}</option>
+                  <option value="island">{it.adminLocations.types.island}</option>
+                  <option value="territory">{it.adminLocations.types.territory}</option>
+                  <option value="landmark">{it.adminLocations.types.landmark}</option>
                 </select>
 
                 <select
                   value={formData.control_status}
-                  onChange={(e) => setFormData({ ...formData, control_status: e.target.value as any })}
-                  className="px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white focus:outline-none focus:border-amber-600"
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      control_status: e.target.value as Location['control_status'],
+                    })
+                  }
+                  className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white"
                 >
-                  <option value="neutral">Neutral</option>
-                  <option value="player_controlled">Player Controlled</option>
-                  <option value="enemy_controlled">Enemy Controlled</option>
-                  <option value="allied">Allied</option>
+                  <option value="neutral">{it.adminLocations.statuses.neutral}</option>
+                  <option value="player_controlled">{it.adminLocations.statuses.player_controlled}</option>
+                  <option value="enemy_controlled">{it.adminLocations.statuses.enemy_controlled}</option>
+                  <option value="allied">{it.adminLocations.statuses.allied}</option>
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-4">
                 <input
                   type="number"
-                  placeholder="X Coordinate"
+                  placeholder={it.adminLocations.fields.x}
                   value={formData.x_coordinate}
-                  onChange={(e) => setFormData({ ...formData, x_coordinate: parseFloat(e.target.value) })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      x_coordinate: parseFloat(e.target.value) || 0,
+                    })
+                  }
                   step="0.1"
                   required
-                  className="px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+                  className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
                 />
-
                 <input
                   type="number"
-                  placeholder="Y Coordinate"
+                  placeholder={it.adminLocations.fields.y}
                   value={formData.y_coordinate}
-                  onChange={(e) => setFormData({ ...formData, y_coordinate: parseFloat(e.target.value) })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      y_coordinate: parseFloat(e.target.value) || 0,
+                    })
+                  }
                   step="0.1"
                   required
-                  className="px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+                  className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
                 />
               </div>
 
               <textarea
-                placeholder="History (Optional)"
+                placeholder={it.adminLocations.fields.history}
                 value={formData.history}
                 onChange={(e) => setFormData({ ...formData, history: e.target.value })}
-                rows={2}
-                className="w-full px-4 py-2 bg-slate-600 border border-amber-700/30 rounded text-white placeholder-slate-400 focus:outline-none focus:border-amber-600"
+                rows={3}
+                className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
               />
 
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   type="submit"
-                  className="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-2 rounded transition"
+                  className="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-4 rounded transition"
                 >
-                  {editingId ? 'Update' : 'Create'} Location
+                  {editingId ? it.adminLocations.actions.update : it.adminLocations.actions.create}
                 </button>
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="flex-1 bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 rounded transition"
+                  className="bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded transition"
                 >
-                  Cancel
+                  {it.adminLocations.actions.cancel}
                 </button>
               </div>
             </form>
@@ -246,22 +270,36 @@ export const LocationsPage: React.FC = () => {
         )}
 
         {isLoading ? (
-          <div className="text-center text-amber-400">Loading locations...</div>
+          <div className="text-center text-amber-300 py-8">
+            {it.adminLocations.loading}
+          </div>
         ) : locations.length === 0 ? (
-          <div className="text-center text-amber-100 py-8">
-            <p>No locations yet. Add some points of interest to your map!</p>
+          <div className="text-center text-slate-300 py-10 bg-slate-800 rounded-xl border border-amber-700/20">
+            {it.adminLocations.empty}
           </div>
         ) : (
           <div className="grid gap-4">
             {locations.map((location) => (
-              <div key={location.id} className="bg-slate-700 border border-amber-700/30 rounded-lg p-4 flex justify-between items-start">
+              <div
+                key={location.id}
+                className="bg-slate-800 border border-amber-700/20 rounded-xl p-5 flex flex-col md:flex-row md:items-start md:justify-between gap-4"
+              >
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold text-amber-400">{location.name}</h3>
-                  <p className="text-amber-100 text-sm">
-                    {location.location_type.replace('_', ' ').toUpperCase()} • <span className={getStatusColor(location.control_status)}>{location.control_status.replace('_', ' ')}</span>
+                  <h3 className="text-xl font-bold text-amber-300">
+                    {location.name}
+                  </h3>
+                  <p className="text-slate-300 text-sm mt-1">
+                    {it.adminLocations.types[location.location_type]} •{' '}
+                    <span className={getStatusColor(location.control_status)}>
+                      {it.adminLocations.statuses[location.control_status]}
+                    </span>
                   </p>
-                  <p className="text-amber-900 text-sm mt-1">Coords: ({location.x_coordinate}, {location.y_coordinate})</p>
-                  <p className="text-amber-100 text-sm mt-2 line-clamp-2">{location.description}</p>
+                  <p className="text-slate-400 text-sm mt-2">
+                    {it.adminLocations.coords}: ({location.x_coordinate}, {location.y_coordinate})
+                  </p>
+                  <p className="text-slate-300 text-sm mt-3 line-clamp-3">
+                    {location.description}
+                  </p>
                 </div>
 
                 <div className="flex gap-2">
@@ -269,7 +307,7 @@ export const LocationsPage: React.FC = () => {
                     onClick={() => handleEdit(location)}
                     className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition"
                   >
-                    <Edit2 size={18} />
+                    <Pencil size={18} />
                   </button>
                   <button
                     onClick={() => handleDelete(location.id)}

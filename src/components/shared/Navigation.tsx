@@ -14,44 +14,58 @@ export const Navigation: React.FC = () => {
       await signOut();
       navigate('/');
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('Errore durante il logout:', error);
     }
   };
 
+  const closeMobileMenu = () => setIsOpen(false);
+
   return (
-    <nav className="sticky top-0 z-50 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 border-b border-amber-700/30 shadow-lg">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">⚓</span>
-            </div>
-            {it.nav.title}
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-950/90 backdrop-blur border-b border-amber-700/20">
+      <div className="max-w-7xl mx-auto px-4 md:px-6">
+        <div className="flex items-center justify-between h-16">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-amber-300 hover:text-amber-200 transition"
+          >
+            <span className="text-xl">⚓</span>
+            <span className="font-bold text-lg md:text-xl">{it.nav.title}</span>
+          </button>
+
+          <div className="hidden md:flex items-center gap-6 text-slate-200">
+            <a href="#campaign" className="hover:text-amber-300 transition">
+              {it.nav.campaign}
+            </a>
+            <a href="#characters" className="hover:text-amber-300 transition">
+              {it.nav.characters}
+            </a>
+            <a href="#sessions" className="hover:text-amber-300 transition">
+              {it.nav.sessions}
+            </a>
+            <a href="#map" className="hover:text-amber-300 transition">
+              {it.nav.map}
+            </a>
+            <a href="#gallery" className="hover:text-amber-300 transition">
+              {it.nav.gallery}
+            </a>
           </div>
 
-          <div className="hidden md:flex gap-8">
-            <a href="#campaign">{it.nav.campaign}</a>
-            <a href="#characters">{it.nav.characters}</a>
-            <a href="#sessions">{it.nav.sessions}</a>
-            <a href="#map">{it.nav.map}</a>
-            <a href="#gallery">{it.nav.gallery}</a>
-          </div>
-
-          <div className="flex items-center gap-4">
+          <div className="hidden sm:flex items-center gap-2">
             {!user && (
               <button
                 onClick={() => navigate('/auth/login')}
-                className="hidden sm:flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-amber-100 px-3 py-2 rounded transition"
+                className="bg-slate-700 hover:bg-slate-600 text-amber-100 px-3 py-2 rounded transition"
               >
                 {it.nav.login}
               </button>
             )}
+
             {isAdmin && (
               <button
                 onClick={() => navigate('/admin')}
-                className="hidden sm:flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded transition"
+                className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded transition"
               >
-                <Settings size={16} />
+                <Settings size={18} />
                 {it.nav.admin}
               </button>
             )}
@@ -59,61 +73,95 @@ export const Navigation: React.FC = () => {
             {user && (
               <button
                 onClick={handleSignOut}
-                className="hidden sm:flex items-center gap-2 text-amber-100 hover:text-amber-300 transition"
+                className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded transition"
               >
-                <LogOut size={16} />
-                <span className="text-sm">Sign Out</span>
+                <LogOut size={18} />
+                {it.nav.logout}
               </button>
             )}
-
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-2 hover:bg-slate-700 rounded transition"
-            >
-              {isOpen ? <X size={24} className="text-amber-400" /> : <Menu size={24} className="text-amber-400" />}
-            </button>
           </div>
+
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="md:hidden p-2 text-amber-200 hover:bg-slate-800 rounded transition"
+          >
+            {isOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
 
         {isOpen && (
-          <div className="md:hidden pb-4 border-t border-amber-700/30">
-            <div className="space-y-2 py-2">
-              <a href="#campaign" className="block px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition">Campaign</a>
-              <a href="#characters" className="block px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition">Characters</a>
-              <a href="#sessions" className="block px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition">Sessions</a>
-              <a href="#map" className="block px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition">Map</a>
-              <a href="#gallery" className="block px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition">Gallery</a>
+          <div className="md:hidden pb-4 space-y-2 border-t border-amber-700/20 pt-4">
+            <a
+              href="#campaign"
+              onClick={closeMobileMenu}
+              className="block px-4 py-2 text-slate-200 hover:bg-slate-800 rounded transition"
+            >
+              {it.nav.campaign}
+            </a>
+            <a
+              href="#characters"
+              onClick={closeMobileMenu}
+              className="block px-4 py-2 text-slate-200 hover:bg-slate-800 rounded transition"
+            >
+              {it.nav.characters}
+            </a>
+            <a
+              href="#sessions"
+              onClick={closeMobileMenu}
+              className="block px-4 py-2 text-slate-200 hover:bg-slate-800 rounded transition"
+            >
+              {it.nav.sessions}
+            </a>
+            <a
+              href="#map"
+              onClick={closeMobileMenu}
+              className="block px-4 py-2 text-slate-200 hover:bg-slate-800 rounded transition"
+            >
+              {it.nav.map}
+            </a>
+            <a
+              href="#gallery"
+              onClick={closeMobileMenu}
+              className="block px-4 py-2 text-slate-200 hover:bg-slate-800 rounded transition"
+            >
+              {it.nav.gallery}
+            </a>
 
-              {!user && (
-                <button
-                  onClick={() => {
-                    navigate('/auth/login');
-                    setIsOpen(false);
-                  }}
-                  className="w-full text-left px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition"
-                >
-                  {it.nav.login}
-                </button>
-              )}
-              
-              {isAdmin && (
-                <button
-                  onClick={() => { navigate('/admin'); setIsOpen(false); }}
-                  className="w-full text-left px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition"
-                >
-                  {it.nav.adminDashboard}
-                </button>
-              )}
+            {!user && (
+              <button
+                onClick={() => {
+                  navigate('/auth/login');
+                  closeMobileMenu();
+                }}
+                className="w-full text-left px-4 py-2 text-amber-100 hover:bg-slate-800 rounded transition"
+              >
+                {it.nav.login}
+              </button>
+            )}
 
-              {user && (
-                <button
-                  onClick={handleSignOut}
-                  className="w-full text-left px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition"
-                >
-                  {it.nav.logout}
-                </button>
-              )}
-            </div>
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  navigate('/admin');
+                  closeMobileMenu();
+                }}
+                className="w-full text-left px-4 py-2 text-amber-100 hover:bg-slate-800 rounded transition"
+              >
+                {it.nav.adminDashboard}
+              </button>
+            )}
+
+            {user && (
+              <button
+                onClick={async () => {
+                  await handleSignOut();
+                  closeMobileMenu();
+                }}
+                className="w-full text-left px-4 py-2 text-red-300 hover:bg-slate-800 rounded transition"
+              >
+                {it.nav.logout}
+              </button>
+            )}
           </div>
         )}
       </div>

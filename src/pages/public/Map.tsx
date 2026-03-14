@@ -1,247 +1,174 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { X, ZoomIn, ZoomOut } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { it } from '../../content/texts';
 import { supabase } from '../../utils/supabase';
 
-interface Location {
+interface WorldLocation {
   id: string;
   name: string;
   description: string;
-  location_type: string;
+  location_type: 'port' | 'island' | 'territory' | 'landmark';
   x_coordinate: number;
   y_coordinate: number;
-  control_status: string;
-  history?: string;
+  control_status: 'neutral' | 'player_controlled' | 'enemy_controlled' | 'allied';
+  history: string | null;
 }
 
 export const MapPage: React.FC = () => {
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const canvasRef = useRef<HTMLDivElement>(null);
-  const mapImageRef = useRef<HTMLImageElement>(null);
+  const [locations, setLocations] = useState<WorldLocation[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<WorldLocation | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchLocations();
-  }, []);
+    const fetchLocations = async () => {
+      setLoading(true);
 
-  const fetchLocations = async () => {
-    try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('world_locations')
-        .select('*')
+        .select('id, name, description, location_type, x_coordinate, y_coordinate, control_status, history')
         .order('name', { ascending: true });
 
-      if (error) throw error;
-      setLocations(data || []);
-    } catch (error) {
-      console.error('Error fetching locations:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      setLocations(data ?? []);
+      setLoading(false);
+    };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y });
-  };
+    void fetchLocations();
+  }, []);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    setPan({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y,
-    });
-  };
+  const typeLabel = (type: WorldLocation['location_type']) =>
+    it.mapPublic.locationTypes[type] ?? type;
 
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
+  const statusLabel = (status: WorldLocation['control_status']) =>
+    it.mapPublic.controlStatuses[status] ?? status;
 
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    const newZoom = zoom - (e.deltaY > 0 ? 0.1 : 0.1);
-    setZoom(Math.max(0.5, Math.min(3, newZoom)));
-  };
-
-  const getControlColor = (status: string) => {
+  const statusColor = (status: WorldLocation['control_status']) => {
     switch (status) {
-      case 'player_controlled': return 'bg-green-500';
-      case 'enemy_controlled': return 'bg-red-500';
-      case 'allied': return 'bg-blue-500';
-      default: return 'bg-amber-500';
-    }
-  };
-
-  const getTypeSymbol = (type: string) => {
-    switch (type) {
-      case 'port': return '⚓';
-      case 'island': return '🏝️';
-      case 'territory': return '🚩';
-      case 'landmark': return '🗺️';
-      default: return '📍';
+      case 'player_controlled':
+        return 'bg-emerald-500';
+      case 'enemy_controlled':
+        return 'bg-red-500';
+      case 'allied':
+        return 'bg-sky-500';
+      default:
+        return 'bg-slate-500';
     }
   };
 
   return (
-    <section id="map" className="py-16 bg-slate-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-amber-400 mb-2">World Map</h2>
-          <p className="text-amber-100">Explore the known world and beyond</p>
+    <section id="map" className="py-24 px-6 bg-slate-950">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-14">
+          <h2 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4">
+            {it.mapPublic.title}
+          </h2>
+          <p className="text-slate-300 text-lg">
+            {it.mapPublic.subtitle}
+          </p>
         </div>
 
-        {isLoading ? (
-          <div className="text-center text-amber-400">Loading map...</div>
+        {loading ? (
+          <p className="text-center text-slate-300 text-lg">
+            {it.mapPublic.loading}
+          </p>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Map Canvas */}
-            <div className="lg:col-span-3">
-              <div
-                ref={canvasRef}
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
-                onMouseLeave={handleMouseUp}
-                onWheel={handleWheel}
-                className="relative w-full h-96 lg:h-screen bg-slate-800 border border-amber-700/30 rounded-lg overflow-hidden cursor-grab active:cursor-grabbing"
-              >
-                {/* Map Image */}
-                <div
-                  style={{
-                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
-                    transition: isDragging ? 'none' : 'transform 0.1s ease-out',
-                  }}
-                  className="absolute inset-0"
-                >
-                  <img
-                    ref={mapImageRef}
-                    src="/07BW004-full.png"
-                    alt="World Map"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Location Markers */}
-                <div className="absolute inset-0 pointer-events-none">
-                  {locations.map((location) => {
-                    const mapElement = mapImageRef.current;
-                    if (!mapElement) return null;
-
-                    const pinX = (location.x_coordinate / 100) * mapElement.offsetWidth;
-                    const pinY = (location.y_coordinate / 100) * mapElement.offsetHeight;
-
-                    return (
-                      <button
-                        key={location.id}
-                        onClick={() => setSelectedLocation(location)}
-                        className="absolute pointer-events-auto -translate-x-1/2 -translate-y-1/2 transition transform hover:scale-125"
-                        style={{
-                          left: `${pinX}px`,
-                          top: `${pinY}px`,
-                          transform: `translate(-50%, -50%) scale(${1 / zoom})`,
-                        }}
-                        title={location.name}
-                      >
-                        <div className={`w-6 h-6 ${getControlColor(location.control_status)} rounded-full border-2 border-white shadow-lg flex items-center justify-center text-sm`}>
-                          {getTypeSymbol(location.location_type)}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Zoom Controls */}
-                <div className="absolute bottom-4 left-4 flex flex-col gap-2 pointer-events-auto">
+          <div className="grid lg:grid-cols-[1.3fr_0.9fr] gap-8">
+            <div className="relative min-h-[520px] rounded-2xl border border-amber-700/20 bg-[linear-gradient(180deg,#132033,#0b1320)] overflow-hidden">
+              <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:24px_24px]" />
+              <div className="absolute inset-0 p-6">
+                {locations.map((location) => (
                   <button
-                    onClick={() => setZoom(Math.min(3, zoom + 0.2))}
-                    className="bg-amber-600 hover:bg-amber-700 text-white p-2 rounded transition"
+                    key={location.id}
+                    onClick={() => setSelectedLocation(location)}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 group"
+                    style={{
+                      left: `${location.x_coordinate}%`,
+                      top: `${location.y_coordinate}%`,
+                    }}
+                    title={location.name}
                   >
-                    <ZoomIn size={20} />
+                    <span className={`block w-4 h-4 rounded-full ${statusColor(location.control_status)} ring-4 ring-white/10 group-hover:scale-125 transition`} />
                   </button>
-                  <button
-                    onClick={() => setZoom(Math.max(0.5, zoom - 0.2))}
-                    className="bg-amber-600 hover:bg-amber-700 text-white p-2 rounded transition"
-                  >
-                    <ZoomOut size={20} />
-                  </button>
-                </div>
+                ))}
+              </div>
+
+              <div className="absolute bottom-4 left-4 text-xs text-slate-400 bg-slate-900/70 px-3 py-2 rounded">
+                {it.mapPublic.worldMapAlt}
               </div>
             </div>
 
-            {/* Locations List */}
-            <div className="lg:col-span-1">
-              <div className="bg-slate-800 border border-amber-700/30 rounded-lg p-4">
-                <h3 className="text-amber-400 font-bold mb-4">Locations ({locations.length})</h3>
+            <div className="rounded-2xl border border-amber-700/20 bg-slate-900 p-6">
+              <h3 className="text-2xl font-bold text-amber-300 mb-6">
+                {it.mapPublic.locations}
+              </h3>
 
-                <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {locations.map((location) => (
-                    <button
-                      key={location.id}
-                      onClick={() => setSelectedLocation(location)}
-                      className="w-full text-left p-2 bg-slate-700 hover:bg-slate-600 rounded transition text-amber-100 text-sm"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{getTypeSymbol(location.location_type)}</span>
-                        <span className="font-bold text-amber-400">{location.name}</span>
-                      </div>
-                      <div className="text-xs text-amber-900 ml-6">{location.location_type.replace('_', ' ')}</div>
-                    </button>
-                  ))}
-                </div>
+              <div className="space-y-4 max-h-[520px] overflow-auto pr-2">
+                {locations.map((location) => (
+                  <button
+                    key={location.id}
+                    onClick={() => setSelectedLocation(location)}
+                    className="w-full text-left rounded-xl border border-amber-700/10 bg-slate-950 p-4 hover:bg-slate-800/50 transition"
+                  >
+                    <h4 className="text-lg font-semibold text-white mb-1">
+                      {location.name}
+                    </h4>
+                    <p className="text-sm text-amber-200 mb-1">
+                      {it.mapPublic.type}: {typeLabel(location.location_type)}
+                    </p>
+                    <p className="text-sm text-slate-400">
+                      {it.mapPublic.control}: {statusLabel(location.control_status)}
+                    </p>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
         )}
-      </div>
 
-      {/* Location Detail Modal */}
-      {selectedLocation && (
-        <div className="fixed inset-0 bg-slate-900/80 z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-800 border border-amber-700/30 rounded-lg max-w-md w-full">
-            <div className="flex justify-between items-start p-4 border-b border-amber-700/30">
-              <h2 className="text-xl font-bold text-amber-400">{selectedLocation.name}</h2>
+        {selectedLocation && (
+          <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4" onClick={() => setSelectedLocation(null)}>
+            <div
+              className="max-w-2xl w-full rounded-2xl border border-amber-700/20 bg-slate-900 p-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 className="text-3xl font-bold text-amber-300 mb-4">
+                {selectedLocation.name}
+              </h3>
+
+              <div className="space-y-3 text-slate-200">
+                <p>
+                  <span className="text-amber-200 font-semibold">{it.mapPublic.type}:</span>{' '}
+                  {typeLabel(selectedLocation.location_type)}
+                </p>
+                <p>
+                  <span className="text-amber-200 font-semibold">{it.mapPublic.control}:</span>{' '}
+                  {statusLabel(selectedLocation.control_status)}
+                </p>
+                <p>
+                  <span className="text-amber-200 font-semibold">{it.mapPublic.coordinates}:</span>{' '}
+                  {selectedLocation.x_coordinate}, {selectedLocation.y_coordinate}
+                </p>
+                <p className="whitespace-pre-line leading-7">
+                  <span className="text-amber-200 font-semibold">{it.mapPublic.description}:</span>{' '}
+                  {selectedLocation.description}
+                </p>
+
+                {selectedLocation.history && (
+                  <p className="whitespace-pre-line leading-7">
+                    <span className="text-amber-200 font-semibold">{it.mapPublic.history}:</span>{' '}
+                    {selectedLocation.history}
+                  </p>
+                )}
+              </div>
+
               <button
                 onClick={() => setSelectedLocation(null)}
-                className="text-amber-400 hover:text-amber-300 transition"
+                className="mt-8 px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded transition"
               >
-                <X size={24} />
+                Chiudi
               </button>
             </div>
-
-            <div className="p-4 space-y-3">
-              <div>
-                <p className="text-amber-900 text-xs font-medium uppercase">Type</p>
-                <p className="text-amber-400 font-bold">{selectedLocation.location_type.replace('_', ' ')}</p>
-              </div>
-
-              <div>
-                <p className="text-amber-900 text-xs font-medium uppercase">Control</p>
-                <p className="text-amber-400 font-bold">{selectedLocation.control_status.replace('_', ' ')}</p>
-              </div>
-
-              <div>
-                <p className="text-amber-900 text-xs font-medium uppercase">Description</p>
-                <p className="text-amber-100">{selectedLocation.description}</p>
-              </div>
-
-              {selectedLocation.history && (
-                <div>
-                  <p className="text-amber-900 text-xs font-medium uppercase">History</p>
-                  <p className="text-amber-100">{selectedLocation.history}</p>
-                </div>
-              )}
-
-              <div className="pt-2 border-t border-amber-700/30">
-                <p className="text-amber-900 text-xs">Coordinates: ({selectedLocation.x_coordinate}, {selectedLocation.y_coordinate})</p>
-              </div>
-            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 };
