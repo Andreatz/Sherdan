@@ -223,3 +223,52 @@ export const SessionsPage: React.FC = () => {
               </div>
             </form>
           </div>
+        )}
+
+        {isLoading ? (
+          <div className="text-center text-amber-300 py-8">
+            {it.adminSessions.loading}
+          </div>
+        ) : sessions.length === 0 ? (
+          <div className="text-center text-slate-300 py-10 bg-slate-800 rounded-xl border border-amber-700/20">
+            {it.adminSessions.empty}
+          </div>
+        ) : (
+          <div className="grid gap-4">
+            {sessions.map((session) => (
+              <div
+                key={session.id}
+                className="bg-slate-800 border border-amber-700/20 rounded-xl p-5 flex flex-col md:flex-row md:items-start md:justify-between gap-4"
+              >
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold text-amber-300">
+                    {it.adminSessions.sessionLabel} {session.session_number}: {session.title}
+                  </h3>
+                  <p className="text-slate-400 text-sm mt-1">{session.date}</p>
+                  <p className="text-slate-300 text-sm mt-3 line-clamp-3">
+                    {session.summary}
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(session)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition"
+                  >
+                    <Pencil size={18} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(session.id)}
+                    className="bg-red-600 hover:bg-red-700 text-white p-2 rounded transition"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </AdminLayout>
+  );
+};
