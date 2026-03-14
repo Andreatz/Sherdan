@@ -6,6 +6,7 @@ export const it = {
     sessions: 'Sessioni',
     map: 'Mappa',
     gallery: 'Galleria',
+    myCharacter: 'Il mio personaggio',
     login: 'Accedi',
     admin: 'Pannello Admin',
     adminDashboard: 'Pannello admin',
@@ -15,8 +16,8 @@ export const it = {
   home: {
     defaultTitle: 'Sherdan',
     defaultTagline: '',
-    beginAdventure: 'Inizia l’avventura',
-    meetCrew: 'Conosci l’equipaggio',
+    beginAdventure: 'Inizia l\u2019avventura',
+    meetCrew: 'Conosci l\u2019equipaggio',
     scroll: 'Scorri',
   },
 
@@ -27,7 +28,7 @@ export const it = {
     storyArcTab: 'Arco narrativo',
     houseRulesTab: 'Regole della campagna',
     worldLoreTitle: 'Lore del mondo',
-    worldLoreEmpty: 'Nessuna lore è stata ancora registrata...',
+    worldLoreEmpty: 'Nessuna lore \u00e8 stata ancora registrata...',
     storyTitle: 'Arco narrativo principale',
     storyEmpty: 'La storia deve ancora essere scritta...',
     rulesTitle: 'Regole della campagna',
@@ -35,7 +36,7 @@ export const it = {
   },
 
   charactersPublic: {
-    title: 'L’equipaggio',
+    title: 'L\u2019equipaggio',
     subtitle: 'Incontra gli avventurieri della leggenda',
     loading: 'Caricamento personaggi...',
     empty: 'Nessun personaggio ancora. Torna presto!',
@@ -49,9 +50,9 @@ export const it = {
 
   sessionsPublic: {
     title: 'Cronache di sessione',
-    subtitle: 'Racconti dall’alto mare',
+    subtitle: 'Racconti dall\u2019alto mare',
     loading: 'Caricamento sessioni...',
-    empty: 'Nessun registro di sessione ancora. La storia inizierà presto...',
+    empty: 'Nessun registro di sessione ancora. La storia inizier\u00e0 presto...',
     session: 'Sessione',
     summary: 'Riassunto',
     fullAccount: 'Resoconto completo',
@@ -85,7 +86,7 @@ export const it = {
 
   galleryPublic: {
     title: 'Galleria della campagna',
-    subtitle: 'Momenti dall’alto mare',
+    subtitle: 'Momenti dall\u2019alto mare',
     loading: 'Caricamento galleria...',
     empty: 'Nessuna immagine ancora. I momenti epici arriveranno presto!',
     of: 'di',
@@ -101,7 +102,7 @@ export const it = {
     locations: 'Luoghi',
     gallery: 'Galleria',
     settings: 'Impostazioni campagna',
-    backToSite: '← Torna al sito',
+    backToSite: '\u2190 Torna al sito',
     logout: 'Esci',
   },
 
@@ -260,7 +261,7 @@ export const it = {
     },
     defaults: {
       title: 'Campagna Pirata',
-      tagline: 'Un’avventura ti attende in alto mare',
+      tagline: 'Un\u2019avventura ti attende in alto mare',
     },
   },
 
@@ -278,7 +279,7 @@ export const it = {
   },
 
   signup: {
-    title: 'Unisciti all’equipaggio',
+    title: 'Unisciti all\u2019equipaggio',
     subtitle: 'Crea il tuo account admin',
     email: 'Email',
     password: 'Password',
@@ -291,7 +292,7 @@ export const it = {
     },
     submit: 'Crea account',
     loading: 'Creazione account...',
-    loginPrompt: 'Hai già un account?',
+    loginPrompt: 'Hai gi\u00e0 un account?',
     loginAction: 'Accedi',
   },
 
