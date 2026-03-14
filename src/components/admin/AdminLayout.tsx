@@ -16,7 +16,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ children, currentPage 
   const handleSignOut = async () => {
     try {
       await signOut();
-      navigate('/');
+      navigate('/auth/login', { replace: true });
     } catch (error) {
       console.error('Error signing out:', error);
     }
