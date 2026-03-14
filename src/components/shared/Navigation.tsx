@@ -37,6 +37,14 @@ export const Navigation: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4">
+            {!user && (
+              <button
+                onClick={() => navigate('/auth/login')}
+                className="hidden sm:flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-amber-100 px-3 py-2 rounded transition"
+              >
+                Login
+              </button>
+            )}
             {isAdmin && (
               <button
                 onClick={() => navigate('/admin')}
@@ -75,6 +83,18 @@ export const Navigation: React.FC = () => {
               <a href="#map" className="block px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition">Map</a>
               <a href="#gallery" className="block px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition">Gallery</a>
 
+              {!user && (
+                <button
+                  onClick={() => {
+                    navigate('/auth/login');
+                    setIsOpen(false);
+                  }}
+                  className="w-full text-left px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition"
+                >
+                  Login
+                </button>
+              )}
+              
               {isAdmin && (
                 <button
                   onClick={() => { navigate('/admin'); setIsOpen(false); }}
