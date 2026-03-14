@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Menu, X, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { it } from '../../content/texts';
 
 export const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,15 +26,15 @@ export const Navigation: React.FC = () => {
             <div className="w-8 h-8 bg-amber-600 rounded-full flex items-center justify-center">
               <span className="text-white font-bold text-sm">⚓</span>
             </div>
-            <span className="hidden sm:inline text-xl font-bold text-amber-600">Pirate Campaign</span>
+            {it.nav.title}
           </div>
 
           <div className="hidden md:flex gap-8">
-            <a href="#campaign" className="text-amber-100 hover:text-amber-300 transition">Campaign</a>
-            <a href="#characters" className="text-amber-100 hover:text-amber-300 transition">Characters</a>
-            <a href="#sessions" className="text-amber-100 hover:text-amber-300 transition">Sessions</a>
-            <a href="#map" className="text-amber-100 hover:text-amber-300 transition">Map</a>
-            <a href="#gallery" className="text-amber-100 hover:text-amber-300 transition">Gallery</a>
+            <a href="#campaign">{it.nav.campaign}</a>
+            <a href="#characters">{it.nav.characters}</a>
+            <a href="#sessions">{it.nav.sessions}</a>
+            <a href="#map">{it.nav.map}</a>
+            <a href="#gallery">{it.nav.gallery}</a>
           </div>
 
           <div className="flex items-center gap-4">
@@ -42,7 +43,7 @@ export const Navigation: React.FC = () => {
                 onClick={() => navigate('/auth/login')}
                 className="hidden sm:flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-amber-100 px-3 py-2 rounded transition"
               >
-                Login
+                {it.nav.login}
               </button>
             )}
             {isAdmin && (
@@ -51,7 +52,7 @@ export const Navigation: React.FC = () => {
                 className="hidden sm:flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded transition"
               >
                 <Settings size={16} />
-                <span className="text-sm">Admin</span>
+                {it.nav.admin}
               </button>
             )}
 
@@ -91,7 +92,7 @@ export const Navigation: React.FC = () => {
                   }}
                   className="w-full text-left px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition"
                 >
-                  Login
+                  {it.nav.login}
                 </button>
               )}
               
@@ -100,7 +101,7 @@ export const Navigation: React.FC = () => {
                   onClick={() => { navigate('/admin'); setIsOpen(false); }}
                   className="w-full text-left px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition"
                 >
-                  Admin Dashboard
+                  {it.nav.adminDashboard}
                 </button>
               )}
 
@@ -109,7 +110,7 @@ export const Navigation: React.FC = () => {
                   onClick={handleSignOut}
                   className="w-full text-left px-4 py-2 text-amber-100 hover:bg-slate-700 rounded transition"
                 >
-                  Sign Out
+                  {it.nav.logout}
                 </button>
               )}
             </div>
