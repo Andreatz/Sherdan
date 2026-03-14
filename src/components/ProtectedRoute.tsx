@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ProtectedRouteProps {
@@ -7,22 +7,29 @@ interface ProtectedRouteProps {
   requireAdmin?: boolean;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requireAdmin = false }) => {
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  requireAdmin = false,
+}) => {
   const { user, isAdmin, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-900">
-        <div className="text-amber-400 text-center">
-          <div className="animate-spin text-4xl mb-4">⚓</div>
-          <p>Loading...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-900 text-amber-400 text-xl">
+        ⚓ Loading...
       </div>
     );
   }
 
   if (!user) {
-    return <Navigate to="/auth/login" replace />;
+    return (
+      <Navigate
+        to="/auth/login"
+        replace
+        state={{ from: location.pathname }}
+      />
+    );
   }
 
   if (requireAdmin && !isAdmin) {
