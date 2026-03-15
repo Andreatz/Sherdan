@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 import { it } from '../../content/texts';
 import { supabase } from '../../utils/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface SessionLog {
   id: string;
@@ -18,6 +19,10 @@ export const SessionsPage: React.FC = () => {
   const [openSession, setOpenSession] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
+  const { user, isLoading } = useAuth();
+
+  // Redirect se non loggato (doppia difesa oltre a ProtectedRoute in App.tsx)
+  if (!isLoading && !user) return <Navigate to="/auth/login" replace />;
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -49,7 +54,6 @@ export const SessionsPage: React.FC = () => {
 
   return (
     <section id="sessions" className="relative py-24 px-6 overflow-hidden">
-      {/* Parallax background */}
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{

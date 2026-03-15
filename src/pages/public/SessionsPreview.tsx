@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../utils/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface SessionLog {
   id: string;
@@ -13,8 +14,10 @@ export const SessionsPreview: React.FC = () => {
   const [sessions, setSessions] = useState<SessionLog[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { user, isLoading } = useAuth();
 
   useEffect(() => {
+    if (!user) { setLoading(false); return; }
     const fetchSessions = async () => {
       setLoading(true);
       const { data } = await supabase
@@ -25,20 +28,45 @@ export const SessionsPreview: React.FC = () => {
       setLoading(false);
     };
     void fetchSessions();
-  }, []);
+  }, [user]);
+
+  const backgroundSection = (
+    <div className="absolute inset-0">
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`, backgroundAttachment: 'fixed' }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/85" />
+    </div>
+  );
+
+  // Guest gate: mostra solo un invito al login
+  if (!isLoading && !user) {
+    return (
+      <section id="sessions" className="relative py-24 px-6 overflow-hidden">
+        {backgroundSection}
+        <div className="relative z-10 max-w-2xl mx-auto text-center space-y-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-amber-300">Diario delle Sessioni</h2>
+          <p className="text-slate-400 text-lg">Le cronache della campagna sono riservate ai giocatori.</p>
+          <div className="inline-flex flex-col sm:flex-row gap-3 mt-4">
+            <button
+              onClick={() => navigate('/auth/login')}
+              className="px-8 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition"
+            >
+              🔑 Accedi per leggere
+            </button>
+          </div>
+          <p className="text-slate-600 text-sm pt-2">
+            Non hai un account? Chiedi al DM di creartene uno.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section id="sessions" className="relative py-24 px-6 overflow-hidden">
-      {/* Background parallax */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`,
-          backgroundAttachment: 'fixed',
-        }}
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/85" />
-
+      {backgroundSection}
       <div className="relative z-10 max-w-4xl mx-auto">
         <div className="text-center mb-14">
           <h2 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4">Diario delle Sessioni</h2>

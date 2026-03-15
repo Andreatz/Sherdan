@@ -60,15 +60,15 @@ function App() {
             }
           />
 
-          {/* Sessioni dedicate */}
+          {/* Sessioni — solo utenti loggati */}
           <Route
             path="/sessioni"
             element={
-              <>
+              <ProtectedRoute>
                 <Navigation />
                 <SessionsPage />
                 <Footer />
-              </>
+              </ProtectedRoute>
             }
           />
 
@@ -80,7 +80,7 @@ function App() {
                 <Navigation />
                 <RegionPage />
                 <Footer />
-              </>
+            </>
             }
           />
 
