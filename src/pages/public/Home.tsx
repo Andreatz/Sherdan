@@ -49,7 +49,7 @@ export const Home: React.FC = () => {
         <img
           src="/Logo Sherdan.png"
           alt="Atlante di Sherdan"
-          className="mx-auto mb-8 w-64 md:w-80 lg:w-96 h-auto object-contain drop-shadow-2xl"
+          className="mx-auto mb-8 w-84 md:w-100 lg:w-146 h-auto object-contain drop-shadow-2xl"
         />
 
         <p className="text-lg md:text-2xl text-slate-200 max-w-3xl mx-auto leading-relaxed mb-10">

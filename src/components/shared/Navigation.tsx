@@ -34,7 +34,7 @@ export const Navigation: React.FC = () => {
             <img
               src="/Logo Sherdan.png"
               alt="Logo Sherdan"
-              className="h-14 w-auto object-contain"
+              className="h-20 w-auto object-contain"
             />
           </button>
 
