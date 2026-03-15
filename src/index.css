@@ -70,68 +70,44 @@ body { @apply bg-slate-900 text-amber-100; }
 .animate-glow  { animation: glow 2s ease-in-out infinite; }
 
 /* ============================================================
-   DADO SVG — animazione lancio
+   DADO — animazioni lancio
    ============================================================ */
 
 @keyframes dice-throw {
-  0%   {
-    transform: translate(-140px, -180px) rotate(-120deg) scale(0.3);
-    opacity: 0;
-    filter: drop-shadow(0 0 0px #ffd700);
-  }
+  0%   { transform: translate(-160px, -200px) rotate(-200deg) scale(0.3); opacity: 0; filter: drop-shadow(0 0 0 #ffd700); }
   8%   { opacity: 1; }
-  38%  { transform: translate(18px, 12px)  rotate(340deg)  scale(1.12); }
-  55%  { transform: translate(-8px, 28px)  rotate(380deg)  scale(0.94); filter: drop-shadow(0 0 8px #ffd70066); }
-  68%  { transform: translate(5px, -10px)  rotate(395deg)  scale(1.04); }
-  78%  { transform: translate(-3px, 5px)   rotate(402deg)  scale(0.98); }
-  86%  { transform: translate(2px, -3px)   rotate(406deg)  scale(1.01); }
-  93%  { transform: translate(-1px, 1px)   rotate(408deg)  scale(1.0);  }
-  100% {
-    transform: translate(0, 0) rotate(410deg) scale(1);
-    opacity: 1;
-    filter: drop-shadow(0 0 24px #ffd700aa);
-  }
+  40%  { transform: translate(16px, 14px)   rotate(340deg) scale(1.13); }
+  56%  { transform: translate(-8px, 26px)   rotate(378deg) scale(0.93); }
+  69%  { transform: translate(5px, -9px)    rotate(393deg) scale(1.04); }
+  79%  { transform: translate(-3px, 4px)    rotate(400deg) scale(0.98); }
+  88%  { transform: translate(1px, -2px)    rotate(404deg) scale(1.01); }
+  100% { transform: translate(0, 0)         rotate(405deg) scale(1);    opacity: 1; filter: drop-shadow(0 0 22px rgba(212,175,55,0.8)); }
 }
 
 @keyframes dice-idle {
-  0%, 100% { transform: rotate(0deg) scale(1); }
-  25%       { transform: rotate(3deg) scale(1.02); }
-  75%       { transform: rotate(-3deg) scale(0.98); }
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(212,175,55,0.4)); }
+  50%       { filter: drop-shadow(0 0 18px rgba(212,175,55,0.7)); }
 }
 
 @keyframes dice-land-glow {
-  0%   { filter: drop-shadow(0 0 24px #ffd700cc); }
-  60%  { filter: drop-shadow(0 0 48px #ffd700ff); }
-  100% { filter: drop-shadow(0 0 16px #ffd70066); }
+  0%   { filter: drop-shadow(0 0 22px rgba(212,175,55,0.8)); }
+  50%  { filter: drop-shadow(0 0 48px rgba(255,215,0,1));    }
+  100% { filter: drop-shadow(0 0 14px rgba(212,175,55,0.5)); }
 }
 
 @keyframes spark {
-  0%   { transform: translate(0, 0) scale(1.2); opacity: 1; }
+  0%   { transform: translate(0,0) scale(1.2); opacity: 1; }
   100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
 }
 
-.dice-svg-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-.dice-svg-wrap.rolling svg {
-  animation: dice-throw 1.8s cubic-bezier(0.18, 0.89, 0.32, 1.1) forwards;
-}
-.dice-svg-wrap.landed svg {
-  animation: dice-land-glow 0.7s ease-out forwards;
-}
-.dice-svg-wrap.idle svg {
-  animation: dice-idle 3s ease-in-out infinite;
-}
+.die-rolling { animation: dice-throw    1.85s cubic-bezier(0.18,0.89,0.32,1.05) forwards; }
+.die-landed  { animation: dice-land-glow 0.7s  ease-out                          forwards; }
+.die-idle    { animation: dice-idle      2.5s  ease-in-out infinite; }
 
 .spark {
   position: absolute;
-  width: 7px;
-  height: 7px;
+  width: 8px; height: 8px;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff 0%, #ffd700 60%, transparent 100%);
   pointer-events: none;
-  animation: spark 0.75s ease-out forwards;
+  animation: spark 0.8s ease-out forwards;
 }
