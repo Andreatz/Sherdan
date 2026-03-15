@@ -13,6 +13,7 @@ import { Signup } from './pages/auth/Signup';
 import { Home } from './pages/public/Home';
 import { CampaignPage } from './pages/public/Campaign';
 import { CharactersPage } from './pages/public/Characters';
+import { SessionsPreview } from './pages/public/SessionsPreview';
 import { SessionsPage } from './pages/public/Sessions';
 import { MapPage } from './pages/public/Map';
 import { GalleryPage } from './pages/public/Gallery';
@@ -37,7 +38,7 @@ function App() {
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/signup" element={<Signup />} />
 
-          {/* Public Routes */}
+          {/* Home */}
           <Route
             path="/"
             element={
@@ -47,7 +48,7 @@ function App() {
                   <Home />
                   <CampaignPage />
                   <CharactersPage />
-                  <SessionsPage />
+                  <SessionsPreview />
                   <MapPage />
                   <GalleryPage />
                 </div>
@@ -56,7 +57,19 @@ function App() {
             }
           />
 
-          {/* Player Route - Il mio personaggio */}
+          {/* Sessioni dedicate */}
+          <Route
+            path="/sessioni"
+            element={
+              <>
+                <Navigation />
+                <SessionsPage />
+                <Footer />
+              </>
+            }
+          />
+
+          {/* Player Route */}
           <Route
             path="/personaggio"
             element={
@@ -69,54 +82,12 @@ function App() {
           />
 
           {/* Admin Routes */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute requireAdmin>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/characters"
-            element={
-              <ProtectedRoute requireAdmin>
-                <AdminCharactersPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/sessions"
-            element={
-              <ProtectedRoute requireAdmin>
-                <AdminSessionsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/locations"
-            element={
-              <ProtectedRoute requireAdmin>
-                <LocationsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/gallery"
-            element={
-              <ProtectedRoute requireAdmin>
-                <AdminGalleryPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/settings"
-            element={
-              <ProtectedRoute requireAdmin>
-                <SettingsPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/admin" element={<ProtectedRoute requireAdmin><DashboardPage /></ProtectedRoute>} />
+          <Route path="/admin/characters" element={<ProtectedRoute requireAdmin><AdminCharactersPage /></ProtectedRoute>} />
+          <Route path="/admin/sessions" element={<ProtectedRoute requireAdmin><AdminSessionsPage /></ProtectedRoute>} />
+          <Route path="/admin/locations" element={<ProtectedRoute requireAdmin><LocationsPage /></ProtectedRoute>} />
+          <Route path="/admin/gallery" element={<ProtectedRoute requireAdmin><AdminGalleryPage /></ProtectedRoute>} />
+          <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><SettingsPage /></ProtectedRoute>} />
 
           {/* Catch all */}
           <Route path="*" element={<Navigate to="/" replace />} />
