@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, User, Shield } from 'lucide-react';
+import { Plus, Pencil, Trash2, User, Shield, Eye, EyeOff } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { supabase } from '../../utils/supabase';
 import { it } from '../../content/texts';
@@ -13,6 +13,7 @@ interface Character {
   backstory: string;
   portrait_url?: string | null;
   is_player_character: boolean;
+  is_revealed: boolean;
   owner_email?: string | null;
   owner_user_id?: string | null;
   sigillo?: string | null;
@@ -27,6 +28,7 @@ const emptyForm = {
   backstory: '',
   portrait_url: '',
   is_player_character: false,
+  is_revealed: false,
   owner_email: '',
   sigillo: '',
   private_notes: '',
@@ -109,6 +111,7 @@ export const CharactersPage: React.FC = () => {
       backstory: character.backstory,
       portrait_url: character.portrait_url || '',
       is_player_character: character.is_player_character,
+      is_revealed: character.is_revealed,
       owner_email: character.owner_email || '',
       sigillo: character.sigillo || '',
       private_notes: character.private_notes || '',
@@ -127,6 +130,19 @@ export const CharactersPage: React.FC = () => {
       await fetchCharacters();
     } catch (error) {
       console.error('Errore eliminazione personaggio:', error);
+    }
+  };
+
+  const handleToggleReveal = async (character: Character) => {
+    try {
+      const { error } = await supabase
+        .from('characters')
+        .update({ is_revealed: !character.is_revealed })
+        .eq('id', character.id);
+      if (error) throw error;
+      await fetchCharacters();
+    } catch (error) {
+      console.error('Errore toggle visibilità:', error);
     }
   };
 
@@ -191,6 +207,24 @@ export const CharactersPage: React.FC = () => {
                   </span>
                 </label>
               </div>
+
+              {/* Toggle Visibilità (solo NPC) */}
+              {!formData.is_player_character && (
+                <div className="flex items-center gap-4 p-4 bg-slate-700/50 rounded-xl border border-amber-700/20">
+                  <span className="text-slate-300 font-medium">Visibilità giocatori:</span>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.is_revealed}
+                      onChange={(e) => setFormData({ ...formData, is_revealed: e.target.checked })}
+                      className="accent-amber-500 w-4 h-4"
+                    />
+                    <span className="text-slate-200 flex items-center gap-1">
+                      {formData.is_revealed ? <><Eye size={14} className="text-green-400" /> Visibile ai giocatori</> : <><EyeOff size={14} className="text-slate-400" /> Nascosto ai giocatori</>}
+                    </span>
+                  </label>
+                </div>
+              )}
 
               {/* Campi base */}
               <div>
@@ -272,7 +306,6 @@ export const CharactersPage: React.FC = () => {
                   <h3 className="text-amber-400 font-semibold flex items-center gap-2">
                     <Shield size={16} /> Campi Personaggio Giocante
                   </h3>
-
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-slate-400 text-sm mb-1">Email giocatore</label>
@@ -296,7 +329,6 @@ export const CharactersPage: React.FC = () => {
                       />
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-slate-400 text-sm mb-1">🔒 Note segrete (visibili solo al giocatore)</label>
                     <textarea
@@ -368,7 +400,11 @@ export const CharactersPage: React.FC = () => {
             {filtered.map((character) => (
               <div
                 key={character.id}
-                className="bg-slate-800 border border-amber-700/20 rounded-xl p-5 flex flex-col md:flex-row md:items-start md:justify-between gap-4"
+                className={`bg-slate-800 border rounded-xl p-5 flex flex-col md:flex-row md:items-start md:justify-between gap-4 ${
+                  !character.is_player_character && !character.is_revealed
+                    ? 'border-slate-600/40 opacity-70'
+                    : 'border-amber-700/20'
+                }`}
               >
                 <div className="flex gap-4 flex-1 min-w-0">
                   {character.portrait_url ? (
@@ -393,6 +429,11 @@ export const CharactersPage: React.FC = () => {
                       ) : (
                         <span className="text-xs bg-slate-700 text-slate-400 border border-slate-600 rounded px-2 py-0.5">NPC</span>
                       )}
+                      {!character.is_player_character && (
+                        character.is_revealed
+                          ? <span className="inline-flex items-center gap-1 text-xs bg-green-900/30 text-green-400 border border-green-700/40 rounded px-2 py-0.5"><Eye size={10} /> Visibile</span>
+                          : <span className="inline-flex items-center gap-1 text-xs bg-slate-700/60 text-slate-500 border border-slate-600/40 rounded px-2 py-0.5"><EyeOff size={10} /> Nascosto</span>
+                      )}
                     </div>
 
                     <p className="text-slate-300 text-sm mt-1">
@@ -411,12 +452,24 @@ export const CharactersPage: React.FC = () => {
                     {character.sigillo && (
                       <p className="text-amber-600 text-xs mt-1 italic">{character.sigillo}</p>
                     )}
-
                     <p className="text-slate-400 text-sm mt-2 line-clamp-2">{character.backstory}</p>
                   </div>
                 </div>
 
                 <div className="flex gap-2 flex-shrink-0">
+                  {!character.is_player_character && (
+                    <button
+                      onClick={() => handleToggleReveal(character)}
+                      className={`p-2 rounded transition text-white ${
+                        character.is_revealed
+                          ? 'bg-green-700 hover:bg-green-800'
+                          : 'bg-slate-600 hover:bg-slate-500'
+                      }`}
+                      title={character.is_revealed ? 'Nascondi ai giocatori' : 'Rivela ai giocatori'}
+                    >
+                      {character.is_revealed ? <Eye size={18} /> : <EyeOff size={18} />}
+                    </button>
+                  )}
                   <button
                     onClick={() => handleEdit(character)}
                     className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition"
