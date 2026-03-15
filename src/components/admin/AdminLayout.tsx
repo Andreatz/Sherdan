@@ -27,12 +27,13 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   };
 
   const menuItems = [
-    { id: 'dashboard', label: it.admin.dashboard, path: '/admin' },
-    { id: 'characters', label: it.admin.characters, path: '/admin/characters' },
-    { id: 'sessions', label: it.admin.sessions, path: '/admin/sessions' },
-    { id: 'locations', label: it.admin.locations, path: '/admin/locations' },
-    { id: 'gallery', label: it.admin.gallery, path: '/admin/gallery' },
-    { id: 'settings', label: it.admin.settings, path: '/admin/settings' },
+    { id: 'dashboard',  label: it.admin.dashboard,   path: '/admin' },
+    { id: 'characters', label: it.admin.characters,   path: '/admin/characters' },
+    { id: 'sessions',   label: it.admin.sessions,     path: '/admin/sessions' },
+    { id: 'missions',   label: 'Missioni',            path: '/admin/missions' },
+    { id: 'locations',  label: it.admin.locations,    path: '/admin/locations' },
+    { id: 'gallery',    label: it.admin.gallery,      path: '/admin/gallery' },
+    { id: 'settings',   label: it.admin.settings,     path: '/admin/settings' },
   ];
 
   return (
@@ -92,41 +93,28 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       <div className="flex-1 flex flex-col min-w-0">
         <header className="md:hidden flex items-center justify-between px-4 py-4 border-b border-amber-700/20 bg-slate-900">
           <h1 className="text-lg font-bold text-amber-300">{it.admin.panel}</h1>
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-amber-300"
-          >
+          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-amber-300">
             <Menu size={22} />
           </button>
         </header>
 
         {sidebarOpen && (
           <div className="md:hidden bg-slate-900 border-b border-amber-700/20 px-4 py-4 space-y-2">
-            <button
-              onClick={() => navigate('/')}
-              className="w-full text-left px-4 py-2 rounded text-amber-100 hover:bg-slate-800 transition"
-            >
+            <button onClick={() => navigate('/')} className="w-full text-left px-4 py-2 rounded text-amber-100 hover:bg-slate-800 transition">
               {it.admin.backToSite}
             </button>
-
             {menuItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => navigate(item.path)}
                 className={`w-full text-left px-4 py-2 rounded transition ${
-                  currentPage === item.id
-                    ? 'bg-amber-600 text-white'
-                    : 'text-amber-100 hover:bg-slate-800'
+                  currentPage === item.id ? 'bg-amber-600 text-white' : 'text-amber-100 hover:bg-slate-800'
                 }`}
               >
                 {item.label}
               </button>
             ))}
-
-            <button
-              onClick={handleSignOut}
-              className="w-full text-left px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white transition"
-            >
+            <button onClick={handleSignOut} className="w-full text-left px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white transition">
               {it.admin.logout}
             </button>
           </div>

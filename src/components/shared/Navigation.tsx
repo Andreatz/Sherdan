@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, LogOut, Settings, Scroll } from 'lucide-react';
+import { Menu, X, LogOut, Settings, Scroll, Sword } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { it } from '../../content/texts';
@@ -34,7 +34,7 @@ export const Navigation: React.FC = () => {
             <img
               src="/Logo Sherdan.png"
               alt="Logo Sherdan"
-              className="h-20 w-auto object-contain animate-logo-glow"
+              className="h-14 w-auto object-contain"
             />
           </button>
 
@@ -47,13 +47,22 @@ export const Navigation: React.FC = () => {
             <a href="/#gallery" className="hover:text-amber-300 transition">{it.nav.gallery}</a>
 
             {user && !isAdmin && (
-              <button
-                onClick={() => navigate('/personaggio')}
-                className="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-semibold transition"
-              >
-                <Scroll size={15} />
-                {it.nav.myCharacter}
-              </button>
+              <>
+                <button
+                  onClick={() => navigate('/personaggio')}
+                  className="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-semibold transition"
+                >
+                  <Scroll size={15} />
+                  {it.nav.myCharacter}
+                </button>
+                <button
+                  onClick={() => navigate('/missioni')}
+                  className="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-semibold transition"
+                >
+                  <Sword size={15} />
+                  Missioni
+                </button>
+              </>
             )}
           </div>
 
@@ -106,14 +115,24 @@ export const Navigation: React.FC = () => {
             <a href="/#gallery" onClick={closeMobileMenu} className="block px-4 py-2 text-slate-200 hover:bg-slate-800 rounded transition">{it.nav.gallery}</a>
 
             {user && !isAdmin && (
-              <button
-                onClick={() => { navigate('/personaggio'); closeMobileMenu(); }}
-                className="w-full text-left flex items-center gap-2 px-4 py-2 text-amber-400 font-semibold hover:bg-slate-800 rounded transition"
-              >
-                <Scroll size={15} />
-                {it.nav.myCharacter}
-              </button>
+              <>
+                <button
+                  onClick={() => { navigate('/personaggio'); closeMobileMenu(); }}
+                  className="w-full text-left flex items-center gap-2 px-4 py-2 text-amber-400 font-semibold hover:bg-slate-800 rounded transition"
+                >
+                  <Scroll size={15} />
+                  {it.nav.myCharacter}
+                </button>
+                <button
+                  onClick={() => { navigate('/missioni'); closeMobileMenu(); }}
+                  className="w-full text-left flex items-center gap-2 px-4 py-2 text-amber-400 font-semibold hover:bg-slate-800 rounded transition"
+                >
+                  <Sword size={15} />
+                  Missioni
+                </button>
+              </>
             )}
+
             {!user && (
               <button
                 onClick={() => { navigate('/auth/login'); closeMobileMenu(); }}
