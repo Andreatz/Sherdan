@@ -15,6 +15,11 @@
 h1, h2, h3, h4 {
   font-family: 'Pirata One', 'Heraldic Shadows', serif;
   letter-spacing: 0.04em;
+  text-shadow:
+    -1px -1px 0 rgba(0, 0, 0, 0.8),
+     1px -1px 0 rgba(0, 0, 0, 0.8),
+    -1px  1px 0 rgba(0, 0, 0, 0.8),
+     1px  1px 0 rgba(0, 0, 0, 0.8);
 }
 
 /* Custom scrollbar */
