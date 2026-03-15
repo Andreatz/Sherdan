@@ -3,6 +3,7 @@ import { Plus, Pencil, Trash2, User, Shield, Eye, EyeOff } from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { supabase } from '../../utils/supabase';
 import { it } from '../../content/texts';
+import { MAP_LOCATIONS } from '../../data/mapData';
 
 interface Character {
   id: string;
@@ -35,6 +36,12 @@ const emptyForm = {
   private_notes: '',
   zone: '',
 };
+
+// Luoghi dalla mappa, ordinati: prima regioni poi città
+const ZONE_OPTIONS = [
+  ...MAP_LOCATIONS.filter((l) => l.type === 'region').map((l) => ({ value: l.name, label: `🏛️ ${l.name} (Regione)` })),
+  ...MAP_LOCATIONS.filter((l) => l.type === 'city').map((l) => ({ value: l.name, label: `🏙️ ${l.name}` })),
+];
 
 export const CharactersPage: React.FC = () => {
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -211,9 +218,28 @@ export const CharactersPage: React.FC = () => {
                   <input type="number" placeholder="Livello *" value={formData.level}
                     onChange={(e) => setFormData({ ...formData, level: parseInt(e.target.value, 10) || 1 })} min={1} max={20} required
                     className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400" />
-                  <input type="text" placeholder="Zona (es. Arborea, Domus Nova, Tharros...)" value={formData.zone}
-                    onChange={(e) => setFormData({ ...formData, zone: e.target.value })}
-                    className="md:col-span-2 px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400" />
+
+                  {/* Zona — dropdown con luoghi dalla mappa */}
+                  <div className="md:col-span-2">
+                    <label className="block text-slate-400 text-sm mb-1">Zona di provenienza</label>
+                    <select
+                      value={formData.zone}
+                      onChange={(e) => setFormData({ ...formData, zone: e.target.value })}
+                      className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white focus:outline-none focus:border-amber-500/60"
+                    >
+                      <option value="">— Nessuna zona —</option>
+                      <optgroup label="🏛️ Regioni">
+                        {ZONE_OPTIONS.filter((o) => o.label.startsWith('🏛️')).map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="🏙️ Città">
+                        {ZONE_OPTIONS.filter((o) => o.label.startsWith('🏙️')).map((o) => (
+                          <option key={o.value} value={o.value}>{o.label}</option>
+                        ))}
+                      </optgroup>
+                    </select>
+                  </div>
                 </div>
               </div>
 
