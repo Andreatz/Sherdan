@@ -28,13 +28,13 @@ export const Navigation: React.FC = () => {
           {/* Logo */}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center hover:opacity-85 transition"
+            className="flex items-center hover:opacity-80 transition"
             aria-label="Torna alla home"
           >
             <img
               src="/Logo Sherdan.png"
               alt="Logo Sherdan"
-              className="h-10 w-auto object-contain"
+              className="h-14 w-auto object-contain"
             />
           </button>
 
@@ -67,7 +67,6 @@ export const Navigation: React.FC = () => {
                 {it.nav.login}
               </button>
             )}
-
             {isAdmin && (
               <button
                 onClick={() => navigate('/admin')}
@@ -77,7 +76,6 @@ export const Navigation: React.FC = () => {
                 {it.nav.admin}
               </button>
             )}
-
             {user && (
               <button
                 onClick={handleSignOut}
@@ -116,7 +114,6 @@ export const Navigation: React.FC = () => {
                 {it.nav.myCharacter}
               </button>
             )}
-
             {!user && (
               <button
                 onClick={() => { navigate('/auth/login'); closeMobileMenu(); }}
@@ -125,7 +122,6 @@ export const Navigation: React.FC = () => {
                 {it.nav.login}
               </button>
             )}
-
             {isAdmin && (
               <button
                 onClick={() => { navigate('/admin'); closeMobileMenu(); }}
@@ -134,7 +130,6 @@ export const Navigation: React.FC = () => {
                 {it.nav.adminDashboard}
               </button>
             )}
-
             {user && (
               <button
                 onClick={async () => { await handleSignOut(); closeMobileMenu(); }}

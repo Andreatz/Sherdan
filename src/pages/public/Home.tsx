@@ -3,7 +3,6 @@ import { it } from '../../content/texts';
 import { supabase } from '../../utils/supabase';
 
 interface CampaignSettings {
-  campaign_title: string;
   campaign_tagline: string;
 }
 
@@ -14,7 +13,7 @@ export const Home: React.FC = () => {
     const fetchSettings = async () => {
       const { data } = await supabase
         .from('campaign_settings')
-        .select('campaign_title, campaign_tagline')
+        .select('campaign_tagline')
         .limit(1)
         .maybeSingle();
       if (data) setSettings(data);
@@ -27,7 +26,7 @@ export const Home: React.FC = () => {
       id="home"
       className="relative min-h-screen flex items-center justify-center overflow-hidden px-6"
     >
-      {/* Background parallax — si estende leggermente sotto per coprire la transizione */}
+      {/* Background parallax */}
       <div
         className="absolute inset-x-0 bg-cover bg-center"
         style={{
@@ -38,18 +37,20 @@ export const Home: React.FC = () => {
         }}
       />
 
-      {/* Overlay: trasparente in cima, si fonde gradualmente verso il basso */}
+      {/* Overlay sfumato verso il basso */}
       <div className="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-black/65 via-black/40 to-transparent" />
 
       {/* Glow ambrato */}
       <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,rgba(212,175,55,0.3),transparent_40%)]" />
 
       <div className="relative z-10 max-w-5xl text-center">
-        <p className="uppercase tracking-[0.35em] text-amber-300/80 text-sm mb-6">Sherdan</p>
 
-        <h1 className="text-5xl md:text-7xl font-bold text-amber-300 drop-shadow-lg mb-6">
-          {settings?.campaign_title || it.home.defaultTitle}
-        </h1>
+        {/* Logo al posto del titolo testuale */}
+        <img
+          src="/Logo Sherdan.png"
+          alt="Atlante di Sherdan"
+          className="mx-auto mb-8 w-64 md:w-80 lg:w-96 h-auto object-contain drop-shadow-2xl"
+        />
 
         <p className="text-lg md:text-2xl text-slate-200 max-w-3xl mx-auto leading-relaxed mb-10">
           {settings?.campaign_tagline || it.home.defaultTagline}
