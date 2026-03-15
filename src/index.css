@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Font custom (Heraldic Shadows — mantenuto come fallback) ── */
+/* ── Font custom (Heraldic Shadows — fallback) ── */
 @font-face {
   font-family: 'Heraldic Shadows';
   src: url('./fonts/heraldic-shadows.regular.otf') format('opentype');
@@ -11,7 +11,7 @@
   font-display: swap;
 }
 
-/* ── Titoli: Pirata One come principale ── */
+/* ── Titoli: Pirata One ── */
 h1, h2, h3, h4 {
   font-family: 'Pirata One', 'Heraldic Shadows', serif;
   letter-spacing: 0.04em;
@@ -27,6 +27,26 @@ html { scroll-behavior: smooth; }
 
 body { @apply bg-slate-900 text-amber-100; }
 
+/* ── Glow dorato pulsante sul logo ── */
+@keyframes logo-glow {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 8px rgba(212, 175, 55, 0.5))
+      drop-shadow(0 0 20px rgba(212, 175, 55, 0.25));
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 18px rgba(212, 175, 55, 0.85))
+      drop-shadow(0 0 40px rgba(212, 175, 55, 0.45))
+      drop-shadow(0 0 70px rgba(212, 175, 55, 0.2));
+  }
+}
+
+.animate-logo-glow {
+  animation: logo-glow 3s ease-in-out infinite;
+}
+
+/* ── Altre animazioni ── */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-20px); }

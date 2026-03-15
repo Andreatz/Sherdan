@@ -40,17 +40,24 @@ export const Home: React.FC = () => {
       {/* Overlay sfumato verso il basso */}
       <div className="absolute inset-x-0 top-0 bottom-0 bg-gradient-to-b from-black/65 via-black/40 to-transparent" />
 
-      {/* Glow ambrato */}
+      {/* Glow ambrato di sfondo */}
       <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,rgba(212,175,55,0.3),transparent_40%)]" />
 
       <div className="relative z-10 max-w-5xl text-center">
 
-        {/* Logo al posto del titolo testuale */}
+        {/* Logo con glow dorato pulsante */}
         <img
           src="/Logo Sherdan.png"
           alt="Atlante di Sherdan"
-          className="mx-auto mb-8 w-84 md:w-100 lg:w-146 h-auto object-contain drop-shadow-2xl"
+          className="mx-auto mb-8 w-64 md:w-80 lg:w-96 h-auto object-contain animate-logo-glow"
         />
+
+        {settings?.campaign_tagline && (
+          <p className="text-lg md:text-2xl text-slate-200 max-w-3xl mx-auto leading-relaxed mb-10">
+            {settings.campaign_tagline}
+          </p>
+        )}
+
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <a href="#campaign" className="px-8 py-4 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-lg transition">
             {it.home.beginAdventure}
