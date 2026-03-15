@@ -18,7 +18,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'tharros',
     name: 'Tharros',
     type: 'region',
-    x: 28,
+    x: 27.6,
     y: 49,
     r: 2,
     shortDescription: 'Il Gioiello d\'Ottone e Vapore. Metropoli verticale dominata dall\'ingegneria e dall\'Obsidium raffinato, governata dal Consiglio del Progresso.',
@@ -105,7 +105,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'solitaria',
     name: 'Solitaria',
     type: 'city',
-    x: 9.8,   // leggermente più a sinistra (era 11)
+    x: 9.7,   // leggermente più a sinistra (era 11)
     y: 53.1,  // leggermente più in alto (era 55)
     r: 1.2,
     shortDescription: 'Città isolata sulle scogliere di granito grigio della costa ovest, avvolta da nebbie perenni. I suoi abitanti vivono di pesca e leggende antiche.',
@@ -115,8 +115,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'bonorxili',
     name: 'Bonorxili',
     type: 'city',
-    x: 21,  // di poco più a sinistra (era 22)
-    y: 72,  // un po' più in alto (era 75)
+    x: 21.3,  // di poco più a sinistra (era 22)
+    y: 71.8,  // un po' più in alto (era 75)
     r: 1.2,
     shortDescription: 'Ultimo avamposto della natura selvaggia a sud-ovest. Foreste antiche e oscure, abitate da Treant e reietti che rifiutano la tecnologia di Tharros.',
     fullDescription: 'Bonorxili si trova nell\'estremo sud, dove le foreste sono fitte, scure e antiche, simili a quelle che coprivano il mondo prima della Scissione. Gli abitanti sono spesso Mezzelfi o Umani reietti che rifiutano la tecnologia di Tharros, vivendo in simbiosi con la boscaglia. Si dice che in queste foreste si nascondano ancora i Treant e Orsigufi particolarmente aggressivi.',
