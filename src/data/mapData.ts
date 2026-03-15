@@ -18,8 +18,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'tharros',
     name: 'Tharros',
     type: 'region',
-    x: 28,
-    y: 51,
+    x: 27,
+    y: 549,
     r: 2,
     shortDescription: 'Il Gioiello d\'Ottone e Vapore. Metropoli verticale dominata dall\'ingegneria e dall\'Obsidium raffinato, governata dal Consiglio del Progresso.',
     fullDescription: 'Tharros è costruita su un massiccio promontorio di granito bianco che si affaccia sulla Madre. L\'aria ha un sapore metallico di rame e ozono, il suono è un ronzio costante di ingranaggi e pistoni. La società è divisa in tre livelli verticali: Aurea (élite), Il Meccanismo (classe lavoratrice) e Il Ventre (gli scarti). Governa il Consiglio del Progresso, sette individui scelti per il valore dei loro brevetti.',
@@ -95,8 +95,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'luxia',
     name: 'Luxia',
     type: 'city',
-    x: 29,  // di poco più a sinistra (era 30)
-    y: 36,  // un po' più in alto (era 40)
+    x: 28,  // di poco più a sinistra (era 30)
+    y: 35,  // un po' più in alto (era 40)
     r: 1.2,
     shortDescription: 'Il cancello delle Pianure Verdi. Città agricola meccanizzata che funge da porta d\'accesso alle fertili terre intorno a Tharros.',
     fullDescription: 'Luxia funge da cancello per le Pianure Verdi, un tempo praterie sconfinate oggi segnate dalle cicatrici del progresso. È circondata da campi coltivati in modo intensivo grazie a macchine agricole semoventi. La popolazione è cosmopolita, con una prevalenza di Umani, Gnomi inventori e Halfling. La fauna locale mostra spesso segni di mutazione dovuta alle scorie di Obsidium.',
