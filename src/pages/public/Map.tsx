@@ -8,7 +8,10 @@ export const MapPage: React.FC = () => {
   const [hovered, setHovered] = useState<string | null>(null);
 
   const handleShowMore = () => {
-    if (selected?.regionSlug) navigate(`/mappa/${selected.regionSlug}`);
+    if (selected?.regionSlug) {
+      navigate(`/mappa/${selected.regionSlug}`);
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
     setSelected(null);
   };
 
