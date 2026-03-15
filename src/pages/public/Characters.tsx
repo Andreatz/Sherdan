@@ -87,6 +87,7 @@ export const CharactersPage: React.FC = () => {
         ) : (
           <div className="space-y-14">
 
+            {/* Sezione PG - mostra livello */}
             {pgs.length > 0 && (
               <div>
                 <h3 className="text-2xl font-bold text-amber-400 mb-6 border-b border-amber-700/30 pb-2">
@@ -123,6 +124,7 @@ export const CharactersPage: React.FC = () => {
               </div>
             )}
 
+            {/* Sezione NPC - livello nascosto */}
             {npcs.length > 0 && (
               <div>
                 <h3 className="text-2xl font-bold text-slate-300 mb-6 border-b border-slate-700/50 pb-2">
@@ -148,7 +150,6 @@ export const CharactersPage: React.FC = () => {
                         <h3 className="text-2xl font-bold text-amber-300">{character.name}</h3>
                         <p className="text-slate-200">{it.charactersPublic.class}: {character.class}</p>
                         <p className="text-slate-200">{it.charactersPublic.race}: {character.race}</p>
-                        <p className="text-slate-200">{it.charactersPublic.level}: {character.level}</p>
                       </div>
                     </button>
                   ))}
@@ -159,6 +160,7 @@ export const CharactersPage: React.FC = () => {
           </div>
         )}
 
+        {/* Modale NPC - livello nascosto */}
         {selectedCharacter && !selectedCharacter.is_player_character && (
           <div
             className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4"
@@ -183,10 +185,13 @@ export const CharactersPage: React.FC = () => {
                   <div className="space-y-2 text-slate-200 mb-6">
                     <p>{it.charactersPublic.class}: {selectedCharacter.class}</p>
                     <p>{it.charactersPublic.race}: {selectedCharacter.race}</p>
-                    <p>{it.charactersPublic.level}: {selectedCharacter.level}</p>
                   </div>
-                  <h4 className="text-xl font-semibold text-amber-200 mb-3">{it.charactersPublic.backstory}</h4>
-                  <p className="text-slate-300 leading-7 whitespace-pre-line">{selectedCharacter.backstory}</p>
+                  {selectedCharacter.backstory && (
+                    <>
+                      <h4 className="text-xl font-semibold text-amber-200 mb-3">{it.charactersPublic.backstory}</h4>
+                      <p className="text-slate-300 leading-7 whitespace-pre-line">{selectedCharacter.backstory}</p>
+                    </>
+                  )}
                   <button
                     onClick={() => setSelectedCharacter(null)}
                     className="mt-8 px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded transition"
