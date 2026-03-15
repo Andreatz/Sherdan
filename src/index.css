@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Font custom ───────────────────────────────────────────── */
+@font-face {
+  font-family: 'Heraldic Shadows';
+  src: url('./fonts/heraldic-shadows.regular.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Applica Heraldic Shadows a tutti i titoli */
+h1, h2, h3, h4 {
+  font-family: 'Heraldic Shadows', serif;
+  letter-spacing: 0.04em;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
