@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Font custom ───────────────────────────────────────────── */
+/* ── Font custom (Heraldic Shadows — mantenuto come fallback) ── */
 @font-face {
   font-family: 'Heraldic Shadows';
   src: url('./fonts/heraldic-shadows.regular.otf') format('opentype');
@@ -11,42 +11,22 @@
   font-display: swap;
 }
 
-/* Applica Heraldic Shadows a tutti i titoli */
+/* ── Titoli: Pirata One come principale ── */
 h1, h2, h3, h4 {
-  font-family: 'Heraldic Shadows', serif;
+  font-family: 'Pirata One', 'Heraldic Shadows', serif;
   letter-spacing: 0.04em;
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(30, 41, 59, 0.5); }
+::-webkit-scrollbar-thumb { background: rgba(217, 119, 6, 0.6); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(217, 119, 6, 0.8); }
 
-::-webkit-scrollbar-track {
-  background: rgba(30, 41, 59, 0.5);
-}
+html { scroll-behavior: smooth; }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(217, 119, 6, 0.6);
-  border-radius: 4px;
-}
+body { @apply bg-slate-900 text-amber-100; }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(217, 119, 6, 0.8);
-}
-
-/* Smooth scrolling */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Base styles */
-body {
-  @apply bg-slate-900 text-amber-100;
-}
-
-/* Animation keyframes */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-20px); }
@@ -57,10 +37,5 @@ body {
   50% { box-shadow: 0 0 20px rgba(217, 119, 6, 0.6); }
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-glow {
-  animation: glow 2s ease-in-out infinite;
-}
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-glow { animation: glow 2s ease-in-out infinite; }

@@ -4,7 +4,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        heraldic: ['Heraldic Shadows', 'serif'],
+        heraldic: ['Pirata One', 'Heraldic Shadows', 'serif'],
+        pirata: ['Pirata One', 'serif'],
       },
     },
   },

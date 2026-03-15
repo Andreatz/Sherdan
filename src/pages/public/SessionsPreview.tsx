@@ -28,8 +28,18 @@ export const SessionsPreview: React.FC = () => {
   }, []);
 
   return (
-    <section id="sessions" className="py-24 px-6 bg-slate-900">
-      <div className="max-w-4xl mx-auto">
+    <section id="sessions" className="relative py-24 px-6 overflow-hidden">
+      {/* Background parallax */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`,
+          backgroundAttachment: 'fixed',
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-950/70 to-slate-950/85" />
+
+      <div className="relative z-10 max-w-4xl mx-auto">
         <div className="text-center mb-14">
           <h2 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4">Diario delle Sessioni</h2>
           <p className="text-slate-300 text-lg">Le cronache della campagna, sessione dopo sessione.</p>
@@ -45,7 +55,7 @@ export const SessionsPreview: React.FC = () => {
               <button
                 key={session.id}
                 onClick={() => navigate(`/sessioni#session-${session.session_number}`)}
-                className="w-full flex items-center justify-between px-6 py-4 bg-slate-950 border border-amber-700/20 rounded-xl hover:bg-slate-800/60 hover:border-amber-500/40 transition group"
+                className="w-full flex items-center justify-between px-6 py-4 bg-slate-950/70 backdrop-blur-sm border border-amber-700/20 rounded-xl hover:bg-slate-800/60 hover:border-amber-500/40 transition group"
               >
                 <div className="flex items-center gap-4 text-left">
                   <span className="text-amber-500 font-bold text-sm w-10 shrink-0">#{session.session_number}</span>
