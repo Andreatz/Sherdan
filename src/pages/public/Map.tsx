@@ -1,16 +1,12 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MAP_LOCATIONS, MapLocation } from '../../data/mapData';
-
-const REGION_COLOR = 'bg-amber-400';
-const CITY_COLOR = 'bg-sky-300';
 
 export const MapPage: React.FC = () => {
   const navigate = useNavigate();
   const [selected, setSelected] = useState<MapLocation | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [hovered, setHovered] = useState<string | null>(null);
 
-  const handleClick = (loc: MapLocation) => setSelected(loc);
   const handleShowMore = () => {
     if (selected?.regionSlug) navigate(`/mappa/${selected.regionSlug}`);
     setSelected(null);
@@ -26,24 +22,13 @@ export const MapPage: React.FC = () => {
             Mappa del Mondo
           </h2>
           <p className="text-slate-300 text-lg">
-            Clicca su una regione o città per scoprire di più
+            Esplora le terre di Sherdan
           </p>
-          <div className="flex justify-center gap-6 mt-4 text-sm text-slate-400">
-            <span className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-amber-400 ring-2 ring-amber-400/30 inline-block" />
-              Regione
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-sky-300 ring-2 ring-sky-300/30 inline-block" />
-              Città
-            </span>
-          </div>
         </div>
 
         {/* Mappa */}
         <div
-          ref={containerRef}
-          className="relative w-full rounded-2xl overflow-hidden border border-amber-700/30 shadow-2xl"
+          className="relative w-full rounded-2xl overflow-hidden border border-amber-700/30 shadow-2xl select-none"
           style={{ aspectRatio: '5734 / 4312' }}
         >
           <img
@@ -53,49 +38,92 @@ export const MapPage: React.FC = () => {
             draggable={false}
           />
 
-          {/* Overlay SVG */}
+          {/* SVG overlay — solo aree invisibili cliccabili con glow al hover */}
           <svg
             className="absolute inset-0 w-full h-full"
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
           >
-            {MAP_LOCATIONS.map((loc) => (
-              <circle
-                key={loc.id}
-                cx={loc.x}
-                cy={loc.y}
-                r={loc.type === 'region' ? 1.4 : 0.8}
-                fill={loc.type === 'region' ? 'rgba(251,191,36,0.85)' : 'rgba(147,210,255,0.85)'}
-                stroke={loc.type === 'region' ? '#78350f' : '#0369a1'}
-                strokeWidth="0.2"
-                className="cursor-pointer hover:opacity-100 transition-opacity"
-                onClick={() => handleClick(loc)}
-              />
-            ))}
+            <defs>
+              {/* Glow ambrato per regioni */}
+              <filter id="glow-region" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="1.2" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              {/* Glow azzurro per città */}
+              <filter id="glow-city" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="0.8" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            {MAP_LOCATIONS.map((loc) => {
+              const r = loc.r ?? (loc.type === 'region' ? 4 : 2.5);
+              const isHovered = hovered === loc.id;
+              const isRegion = loc.type === 'region';
+
+              return (
+                <circle
+                  key={loc.id}
+                  cx={loc.x}
+                  cy={loc.y}
+                  r={r}
+                  fill={
+                    isHovered
+                      ? isRegion
+                        ? 'rgba(251,191,36,0.18)'
+                        : 'rgba(147,210,255,0.15)'
+                      : 'transparent'
+                  }
+                  stroke="none"
+                  style={{
+                    cursor: 'pointer',
+                    filter: isHovered
+                      ? isRegion
+                        ? 'url(#glow-region)'
+                        : 'url(#glow-city)'
+                      : 'none',
+                    transition: 'fill 0.25s ease',
+                  }}
+                  onMouseEnter={() => setHovered(loc.id)}
+                  onMouseLeave={() => setHovered(null)}
+                  onClick={() => setSelected(loc)}
+                />
+              );
+            })}
           </svg>
 
-          {/* Label tooltip SVG */}
-          <svg
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-          >
-            {MAP_LOCATIONS.map((loc) => (
-              <text
-                key={loc.id + '-label'}
-                x={loc.x}
-                y={loc.y - (loc.type === 'region' ? 1.8 : 1.2)}
-                textAnchor="middle"
-                fontSize={loc.type === 'region' ? '1.3' : '0.9'}
-                fill={loc.type === 'region' ? '#fde68a' : '#bae6fd'}
-                fontFamily="serif"
-                fontWeight={loc.type === 'region' ? 'bold' : 'normal'}
-                style={{ textShadow: '0 0 3px #000' }}
+          {/* Tooltip nome al hover */}
+          {hovered && (() => {
+            const loc = MAP_LOCATIONS.find((l) => l.id === hovered);
+            if (!loc) return null;
+            return (
+              <div
+                className="absolute pointer-events-none z-10 px-3 py-1.5 rounded-lg text-sm font-semibold shadow-lg"
+                style={{
+                  left: `${loc.x}%`,
+                  top: `${loc.y - (loc.r ?? 3) - 2}%`,
+                  transform: 'translateX(-50%) translateY(-100%)',
+                  background: 'rgba(15,23,42,0.85)',
+                  color: loc.type === 'region' ? '#fde68a' : '#bae6fd',
+                  border: `1px solid ${
+                    loc.type === 'region' ? 'rgba(251,191,36,0.4)' : 'rgba(147,210,255,0.3)'
+                  }`,
+                  backdropFilter: 'blur(4px)',
+                  whiteSpace: 'nowrap',
+                }}
               >
                 {loc.name}
-              </text>
-            ))}
-          </svg>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Popup */}
@@ -110,8 +138,8 @@ export const MapPage: React.FC = () => {
             >
               <div className="flex items-center gap-3 mb-2">
                 <span
-                  className={`w-3 h-3 rounded-full flex-shrink-0 ${
-                    selected.type === 'region' ? REGION_COLOR : CITY_COLOR
+                  className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
+                    selected.type === 'region' ? 'bg-amber-400' : 'bg-sky-300'
                   }`}
                 />
                 <span className="text-xs uppercase tracking-widest text-slate-400">
