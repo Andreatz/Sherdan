@@ -95,6 +95,16 @@ export const CharactersPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeZone, setActiveZone] = useState<string | null>(null);
 
+  // Blocca lo scroll del body quando la modal è aperta
+  useEffect(() => {
+    if (selectedCharacter) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [selectedCharacter]);
+
   useEffect(() => {
     const fetchCharacters = async () => {
       setLoading(true);
