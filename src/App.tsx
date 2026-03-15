@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Navigation } from './components/shared/Navigation';
@@ -33,10 +33,35 @@ import { LocationsPage as AdminLocationsPage } from './pages/admin/Locations';
 import { GalleryPage as AdminGalleryPage } from './pages/admin/Gallery';
 import { SettingsPage } from './pages/admin/Settings';
 
+// Componente interno che gestisce lo scroll automatico via location.state
+const ScrollToSection: React.FC = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const state = location.state as { scrollTo?: string } | null;
+    if (state?.scrollTo) {
+      const tryScroll = (attempts = 0) => {
+        const el = document.getElementById(state.scrollTo!);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Pulisce lo state per evitare scroll ripetuti
+          window.history.replaceState({}, '');
+        } else if (attempts < 10) {
+          setTimeout(() => tryScroll(attempts + 1), 150);
+        }
+      };
+      tryScroll();
+    }
+  }, [location.state]);
+
+  return null;
+};
+
 function App() {
   return (
     <Router>
       <AuthProvider>
+        <ScrollToSection />
         <Routes>
           {/* Auth Routes */}
           <Route path="/auth/login" element={<Login />} />
