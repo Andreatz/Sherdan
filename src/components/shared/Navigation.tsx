@@ -24,12 +24,18 @@ export const Navigation: React.FC = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-950/90 backdrop-blur border-b border-amber-700/20">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-16">
+
+          {/* Logo */}
           <button
             onClick={() => navigate('/')}
-            className="flex items-center gap-2 text-amber-300 hover:text-amber-200 transition"
+            className="flex items-center hover:opacity-85 transition"
+            aria-label="Torna alla home"
           >
-            <span className="text-xl">⚓</span>
-            <span className="font-bold text-lg md:text-xl">{it.nav.title}</span>
+            <img
+              src="/Logo Sherdan.png"
+              alt="Logo Sherdan"
+              className="h-10 w-auto object-contain"
+            />
           </button>
 
           {/* Desktop links */}
@@ -40,7 +46,6 @@ export const Navigation: React.FC = () => {
             <a href="/#map" className="hover:text-amber-300 transition">{it.nav.map}</a>
             <a href="/#gallery" className="hover:text-amber-300 transition">{it.nav.gallery}</a>
 
-            {/* Link personaggio: visibile solo ai giocatori loggati non-admin */}
             {user && !isAdmin && (
               <button
                 onClick={() => navigate('/personaggio')}
