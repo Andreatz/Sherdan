@@ -40,7 +40,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'eshterzyli',
     name: 'Eshterzyli',
     type: 'region',
-    x: 40,  // leggermente più a destra (era 38)
+    x: 39,  // leggermente più a destra (era 38)
     y: 14,
     r: 2,
     shortDescription: 'Il Bastione di Cenere e Sangue. Fortezza-città ai piedi di un vulcano attivo, dominata da una cultura marziale e dalle fonderie più grandi del mondo.',
@@ -63,7 +63,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     name: 'Domus Nova',
     type: 'region',
     x: 64,  // un po' più a sinistra (era 67)
-    y: 26,  // di molto più in basso (era 11)
+    y: 15,  // di molto più in basso (era 11)
     r: 2,
     shortDescription: 'Dove il Mondo Finisce. Arcipelago anarchico di pirati e reietti, labirinto di isole tropicali dove la Fratellanza della Marea ha costruito il suo impero.',
     fullDescription: 'Domus Nova è un arcipelago di isole tropicali insidiose, coperte da giungle umide e circondate da barriere coralline affilate. È la casa della Fratellanza della Marea: marinai, operai fuggiaschi e disertori che rifiutano le leggi delle grandi nazioni. Qui vivono tutte le razze mescolate: Tiefling, Mezzorchi, Tabaxi e molti altri. La legge è solo quella del più forte.',
@@ -75,7 +75,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'ultima-dimora',
     name: 'Ultima Dimora',
     type: 'city',
-    x: 25,  // un bel po' più a destra (era 23)
+    x: 27,  // un bel po' più a destra (era 23)
     y: 17,  // più in alto (era 21)
     r: 1.2,
     shortDescription: 'Avamposto ai margini del Mare Senza Tempo, dove il ghiaccio eterno incontra la civiltà. Sopravvive grazie alla caccia alle balene e agli scambi con Tharros.',
