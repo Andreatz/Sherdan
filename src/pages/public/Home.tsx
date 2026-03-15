@@ -51,11 +51,6 @@ export const Home: React.FC = () => {
           alt="Atlante di Sherdan"
           className="mx-auto mb-8 w-84 md:w-100 lg:w-146 h-auto object-contain drop-shadow-2xl"
         />
-
-        <p className="text-lg md:text-2xl text-slate-200 max-w-3xl mx-auto leading-relaxed mb-10">
-          {settings?.campaign_tagline || it.home.defaultTagline}
-        </p>
-
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <a href="#campaign" className="px-8 py-4 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-lg transition">
             {it.home.beginAdventure}
