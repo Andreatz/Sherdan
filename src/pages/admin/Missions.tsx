@@ -39,7 +39,8 @@ export const MissionsAdminPage: React.FC = () => {
     setIsLoading(true);
     const [{ data: mData }, { data: nData }] = await Promise.all([
       supabase.from('missions').select('*').order('created_at', { ascending: false }),
-      supabase.from('npcs').select('id, name').order('name'),
+      // Gli NPC sono i personaggi NON giocanti nella tabella characters
+      supabase.from('characters').select('id, name').eq('is_player_character', false).order('name'),
     ]);
     setMissions(mData ?? []);
     setNpcs(nData ?? []);
@@ -107,7 +108,6 @@ export const MissionsAdminPage: React.FC = () => {
                 required
                 className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
               />
-
               <textarea
                 placeholder="Descrizione (opzionale)"
                 value={formData.description ?? ''}
@@ -115,7 +115,6 @@ export const MissionsAdminPage: React.FC = () => {
                 rows={4}
                 className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400"
               />
-
               <div className="grid md:grid-cols-2 gap-4">
                 <select
                   value={formData.status}
@@ -126,7 +125,6 @@ export const MissionsAdminPage: React.FC = () => {
                     <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
                   ))}
                 </select>
-
                 <select
                   value={formData.npc_id ?? ''}
                   onChange={(e) => setFormData({ ...formData, npc_id: e.target.value || null })}
@@ -138,7 +136,6 @@ export const MissionsAdminPage: React.FC = () => {
                   ))}
                 </select>
               </div>
-
               <div className="flex gap-3">
                 <button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-4 rounded transition">
                   {editingId ? 'Aggiorna' : 'Crea missione'}

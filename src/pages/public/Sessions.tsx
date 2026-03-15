@@ -32,20 +32,15 @@ export const SessionsPage: React.FC = () => {
     void fetchSessions();
   }, []);
 
-  // Scroll all'anchor dopo che i dati sono caricati
   useEffect(() => {
     if (loading) return;
-    const hash = location.hash; // es. #session-2
+    const hash = location.hash;
     if (!hash) return;
-
-    // Apri automaticamente la sessione corrispondente
     const sessionNumber = parseInt(hash.replace('#session-', ''), 10);
     if (!isNaN(sessionNumber)) {
       const target = sessions.find(s => s.session_number === sessionNumber);
       if (target) setOpenSession(target.id);
     }
-
-    // Scroll con piccolo delay per dare tempo al DOM di renderizzare
     setTimeout(() => {
       const el = document.getElementById(hash.replace('#', ''));
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -53,35 +48,38 @@ export const SessionsPage: React.FC = () => {
   }, [loading, location.hash, sessions]);
 
   return (
-    <section id="sessions" className="py-24 px-6 bg-slate-900">
-      <div className="max-w-5xl mx-auto">
+    <section id="sessions" className="relative py-24 px-6 overflow-hidden">
+      {/* Parallax background */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`,
+          backgroundAttachment: 'fixed',
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/80 to-slate-950/95" />
+
+      <div className="relative z-10 max-w-5xl mx-auto">
         <div className="text-center mb-14">
           <h2 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4">
             {it.sessionsPublic.title}
           </h2>
-          <p className="text-slate-300 text-lg">
-            {it.sessionsPublic.subtitle}
-          </p>
+          <p className="text-slate-300 text-lg">{it.sessionsPublic.subtitle}</p>
         </div>
 
         {loading ? (
-          <p className="text-center text-slate-300 text-lg animate-pulse">
-            {it.sessionsPublic.loading}
-          </p>
+          <p className="text-center text-slate-300 text-lg animate-pulse">{it.sessionsPublic.loading}</p>
         ) : sessions.length === 0 ? (
-          <p className="text-center text-slate-400 text-lg">
-            {it.sessionsPublic.empty}
-          </p>
+          <p className="text-center text-slate-400 text-lg">{it.sessionsPublic.empty}</p>
         ) : (
           <div className="space-y-6">
             {sessions.map((session) => {
               const isOpen = openSession === session.id;
-
               return (
                 <div
                   key={session.id}
                   id={`session-${session.session_number}`}
-                  className="border border-amber-700/20 rounded-2xl bg-slate-950 overflow-hidden shadow-lg scroll-mt-24"
+                  className="border border-amber-700/20 rounded-2xl bg-slate-950/80 backdrop-blur-sm overflow-hidden shadow-lg scroll-mt-24"
                 >
                   <button
                     onClick={() => setOpenSession(isOpen ? null : session.id)}
@@ -92,9 +90,7 @@ export const SessionsPage: React.FC = () => {
                         <p className="text-amber-300 font-semibold mb-1">
                           {it.sessionsPublic.session} {session.session_number}
                         </p>
-                        <h3 className="text-2xl font-bold text-white">
-                          {session.title}
-                        </h3>
+                        <h3 className="text-2xl font-bold text-white">{session.title}</h3>
                       </div>
                       <p className="text-slate-400">{session.date}</p>
                     </div>
@@ -102,27 +98,16 @@ export const SessionsPage: React.FC = () => {
 
                   <div className="px-6 pb-6">
                     <p className="text-slate-300 leading-7 mb-4">
-                      <span className="text-amber-200 font-semibold">
-                        {it.sessionsPublic.summary}:
-                      </span>{' '}
+                      <span className="text-amber-200 font-semibold">{it.sessionsPublic.summary}:</span>{' '}
                       {session.summary}
                     </p>
-
                     {isOpen && (
                       <div className="border-t border-amber-700/20 pt-6">
                         {session.featured_image_url && (
-                          <img
-                            src={session.featured_image_url}
-                            alt={session.title}
-                            className="w-full h-72 object-cover rounded-xl mb-6"
-                          />
+                          <img src={session.featured_image_url} alt={session.title} className="w-full h-72 object-cover rounded-xl mb-6" />
                         )}
-                        <h4 className="text-xl font-semibold text-amber-200 mb-3">
-                          {it.sessionsPublic.fullAccount}
-                        </h4>
-                        <p className="text-slate-300 leading-8 whitespace-pre-line">
-                          {session.detailed_narrative}
-                        </p>
+                        <h4 className="text-xl font-semibold text-amber-200 mb-3">{it.sessionsPublic.fullAccount}</h4>
+                        <p className="text-slate-300 leading-8 whitespace-pre-line">{session.detailed_narrative}</p>
                       </div>
                     )}
                   </div>

@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { MAP_LOCATIONS } from '../../data/mapData';
 import { REGION_DATA } from '../../data/regionData';
 
+const BG = `url('/backgrounds/Landing Page Sherdan.png')`;
+
 const SectionCard: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="bg-slate-900/80 backdrop-blur-sm border border-amber-700/20 rounded-2xl p-7 mb-6">
     <h2 className="text-xl font-bold text-amber-200 mb-5">{title}</h2>
@@ -30,19 +32,16 @@ export const RegionPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="relative min-h-screen overflow-hidden">
 
-      {/* Hero banner con parallax */}
+      {/* Background parallax globale */}
+      <div className="fixed inset-0 bg-cover bg-center -z-10" style={{ backgroundImage: BG }} />
+      <div className="fixed inset-0 bg-slate-950/80 -z-10" />
+
+      {/* Hero banner */}
       <div className="relative h-72 md:h-96 overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`,
-            backgroundAttachment: 'fixed',
-          }}
-        />
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: BG, backgroundAttachment: 'fixed' }} />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-slate-950" />
-
         <div className="absolute top-6 left-6 z-10">
           <button
             onClick={() => navigate(-1)}
@@ -51,7 +50,6 @@ export const RegionPage: React.FC = () => {
             ← Torna alla mappa
           </button>
         </div>
-
         <div className="absolute bottom-0 left-0 right-0 z-10 px-6 pb-8 max-w-4xl mx-auto">
           <span className="text-xs uppercase tracking-widest text-slate-400 mb-2 block">Regione</span>
           <h1 className="text-5xl md:text-6xl font-bold text-amber-300 drop-shadow-lg">{region.name}</h1>
