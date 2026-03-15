@@ -175,7 +175,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'porto-verde',
     name: 'Porto Verde',
     type: 'city',
-    x: 58,  // un bel po' più a sinistra (era 63)
+    x: 57.9,  // un bel po' più a sinistra (era 63)
     y: 79,  // un po' più in basso (era 77)
     r: 1.2,
     shortDescription: 'Porto commerciale sul Mare dei Sussurri. Punto di partenza per le rotte verso Y\'Tshal e le terre del sud, avvolto dalla nebbia psichica delle acque meridionali.',
