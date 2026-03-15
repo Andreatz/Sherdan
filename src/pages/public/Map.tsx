@@ -47,7 +47,7 @@ export const MapPage: React.FC = () => {
           style={{ aspectRatio: '5734 / 4312' }}
         >
           <img
-            src="/Mappa-Sherdan.jpg"
+            src="/Mappa-Sherdan.png"
             alt="Mappa di Sherdan"
             className="w-full h-full object-cover"
             draggable={false}
