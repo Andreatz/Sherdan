@@ -29,7 +29,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'arborea',
     name: 'Arborea',
     type: 'region',
-    x: 68,  // un po' più a sinistra (era 72)
+    x: 69.5,  // un po' più a sinistra (era 72)
     y: 48,
     r: 2,
     shortDescription: 'Il Santuario Vivente. Città-foresta bioluminescente dove la natura domina la tecnologia, patria degli Elfi e dei druidi del Circolo dei Custodi.',
@@ -51,8 +51,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'urash',
     name: 'Urash',
     type: 'region',
-    x: 76,  // un bel po' più a sinistra (era 83)
-    y: 76,  // un po' più in basso (era 72)
+    x: 77.5,  // un bel po' più a sinistra (era 83)
+    y: 76.2,  // un po' più in basso (era 72)
     r: 2,
     shortDescription: 'I Custodi Silenziosi. Città a terrazze tra le vette innevate, regno di Goliath e monaci che praticano la neutralità armata e custodiscono antiche sorgenti di Obsidium.',
     fullDescription: 'Urash si innalza sulle catene montuose del sud-est, con vette perennemente innevate e aria rarefatta. La città è costruita a terrazze sulle pareti rocciose. È il regno dei Goliath, dei monaci, degli Aarakocra e dei Duergar. La filosofia locale è la Neutralità Armata: non attaccano nessuno, ma sono pronti a difendersi con ferocia assoluta. Nelle valli nascoste esistono sorgenti termali riscaldate dall\'Obsidium.',
@@ -63,7 +63,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     name: 'Domus Nova',
     type: 'region',
     x: 64,  // un po' più a sinistra (era 67)
-    y: 15,  // di molto più in basso (era 11)
+    y: 16.6,  // di molto più in basso (era 11)
     r: 2,
     shortDescription: 'Dove il Mondo Finisce. Arcipelago anarchico di pirati e reietti, labirinto di isole tropicali dove la Fratellanza della Marea ha costruito il suo impero.',
     fullDescription: 'Domus Nova è un arcipelago di isole tropicali insidiose, coperte da giungle umide e circondate da barriere coralline affilate. È la casa della Fratellanza della Marea: marinai, operai fuggiaschi e disertori che rifiutano le leggi delle grandi nazioni. Qui vivono tutte le razze mescolate: Tiefling, Mezzorchi, Tabaxi e molti altri. La legge è solo quella del più forte.',
@@ -75,7 +75,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'ultima-dimora',
     name: 'Ultima Dimora',
     type: 'city',
-    x: 26.7,  // un bel po' più a destra (era 23)
+    x: 26.6,  // un bel po' più a destra (era 23)
     y: 17,  // più in alto (era 21)
     r: 1.2,
     shortDescription: 'Avamposto ai margini del Mare Senza Tempo, dove il ghiaccio eterno incontra la civiltà. Sopravvive grazie alla caccia alle balene e agli scambi con Tharros.',
@@ -85,7 +85,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'porto-antico',
     name: 'Porto Antico',
     type: 'city',
-    x: 41,  // un bel po' più a destra (era 39)
+    x: 42,  // un bel po' più a destra (era 39)
     y: 29,  // più in alto (era 33)
     r: 1.2,
     shortDescription: 'Scalo commerciale strategico tra Tharros e il continente orientale. Porto trafficato dove si incrociano merci lecite e traffici clandestini.',
@@ -95,7 +95,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'luxia',
     name: 'Luxia',
     type: 'city',
-    x: 28.8,  // di poco più a sinistra (era 30)
+    x: 28.9,  // di poco più a sinistra (era 30)
     y: 35.2,  // un po' più in alto (era 40)
     r: 1.2,
     shortDescription: 'Il cancello delle Pianure Verdi. Città agricola meccanizzata che funge da porta d\'accesso alle fertili terre intorno a Tharros.',
@@ -135,8 +135,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'mineralia',
     name: 'Mineralia',
     type: 'city',
-    x: 78,  // di poco più a sinistra (era 80)
-    y: 38,  // un bel po' più in basso (era 28)
+    x: 77.8,  // di poco più a sinistra (era 80)
+    y: 32,  // un bel po' più in basso (era 28)
     r: 1.2,
     shortDescription: 'Città nelle anomalie magnetiche del nord-est. Canyon rossi e rocce fluttuanti dovute all\'Obsidium grezzo nel sottosuolo, abitata da Genasi e tribù Firbolg.',
     fullDescription: 'Mineralia è un deserto roccioso di canyon rossi e formazioni geologiche impossibili: le rocce fluttuano a pochi metri da terra a causa delle anomalie magnetiche causate dall\'Obsidium grezzo nel sottosuolo. Qui abitano i Genasi della Terra e tribù di Firbolg nomadi. Le miniere a cielo aperto sono infestate da Bulette e Basilischi. La vegetazione è composta da cactus giganti e arbusti spinosi.',
@@ -155,8 +155,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'tana-del-falco',
     name: 'Tana del Falco',
     type: 'city',
-    x: 79,  // pochissimo più a sinistra (era 80)
-    y: 54,  // un bel po' più in basso (era 44)
+    x: 79.2,  // pochissimo più a sinistra (era 80)
+    y: 52,  // un bel po' più in basso (era 44)
     r: 1.2,
     shortDescription: 'Fortezza arroccata sulle alture ad est di Arborea. Rifugio di cacciatori, mercenari e guardie di frontiera che proteggono i confini orientali.',
     fullDescription: 'La Tana del Falco è una fortezza arroccata sulle alture orientali, dominando il territorio sottostante. È il rifugio di cacciatori, mercenari e guardie di frontiera che proteggono i confini tra le terre civilizzate e le regioni selvagge a est. Il nome deriva dall\'usanza locale di addestrare falchi da guerra per il pattugliamento aereo.',
@@ -166,7 +166,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     name: 'Guardia del Lago',
     type: 'city',
     x: 80,
-    y: 62,  // di poco più in basso (era 59)
+    y: 61,  // di poco più in basso (era 59)
     r: 1.2,
     shortDescription: 'Città lacustre tra Arborea e Urash. Custodisce uno dei laghi più grandi del continente orientale, fonte d\'acqua strategica per tutta la regione.',
     fullDescription: 'Guardia del Lago sorge sulle rive di uno dei laghi più grandi del continente orientale. La sua posizione tra Arborea e Urash la rende un punto di equilibrio delicato tra la filosofia druidica degli elfi e la neutralità armata dei montanari. L\'acqua del lago è una risorsa strategica, contesa da più fazioni.',
@@ -185,8 +185,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'ytshal',
     name: "Y'Tshal",
     type: 'city',
-    x: 32,  // di molto più a sinistra (era 44)
-    y: 80,  // un po' più in alto (era 83)
+    x: 34,  // di molto più a sinistra (era 44)
+    y: 80.3,  // un po' più in alto (era 83)
     r: 1.2,
     shortDescription: 'Gioiello del deserto, scavata nell\'arenaria su un\'oasi sotterranea. Patria dei Thri-kreen e delle tribù del deserto, mercato di veleni e spezie rarissime.',
     fullDescription: "Y'Tshal sorge su un'oasi sotterranea in una penisola desertica di sabbia bianca e perlacea, resti di antiche barriere coralline di un mare prosciugato millenni fa. È un gioiello di architettura scavata nell'arenaria, abitata dai misteriosi Thri-kreen (uomini-insetto) e dalle tribù umane del deserto. I pericoli principali sono i Vermi Purpurei e gli scorpioni giganti il cui veleno è ricercatissimo dagli alchimisti di Tharros.",
