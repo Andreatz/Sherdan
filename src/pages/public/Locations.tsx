@@ -20,9 +20,16 @@ export const LocationsPage: React.FC = () => {
   const regions = filtered.filter((l) => l.type === 'region');
   const cities = filtered.filter((l) => l.type === 'city');
 
+  const goToMap = () => {
+    navigate('/');
+    setTimeout(() => {
+      const el = document.getElementById('map');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  };
+
   return (
     <section className="relative min-h-screen py-24 px-6 overflow-hidden">
-      {/* Background */}
       <div
         className="fixed inset-0 bg-cover bg-center -z-10"
         style={{ backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`, backgroundAttachment: 'fixed' }}
@@ -30,14 +37,11 @@ export const LocationsPage: React.FC = () => {
       <div className="fixed inset-0 bg-slate-950/85 -z-10" />
 
       <div className="relative z-10 max-w-6xl mx-auto">
-
-        {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-5xl md:text-6xl font-bold text-amber-300 mb-4">🗺️ Luoghi di Sherdan</h1>
           <p className="text-slate-300 text-lg">Regioni, città e avamposti del mondo conosciuto.</p>
         </div>
 
-        {/* Barra filtri + ricerca */}
         <div className="flex flex-col sm:flex-row gap-3 mb-10">
           <div className="flex gap-2">
             {(['all', 'region', 'city'] as Filter[]).map((f) => (
@@ -67,7 +71,6 @@ export const LocationsPage: React.FC = () => {
           <p className="text-center text-slate-500 italic py-16">Nessun luogo trovato.</p>
         )}
 
-        {/* Regioni */}
         {regions.length > 0 && (
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-amber-400 mb-5 flex items-center gap-2">
@@ -75,17 +78,12 @@ export const LocationsPage: React.FC = () => {
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {regions.map((loc) => (
-                <LocationCard
-                  key={loc.id}
-                  loc={loc}
-                  onClick={() => setSelected(loc)}
-                />
+                <LocationCard key={loc.id} loc={loc} onClick={() => setSelected(loc)} />
               ))}
             </div>
           </div>
         )}
 
-        {/* Città */}
         {cities.length > 0 && (
           <div>
             <h2 className="text-2xl font-bold text-sky-400 mb-5 flex items-center gap-2">
@@ -93,18 +91,13 @@ export const LocationsPage: React.FC = () => {
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {cities.map((loc) => (
-                <LocationCard
-                  key={loc.id}
-                  loc={loc}
-                  onClick={() => setSelected(loc)}
-                />
+                <LocationCard key={loc.id} loc={loc} onClick={() => setSelected(loc)} />
               ))}
             </div>
           </div>
         )}
       </div>
 
-      {/* Modal dettaglio */}
       {selected && (
         <div
           className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4 py-8"
@@ -125,17 +118,21 @@ export const LocationsPage: React.FC = () => {
             <h3 className="text-3xl font-bold text-amber-300 mb-3">{selected.name}</h3>
             <p className="text-slate-400 italic mb-6 leading-6">{selected.shortDescription}</p>
             <p className="text-slate-300 leading-8 whitespace-pre-line">{selected.fullDescription}</p>
-            <div className="flex gap-3 mt-8">
+            <div className="flex flex-wrap gap-3 mt-8">
               {selected.type === 'region' && selected.regionSlug && (
                 <button
-                  onClick={() => { navigate(`/mappa/${selected.regionSlug}`); window.scrollTo({ top: 0 }); setSelected(null); }}
+                  onClick={() => {
+                    navigate(`/mappa/${selected.regionSlug}`);
+                    window.scrollTo({ top: 0 });
+                    setSelected(null);
+                  }}
                   className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold transition"
                 >
-                  Esplora sulla mappa →
+                  Ulteriori informazioni →
                 </button>
               )}
               <button
-                onClick={() => { navigate('/#map'); setSelected(null); }}
+                onClick={() => { setSelected(null); goToMap(); }}
                 className="px-5 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl transition"
               >
                 🗺️ Vedi sulla mappa
