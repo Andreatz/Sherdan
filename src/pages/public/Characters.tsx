@@ -40,7 +40,6 @@ const NpcNotes: React.FC<{ characterId: string }> = ({ characterId }) => {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const initialLoadDone = useRef(false);
 
-  // Carica nota esistente
   useEffect(() => {
     if (!user) return;
     const load = async () => {
@@ -56,7 +55,6 @@ const NpcNotes: React.FC<{ characterId: string }> = ({ characterId }) => {
     void load();
   }, [user, characterId]);
 
-  // Autosave con debounce 800ms
   useEffect(() => {
     if (!user || !initialLoadDone.current) return;
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -146,8 +144,15 @@ export const CharactersPage: React.FC = () => {
   const npcs = characters.filter((c) => !c.is_player_character);
 
   return (
-    <section id="characters" className="py-24 px-6 bg-slate-950">
-      <div className="max-w-6xl mx-auto">
+    <section id="characters" className="relative py-24 px-6 overflow-hidden">
+      {/* Background */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('/backgrounds/02BW022-full.png')` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/80 to-slate-950/95" />
+
+      <div className="relative z-10 max-w-6xl mx-auto">
         <div className="text-center mb-14">
           <h2 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4">
             {it.charactersPublic.title}
@@ -169,7 +174,6 @@ export const CharactersPage: React.FC = () => {
           <p className="text-center text-slate-400 text-lg">{it.charactersPublic.empty}</p>
         ) : (
           <div className="space-y-14">
-            {/* PG */}
             {pgs.length > 0 && (
               <div>
                 <h3 className="text-2xl font-bold text-amber-400 mb-6 border-b border-amber-700/30 pb-2">
@@ -180,7 +184,7 @@ export const CharactersPage: React.FC = () => {
                     <button
                       key={character.id}
                       onClick={() => handleCardClick(character)}
-                      className="text-left rounded-2xl overflow-hidden border border-amber-600/30 bg-slate-900 hover:-translate-y-1 hover:shadow-2xl transition"
+                      className="text-left rounded-2xl overflow-hidden border border-amber-600/30 bg-slate-900/80 backdrop-blur-sm hover:-translate-y-1 hover:shadow-2xl transition"
                     >
                       <div className="h-72 bg-slate-800 overflow-hidden">
                         {character.portrait_url ? (
@@ -197,15 +201,9 @@ export const CharactersPage: React.FC = () => {
                       </div>
                       <div className="p-6 space-y-2">
                         <h3 className="text-2xl font-bold text-amber-300">{character.name}</h3>
-                        <p className="text-slate-200">
-                          {it.charactersPublic.class}: {character.class}
-                        </p>
-                        <p className="text-slate-200">
-                          {it.charactersPublic.race}: {character.race}
-                        </p>
-                        <p className="text-slate-200">
-                          {it.charactersPublic.level}: {character.level}
-                        </p>
+                        <p className="text-slate-200">{it.charactersPublic.class}: {character.class}</p>
+                        <p className="text-slate-200">{it.charactersPublic.race}: {character.race}</p>
+                        <p className="text-slate-200">{it.charactersPublic.level}: {character.level}</p>
                         <span className="inline-block text-xs text-amber-500 border border-amber-700/40 rounded px-2 py-0.5 mt-1">
                           Personaggio Giocante
                         </span>
@@ -216,7 +214,6 @@ export const CharactersPage: React.FC = () => {
               </div>
             )}
 
-            {/* NPC */}
             {npcs.length > 0 && (
               <div>
                 <h3 className="text-2xl font-bold text-slate-300 mb-6 border-b border-slate-700/50 pb-2">
@@ -227,7 +224,7 @@ export const CharactersPage: React.FC = () => {
                     <button
                       key={character.id}
                       onClick={() => handleCardClick(character)}
-                      className="text-left rounded-2xl overflow-hidden border border-amber-700/20 bg-slate-900 hover:-translate-y-1 hover:shadow-2xl transition"
+                      className="text-left rounded-2xl overflow-hidden border border-amber-700/20 bg-slate-900/80 backdrop-blur-sm hover:-translate-y-1 hover:shadow-2xl transition"
                     >
                       <div className="h-72 bg-slate-800 overflow-hidden">
                         {character.portrait_url ? (
@@ -244,12 +241,8 @@ export const CharactersPage: React.FC = () => {
                       </div>
                       <div className="p-6 space-y-2">
                         <h3 className="text-2xl font-bold text-amber-300">{character.name}</h3>
-                        <p className="text-slate-200">
-                          {it.charactersPublic.class}: {character.class}
-                        </p>
-                        <p className="text-slate-200">
-                          {it.charactersPublic.race}: {character.race}
-                        </p>
+                        <p className="text-slate-200">{it.charactersPublic.class}: {character.class}</p>
+                        <p className="text-slate-200">{it.charactersPublic.race}: {character.race}</p>
                         {user && (
                           <span className="inline-block text-xs text-slate-500 border border-slate-700/40 rounded px-2 py-0.5 mt-1">
                             📝 Note personali
@@ -275,7 +268,6 @@ export const CharactersPage: React.FC = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="grid md:grid-cols-2">
-                {/* Colonna sinistra — ritratto */}
                 <div className="bg-slate-800 min-h-[320px]">
                   {selectedCharacter.portrait_url ? (
                     <PortraitImg
@@ -289,21 +281,12 @@ export const CharactersPage: React.FC = () => {
                     </div>
                   )}
                 </div>
-
-                {/* Colonna destra — info + note */}
                 <div className="p-8 overflow-y-auto max-h-[80vh]">
-                  <h3 className="text-3xl font-bold text-amber-300 mb-4">
-                    {selectedCharacter.name}
-                  </h3>
+                  <h3 className="text-3xl font-bold text-amber-300 mb-4">{selectedCharacter.name}</h3>
                   <div className="space-y-2 text-slate-200 mb-4">
-                    <p>
-                      {it.charactersPublic.class}: {selectedCharacter.class}
-                    </p>
-                    <p>
-                      {it.charactersPublic.race}: {selectedCharacter.race}
-                    </p>
+                    <p>{it.charactersPublic.class}: {selectedCharacter.class}</p>
+                    <p>{it.charactersPublic.race}: {selectedCharacter.race}</p>
                   </div>
-
                   {selectedCharacter.backstory && (
                     <>
                       <h4 className="text-base font-semibold text-amber-200 mb-2">
@@ -314,16 +297,12 @@ export const CharactersPage: React.FC = () => {
                       </p>
                     </>
                   )}
-
-                  {/* Note private — visibili solo se loggato */}
                   <NpcNotes characterId={selectedCharacter.id} />
-
                   {!user && (
                     <p className="mt-6 text-slate-500 text-xs italic border-t border-slate-700/40 pt-4">
                       🔒 Accedi per aggiungere note personali su questo personaggio.
                     </p>
                   )}
-
                   <button
                     onClick={() => setSelectedCharacter(null)}
                     className="mt-6 px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded transition text-sm"

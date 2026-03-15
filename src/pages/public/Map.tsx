@@ -16,17 +16,21 @@ export const MapPage: React.FC = () => {
   };
 
   return (
-    <section id="map" className="py-24 px-6 bg-slate-950">
-      <div className="max-w-7xl mx-auto">
+    <section id="map" className="relative py-24 px-6 overflow-hidden">
+      {/* Background */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('/backgrounds/07BW004-full.png')` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/75 to-slate-950/95" />
 
+      <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-10">
           <h2 className="text-4xl md:text-5xl font-bold text-amber-300 mb-3">
             Mappa del Mondo
           </h2>
-          <p className="text-slate-300 text-lg">
-            Esplora le terre di Sherdan
-          </p>
+          <p className="text-slate-300 text-lg">Esplora le terre di Sherdan</p>
         </div>
 
         {/* Mappa */}
@@ -41,14 +45,12 @@ export const MapPage: React.FC = () => {
             draggable={false}
           />
 
-          {/* SVG overlay — solo aree invisibili cliccabili con glow al hover */}
           <svg
             className="absolute inset-0 w-full h-full"
             viewBox="0 0 100 100"
             preserveAspectRatio="none"
           >
             <defs>
-              {/* Glow ambrato per regioni */}
               <filter id="glow-region" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur stdDeviation="1.2" result="blur" />
                 <feMerge>
@@ -57,7 +59,6 @@ export const MapPage: React.FC = () => {
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
-              {/* Glow azzurro per città */}
               <filter id="glow-city" x="-50%" y="-50%" width="200%" height="200%">
                 <feGaussianBlur stdDeviation="0.8" result="blur" />
                 <feMerge>
@@ -71,7 +72,6 @@ export const MapPage: React.FC = () => {
               const r = loc.r ?? (loc.type === 'region' ? 4 : 2.5);
               const isHovered = hovered === loc.id;
               const isRegion = loc.type === 'region';
-
               return (
                 <circle
                   key={loc.id}
@@ -80,18 +80,14 @@ export const MapPage: React.FC = () => {
                   r={r}
                   fill={
                     isHovered
-                      ? isRegion
-                        ? 'rgba(251,191,36,0.18)'
-                        : 'rgba(147,210,255,0.15)'
+                      ? isRegion ? 'rgba(251,191,36,0.18)' : 'rgba(147,210,255,0.15)'
                       : 'transparent'
                   }
                   stroke="none"
                   style={{
                     cursor: 'pointer',
                     filter: isHovered
-                      ? isRegion
-                        ? 'url(#glow-region)'
-                        : 'url(#glow-city)'
+                      ? isRegion ? 'url(#glow-region)' : 'url(#glow-city)'
                       : 'none',
                     transition: 'fill 0.25s ease',
                   }}
@@ -103,7 +99,6 @@ export const MapPage: React.FC = () => {
             })}
           </svg>
 
-          {/* Tooltip nome al hover */}
           {hovered && (() => {
             const loc = MAP_LOCATIONS.find((l) => l.id === hovered);
             if (!loc) return null;
@@ -149,15 +144,8 @@ export const MapPage: React.FC = () => {
                   {selected.type === 'region' ? 'Regione' : 'Città'}
                 </span>
               </div>
-
-              <h3 className="text-3xl font-bold text-amber-300 mb-4">
-                {selected.name}
-              </h3>
-
-              <p className="text-slate-300 leading-7">
-                {selected.shortDescription}
-              </p>
-
+              <h3 className="text-3xl font-bold text-amber-300 mb-4">{selected.name}</h3>
+              <p className="text-slate-300 leading-7">{selected.shortDescription}</p>
               <div className="flex gap-3 mt-8">
                 {selected.type === 'region' && (
                   <button

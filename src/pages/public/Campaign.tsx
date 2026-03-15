@@ -18,17 +18,14 @@ export const CampaignPage: React.FC = () => {
   useEffect(() => {
     const fetchSettings = async () => {
       setLoading(true);
-
       const { data } = await supabase
         .from('campaign_settings')
         .select('world_lore, main_story_arc, house_rules')
         .limit(1)
         .maybeSingle();
-
       setSettings(data ?? null);
       setLoading(false);
     };
-
     void fetchSettings();
   }, []);
 
@@ -41,43 +38,32 @@ export const CampaignPage: React.FC = () => {
   const renderContent = () => {
     if (!settings) {
       return (
-        <p className="text-slate-300 text-lg text-center">
-          {it.campaign.empty}
-        </p>
+        <p className="text-slate-300 text-lg text-center">{it.campaign.empty}</p>
       );
     }
-
     if (activeTab === 'lore') {
       return (
         <>
-          <h3 className="text-2xl font-bold text-amber-300 mb-4">
-            {it.campaign.worldLoreTitle}
-          </h3>
+          <h3 className="text-2xl font-bold text-amber-300 mb-4">{it.campaign.worldLoreTitle}</h3>
           <p className="text-slate-200 leading-8 whitespace-pre-line">
             {settings.world_lore || it.campaign.worldLoreEmpty}
           </p>
         </>
       );
     }
-
     if (activeTab === 'story') {
       return (
         <>
-          <h3 className="text-2xl font-bold text-amber-300 mb-4">
-            {it.campaign.storyTitle}
-          </h3>
+          <h3 className="text-2xl font-bold text-amber-300 mb-4">{it.campaign.storyTitle}</h3>
           <p className="text-slate-200 leading-8 whitespace-pre-line">
             {settings.main_story_arc || it.campaign.storyEmpty}
           </p>
         </>
       );
     }
-
     return (
       <>
-        <h3 className="text-2xl font-bold text-amber-300 mb-4">
-          {it.campaign.rulesTitle}
-        </h3>
+        <h3 className="text-2xl font-bold text-amber-300 mb-4">{it.campaign.rulesTitle}</h3>
         <p className="text-slate-200 leading-8 whitespace-pre-line">
           {settings.house_rules || it.campaign.rulesEmpty}
         </p>
@@ -86,9 +72,19 @@ export const CampaignPage: React.FC = () => {
   };
 
   return (
-    <section id="campaign" className="py-24 px-6 bg-slate-900">
-      <div className="max-w-6xl mx-auto">
-        <div className="bg-[linear-gradient(180deg,rgba(212,175,55,0.08),rgba(255,255,255,0.02))] border border-amber-700/20 rounded-2xl p-8 md:p-12 shadow-2xl">
+    <section
+      id="campaign"
+      className="relative py-24 px-6 overflow-hidden"
+    >
+      {/* Background */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('/backgrounds/02BW002-full.png')` }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-900/80 to-slate-950/90" />
+
+      <div className="relative z-10 max-w-6xl mx-auto">
+        <div className="bg-slate-900/70 backdrop-blur-sm border border-amber-700/20 rounded-2xl p-8 md:p-12 shadow-2xl">
           <div className="flex flex-wrap gap-3 mb-8">
             {tabs.map((tab) => (
               <button
@@ -104,7 +100,6 @@ export const CampaignPage: React.FC = () => {
               </button>
             ))}
           </div>
-
           {loading ? (
             <p className="text-slate-300 text-lg">{it.campaign.loading}</p>
           ) : (

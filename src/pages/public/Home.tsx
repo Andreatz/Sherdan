@@ -17,20 +17,30 @@ export const Home: React.FC = () => {
         .select('campaign_title, campaign_tagline')
         .limit(1)
         .maybeSingle();
-
       if (data) setSettings(data);
     };
-
     void fetchSettings();
   }, []);
 
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800 px-6"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden px-6"
     >
-      <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,rgba(212,175,55,0.25),transparent_35%)]" />
-      <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_bottom,transparent,rgba(15,27,46,0.95))]" />
+      {/* Background image con parallax */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`,
+          backgroundAttachment: 'fixed',
+        }}
+      />
+
+      {/* Overlay gradiente scuro per leggibilità */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-slate-950" />
+
+      {/* Glow ambrato */}
+      <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,rgba(212,175,55,0.3),transparent_40%)]" />
 
       <div className="relative z-10 max-w-5xl text-center">
         <p className="uppercase tracking-[0.35em] text-amber-300/80 text-sm mb-6">
@@ -52,7 +62,6 @@ export const Home: React.FC = () => {
           >
             {it.home.beginAdventure}
           </a>
-
           <a
             href="#characters"
             className="px-8 py-4 rounded-lg border border-amber-400 text-amber-200 hover:bg-amber-400/10 transition"
