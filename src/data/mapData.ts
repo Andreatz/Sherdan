@@ -145,8 +145,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'collefermo',
     name: 'Collefermo',
     type: 'city',
-    x: 55.2,  // un bel po' più a sinistra (era 60)
-    y: 53.4,  // di poco più in alto (era 56)
+    x: 55.4,  // un bel po' più a sinistra (era 60)
+    y: 53.5,  // di poco più in alto (era 56)
     r: 1.2,
     shortDescription: 'Città al confine tra i territori di Arborea e il centro del continente orientale. Punto di transito e rifornimento per i viaggiatori.',
     fullDescription: 'Collefermo è situata nel cuore del continente orientale, al confine tra le influenze di Arborea e le terre più aride del centro. È una città di transito, dove i viaggiatori si riforniscono prima di addentrarsi nella foresta o nel deserto. La sua posizione strategica la rende un luogo di incontro tra culture molto diverse.',
@@ -156,7 +156,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     name: 'Tana del Falco',
     type: 'city',
     x: 79.6,  // pochissimo più a sinistra (era 80)
-    y: 51.4,  // un bel po' più in basso (era 44)
+    y: 51.2,  // un bel po' più in basso (era 44)
     r: 1.2,
     shortDescription: 'Fortezza arroccata sulle alture ad est di Arborea. Rifugio di cacciatori, mercenari e guardie di frontiera che proteggono i confini orientali.',
     fullDescription: 'La Tana del Falco è una fortezza arroccata sulle alture orientali, dominando il territorio sottostante. È il rifugio di cacciatori, mercenari e guardie di frontiera che proteggono i confini tra le terre civilizzate e le regioni selvagge a est. Il nome deriva dall\'usanza locale di addestrare falchi da guerra per il pattugliamento aereo.',
