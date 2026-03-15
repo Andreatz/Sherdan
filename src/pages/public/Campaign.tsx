@@ -37,17 +37,13 @@ export const CampaignPage: React.FC = () => {
 
   const renderContent = () => {
     if (!settings) {
-      return (
-        <p className="text-slate-300 text-lg text-center">{it.campaign.empty}</p>
-      );
+      return <p className="text-slate-300 text-lg text-center">{it.campaign.empty}</p>;
     }
     if (activeTab === 'lore') {
       return (
         <>
           <h3 className="text-2xl font-bold text-amber-300 mb-4">{it.campaign.worldLoreTitle}</h3>
-          <p className="text-slate-200 leading-8 whitespace-pre-line">
-            {settings.world_lore || it.campaign.worldLoreEmpty}
-          </p>
+          <p className="text-slate-200 leading-8 whitespace-pre-line">{settings.world_lore || it.campaign.worldLoreEmpty}</p>
         </>
       );
     }
@@ -55,31 +51,26 @@ export const CampaignPage: React.FC = () => {
       return (
         <>
           <h3 className="text-2xl font-bold text-amber-300 mb-4">{it.campaign.storyTitle}</h3>
-          <p className="text-slate-200 leading-8 whitespace-pre-line">
-            {settings.main_story_arc || it.campaign.storyEmpty}
-          </p>
+          <p className="text-slate-200 leading-8 whitespace-pre-line">{settings.main_story_arc || it.campaign.storyEmpty}</p>
         </>
       );
     }
     return (
       <>
         <h3 className="text-2xl font-bold text-amber-300 mb-4">{it.campaign.rulesTitle}</h3>
-        <p className="text-slate-200 leading-8 whitespace-pre-line">
-          {settings.house_rules || it.campaign.rulesEmpty}
-        </p>
+        <p className="text-slate-200 leading-8 whitespace-pre-line">{settings.house_rules || it.campaign.rulesEmpty}</p>
       </>
     );
   };
 
   return (
-    <section
-      id="campaign"
-      className="relative py-24 px-6 overflow-hidden"
-    >
-      {/* Background */}
+    <section id="campaign" className="relative py-24 px-6 overflow-hidden">
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url('/backgrounds/02BW002-full.png')` }}
+        style={{
+          backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`,
+          backgroundAttachment: 'fixed',
+        }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-900/80 to-slate-950/90" />
 

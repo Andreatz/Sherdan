@@ -15,9 +15,7 @@ export const RegionPage: React.FC = () => {
   const navigate = useNavigate();
   const [openNpc, setOpenNpc] = useState<number | null>(null);
 
-  const region = MAP_LOCATIONS.find(
-    (l) => l.type === 'region' && l.regionSlug === regionSlug
-  );
+  const region = MAP_LOCATIONS.find((l) => l.type === 'region' && l.regionSlug === regionSlug);
   const data = REGION_DATA.find((r) => r.slug === regionSlug);
 
   if (!region) {
@@ -25,12 +23,7 @@ export const RegionPage: React.FC = () => {
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">
           <p className="text-slate-400 text-lg mb-4">Regione non trovata.</p>
-          <button
-            onClick={() => navigate('/')}
-            className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl transition"
-          >
-            Torna alla mappa
-          </button>
+          <button onClick={() => navigate('/')} className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl transition">Torna alla mappa</button>
         </div>
       </div>
     );
@@ -39,15 +32,17 @@ export const RegionPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950">
 
-      {/* Hero banner con background */}
+      {/* Hero banner con parallax */}
       <div className="relative h-72 md:h-96 overflow-hidden">
         <div
           className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url('/backgrounds/07BW035-full.png')` }}
+          style={{
+            backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`,
+            backgroundAttachment: 'fixed',
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-slate-950" />
 
-        {/* Back button */}
         <div className="absolute top-6 left-6 z-10">
           <button
             onClick={() => navigate(-1)}
@@ -57,20 +52,15 @@ export const RegionPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Titolo nel banner */}
         <div className="absolute bottom-0 left-0 right-0 z-10 px-6 pb-8 max-w-4xl mx-auto">
           <span className="text-xs uppercase tracking-widest text-slate-400 mb-2 block">Regione</span>
-          <h1 className="text-5xl md:text-6xl font-bold text-amber-300 drop-shadow-lg">
-            {region.name}
-          </h1>
+          <h1 className="text-5xl md:text-6xl font-bold text-amber-300 drop-shadow-lg">{region.name}</h1>
         </div>
       </div>
 
       {/* Contenuto */}
       <div className="py-12 px-6">
         <div className="max-w-4xl mx-auto">
-
-          {/* Tagline */}
           <p className="text-slate-300 text-xl leading-8 mb-10">{region.shortDescription}</p>
 
           {data && (
@@ -106,10 +96,7 @@ export const RegionPage: React.FC = () => {
             <SectionCard title="🏛️ Luoghi di Interesse">
               <div className="grid sm:grid-cols-2 gap-4">
                 {data.locations.map((loc, i) => (
-                  <div
-                    key={i}
-                    className="bg-slate-800/60 border border-slate-700 rounded-xl p-4"
-                  >
+                  <div key={i} className="bg-slate-800/60 border border-slate-700 rounded-xl p-4">
                     <p className="font-semibold text-amber-200 mb-1 text-sm">{loc.name}</p>
                     <p className="text-slate-400 text-sm leading-6">{loc.description}</p>
                   </div>
@@ -122,10 +109,7 @@ export const RegionPage: React.FC = () => {
             <SectionCard title="🎭 Personaggi Notevoli">
               <div className="space-y-3">
                 {data.npcs.map((npc, i) => (
-                  <div
-                    key={i}
-                    className="border border-slate-700 rounded-xl overflow-hidden"
-                  >
+                  <div key={i} className="border border-slate-700 rounded-xl overflow-hidden">
                     <button
                       className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-800/50 transition"
                       onClick={() => setOpenNpc(openNpc === i ? null : i)}
@@ -159,7 +143,6 @@ export const RegionPage: React.FC = () => {
               Mappa locale in arrivo...
             </div>
           </SectionCard>
-
         </div>
       </div>
     </div>
