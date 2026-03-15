@@ -5,143 +5,144 @@ import { DiceCanvas } from '../dice/DiceCanvas';
 const DICE = [4, 6, 8, 10, 12, 20, 100] as const;
 type DieType = typeof DICE[number];
 
-interface Roll {
-  die: DieType;
-  result: number;
-  ts: number;
-}
+interface Roll { die: DieType; result: number; ts: number; }
 
-function dieLabel(d: DieType) {
-  return `d${d}`;
-}
-
-function resultColor(result: number, sides: DieType): string {
+function resultColor(result: number, sides: DieType) {
   if (result === sides) return 'text-yellow-300 font-black';
-  if (result === 1) return 'text-red-400 font-black';
+  if (result === 1)     return 'text-red-400 font-black';
   if (result >= Math.ceil(sides * 0.75)) return 'text-green-400';
   return 'text-white';
 }
 
 export const DiceRoller: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const [selected, setSelected] = useState<DieType>(20);
-  const [rolling, setRolling] = useState(false);
-  const [lastResult, setLastResult] = useState<{ die: DieType; value: number } | null>(null);
-  const [history, setHistory] = useState<Roll[]>([]);
+  const [selected, setSelected]     = useState<DieType>(20);
+  const [rolling, setRolling]       = useState(false);
+  const [result, setResult]         = useState<{ die: DieType; value: number } | null>(null);
+  const [history, setHistory]       = useState<Roll[]>([]);
   const [showHistory, setShowHistory] = useState(false);
 
   const handleResult = useCallback((value: number) => {
     setRolling(false);
-    setLastResult({ die: selected, value });
+    setResult({ die: selected, value });
     setHistory(prev => [{ die: selected, result: value, ts: Date.now() }, ...prev].slice(0, 20));
   }, [selected]);
 
   const handleRoll = () => {
     if (rolling) return;
-    setLastResult(null);
+    setResult(null);
     setRolling(true);
   };
 
-  const isCrit = lastResult?.value === lastResult?.die;
-  const isFail = lastResult?.value === 1;
+  const isCrit = result?.value === result?.die;
+  const isFail = result?.value === 1;
 
   return (
-    <div className="fixed bottom-20 right-4 z-[200] w-96 bg-slate-900 border border-amber-700/40 rounded-2xl shadow-2xl overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-slate-800 border-b border-amber-700/20">
-        <span className="text-amber-300 font-bold tracking-wide text-sm">🎲 Tiro Dadi 3D</span>
-        <button onClick={onClose} className="text-slate-400 hover:text-white transition"><X size={16} /></button>
-      </div>
+    /* Overlay fullscreen */
+    <div className="fixed inset-0 z-[300] flex flex-col">
 
-      {/* Selettore dado */}
-      <div className="flex flex-wrap gap-2 justify-center px-4 pt-4">
-        {DICE.map(d => (
-          <button
-            key={d}
-            onClick={() => { setSelected(d); setLastResult(null); }}
-            className={`w-12 h-12 rounded-xl text-xs font-bold border transition ${
-              selected === d
-                ? 'bg-amber-600 border-amber-500 text-white scale-110 shadow-lg shadow-amber-900/50'
-                : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:border-amber-700'
-            }`}
-          >
-            {dieLabel(d)}
-          </button>
-        ))}
-      </div>
-
-      {/* Canvas 3D */}
-      <div className="relative mx-4 mt-3 rounded-xl overflow-hidden bg-slate-950 border border-amber-900/30" style={{ height: 220 }}>
+      {/* Canvas 3D — occupa tutto lo schermo */}
+      <div className="absolute inset-0 bg-slate-950/92 backdrop-blur-sm">
         <DiceCanvas dieType={selected} onResult={handleResult} rolling={rolling} />
-
-        {/* Overlay risultato */}
-        {!rolling && lastResult && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <div className={`text-7xl font-black drop-shadow-lg ${
-              isCrit ? 'text-yellow-300' : isFail ? 'text-red-400' : 'text-white'
-            }`}>
-              {lastResult.value}
-            </div>
-            {isCrit && <span className="text-yellow-300 text-sm font-bold animate-pulse mt-1">✨ CRITICO!</span>}
-            {isFail && <span className="text-red-400 text-sm font-bold mt-1">💀 Fallimento critico</span>}
-          </div>
-        )}
-
-        {!rolling && !lastResult && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <p className="text-slate-600 text-sm">Premi Tira!</p>
-          </div>
-        )}
-
-        {rolling && (
-          <div className="absolute bottom-2 right-2 text-xs text-amber-500 animate-pulse">Rotolando...</div>
-        )}
       </div>
 
-      {/* Bottone tira */}
-      <div className="px-4 pt-3">
-        <button
-          onClick={handleRoll}
-          disabled={rolling}
-          className={`w-full py-3 rounded-xl font-bold text-white text-base transition ${
-            rolling
-              ? 'bg-amber-700 opacity-60 cursor-not-allowed'
-              : 'bg-amber-600 hover:bg-amber-500 active:scale-95 shadow-lg shadow-amber-900/40'
-          }`}
-        >
-          {rolling ? '🎲 Rotolando...' : `🎲 Tira ${dieLabel(selected)}`}
-        </button>
-      </div>
-
-      {/* Storico */}
-      {history.length > 0 && (
-        <div className="px-4 pb-4 pt-2">
-          <button
-            onClick={() => setShowHistory(v => !v)}
-            className="w-full flex items-center justify-between text-xs text-slate-400 hover:text-slate-200 transition px-1"
-          >
-            <span>Ultimi tiri ({history.length})</span>
-            <ChevronDown size={14} className={`transition-transform ${showHistory ? 'rotate-180' : ''}`} />
-          </button>
-          {showHistory && (
-            <div className="mt-2 max-h-32 overflow-y-auto space-y-1 pr-1">
-              {history.map((r) => (
-                <div key={r.ts} className="flex items-center justify-between text-xs bg-slate-800 rounded-lg px-3 py-1.5">
-                  <span className="text-slate-400">{dieLabel(r.die)}</span>
-                  <span className={resultColor(r.result, r.die)}>{r.result}</span>
-                  {r.result === r.die && <span className="text-yellow-400">✨</span>}
-                  {r.result === 1 && <span className="text-red-400">💀</span>}
-                </div>
-              ))}
-            </div>
-          )}
-          <button
-            onClick={() => { setHistory([]); setLastResult(null); }}
-            className="mt-1 flex items-center gap-1 text-xs text-slate-600 hover:text-slate-400 transition px-1"
-          >
-            <RotateCcw size={11} /> Azzera storico
-          </button>
+      {/* Risultato centrale — appare dopo il tiro */}
+      {!rolling && result && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+          <div className={`text-[10rem] leading-none font-black drop-shadow-2xl animate-bounce-once ${
+            isCrit ? 'text-yellow-300' : isFail ? 'text-red-400' : 'text-white'
+          }`} style={{ textShadow: '0 0 60px rgba(255,215,0,0.5)' }}>
+            {result.value}
+          </div>
+          <div className="text-slate-400 text-xl mt-2">d{result.die}</div>
+          {isCrit && <div className="text-yellow-300 text-2xl font-bold mt-3 animate-pulse">✨ CRITICO!</div>}
+          {isFail && <div className="text-red-400 text-2xl font-bold mt-3">💀 Fallimento critico</div>}
         </div>
       )}
+
+      {/* Prompt iniziale */}
+      {!rolling && !result && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <p className="text-slate-600 text-xl">Seleziona un dado e tira!</p>
+        </div>
+      )}
+
+      {/* HUD in basso */}
+      <div className="absolute bottom-0 left-0 right-0 z-10 bg-slate-950/80 backdrop-blur border-t border-amber-700/20 px-6 py-4">
+        <div className="max-w-2xl mx-auto space-y-4">
+
+          {/* Selettore dadi */}
+          <div className="flex flex-wrap gap-2 justify-center">
+            {DICE.map(d => (
+              <button
+                key={d}
+                onClick={() => { setSelected(d); setResult(null); }}
+                className={`w-14 h-14 rounded-xl text-sm font-bold border transition ${
+                  selected === d
+                    ? 'bg-amber-600 border-amber-400 text-white scale-110 shadow-lg shadow-amber-900/60'
+                    : 'bg-slate-800 border-slate-700 text-slate-300 hover:border-amber-600 hover:text-amber-300'
+                }`}
+              >
+                d{d}
+              </button>
+            ))}
+          </div>
+
+          {/* Azioni */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleRoll}
+              disabled={rolling}
+              className={`flex-1 py-3 rounded-xl font-bold text-white text-lg transition ${
+                rolling
+                  ? 'bg-amber-700/60 cursor-not-allowed'
+                  : 'bg-amber-600 hover:bg-amber-500 active:scale-95 shadow-xl shadow-amber-900/40'
+              }`}
+            >
+              {rolling ? '🎲 Rotolando...' : `🎲 Tira d${selected}`}
+            </button>
+
+            {/* Storico */}
+            {history.length > 0 && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowHistory(v => !v)}
+                  className="flex items-center gap-1 px-4 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl text-sm transition"
+                >
+                  Storico <ChevronDown size={14} className={`transition-transform ${showHistory ? 'rotate-180' : ''}`} />
+                </button>
+                {showHistory && (
+                  <div className="absolute bottom-14 right-0 w-52 bg-slate-900 border border-amber-700/20 rounded-xl shadow-xl overflow-hidden">
+                    <div className="max-h-56 overflow-y-auto">
+                      {history.map(r => (
+                        <div key={r.ts} className="flex items-center justify-between text-xs px-3 py-2 border-b border-slate-800 last:border-0">
+                          <span className="text-slate-400">d{r.die}</span>
+                          <span className={resultColor(r.result, r.die)}>{r.result}</span>
+                          {r.result === r.die && <span className="text-yellow-400">✨</span>}
+                          {r.result === 1     && <span className="text-red-400">💀</span>}
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => setHistory([])}
+                      className="w-full flex items-center justify-center gap-1 text-xs text-slate-500 hover:text-slate-300 py-2 transition"
+                    >
+                      <RotateCcw size={11} /> Azzera
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <button
+              onClick={onClose}
+              className="p-3 bg-slate-800 hover:bg-red-900/60 border border-slate-700 hover:border-red-700 text-slate-300 hover:text-red-300 rounded-xl transition"
+              title="Chiudi"
+            >
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
