@@ -40,7 +40,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'eshterzyli',
     name: 'Eshterzyli',
     type: 'region',
-    x: 47,  // leggermente più a destra (era 38)
+    x: 35,  // leggermente più a destra (era 38)
     y: 14,  // pochissimo più in basso (era 13)
     r: 2,
     shortDescription: 'Il Bastione di Cenere e Sangue. Fortezza-città ai piedi di un vulcano attivo, dominata da una cultura marziale e dalle fonderie più grandi del mondo.',
@@ -75,7 +75,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'ultima-dimora',
     name: 'Ultima Dimora',
     type: 'city',
-    x: 13,  // un bel po' più a destra (era 23)
+    x: 20,  // un bel po' più a destra (era 23)
     y: 18,  // più in alto (era 21)
     r: 1.2,
     shortDescription: 'Avamposto ai margini del Mare Senza Tempo, dove il ghiaccio eterno incontra la civiltà. Sopravvive grazie alla caccia alle balene e agli scambi con Tharros.',
