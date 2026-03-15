@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, LogOut, Settings, Scroll, Sword } from 'lucide-react';
+import { Menu, X, LogOut, Settings, Scroll, Sword, MapPin } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { it } from '../../content/texts';
@@ -44,6 +44,13 @@ export const Navigation: React.FC = () => {
             <a href="/#characters" className="hover:text-amber-300 transition">{it.nav.characters}</a>
             <a href="/#sessions" className="hover:text-amber-300 transition">{it.nav.sessions}</a>
             <a href="/#map" className="hover:text-amber-300 transition">{it.nav.map}</a>
+            <button
+              onClick={() => navigate('/luoghi')}
+              className="flex items-center gap-1 hover:text-amber-300 transition"
+            >
+              <MapPin size={14} />
+              Luoghi
+            </button>
             <a href="/#gallery" className="hover:text-amber-300 transition">{it.nav.gallery}</a>
 
             {user && !isAdmin && (
@@ -112,6 +119,13 @@ export const Navigation: React.FC = () => {
             <a href="/#characters" onClick={closeMobileMenu} className="block px-4 py-2 text-slate-200 hover:bg-slate-800 rounded transition">{it.nav.characters}</a>
             <a href="/#sessions" onClick={closeMobileMenu} className="block px-4 py-2 text-slate-200 hover:bg-slate-800 rounded transition">{it.nav.sessions}</a>
             <a href="/#map" onClick={closeMobileMenu} className="block px-4 py-2 text-slate-200 hover:bg-slate-800 rounded transition">{it.nav.map}</a>
+            <button
+              onClick={() => { navigate('/luoghi'); closeMobileMenu(); }}
+              className="w-full text-left flex items-center gap-2 px-4 py-2 text-slate-200 hover:bg-slate-800 rounded transition"
+            >
+              <MapPin size={14} />
+              Luoghi
+            </button>
             <a href="/#gallery" onClick={closeMobileMenu} className="block px-4 py-2 text-slate-200 hover:bg-slate-800 rounded transition">{it.nav.gallery}</a>
 
             {user && !isAdmin && (

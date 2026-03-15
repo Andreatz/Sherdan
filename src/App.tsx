@@ -18,6 +18,7 @@ import { SessionsPage } from './pages/public/Sessions';
 import { MapPage } from './pages/public/Map';
 import { GalleryPage } from './pages/public/Gallery';
 import { RegionPage } from './pages/public/RegionPage';
+import { LocationsPage } from './pages/public/Locations';
 
 // Player Pages
 import { MyCharacterPage } from './pages/player/MyCharacter';
@@ -28,7 +29,7 @@ import { DashboardPage } from './pages/admin/Dashboard';
 import { CharactersPage as AdminCharactersPage } from './pages/admin/Characters';
 import { SessionsPage as AdminSessionsPage } from './pages/admin/Sessions';
 import { MissionsAdminPage } from './pages/admin/Missions';
-import { LocationsPage } from './pages/admin/Locations';
+import { LocationsPage as AdminLocationsPage } from './pages/admin/Locations';
 import { GalleryPage as AdminGalleryPage } from './pages/admin/Gallery';
 import { SettingsPage } from './pages/admin/Settings';
 
@@ -72,6 +73,18 @@ function App() {
             }
           />
 
+          {/* Luoghi */}
+          <Route
+            path="/luoghi"
+            element={
+              <>
+                <Navigation />
+                <LocationsPage />
+                <Footer />
+              </>
+            }
+          />
+
           {/* Pagine regione */}
           <Route
             path="/mappa/:regionSlug"
@@ -80,7 +93,7 @@ function App() {
                 <Navigation />
                 <RegionPage />
                 <Footer />
-            </>
+              </>
             }
           />
 
@@ -109,7 +122,7 @@ function App() {
           <Route path="/admin/characters" element={<ProtectedRoute requireAdmin><AdminCharactersPage /></ProtectedRoute>} />
           <Route path="/admin/sessions"   element={<ProtectedRoute requireAdmin><AdminSessionsPage /></ProtectedRoute>} />
           <Route path="/admin/missions"   element={<ProtectedRoute requireAdmin><MissionsAdminPage /></ProtectedRoute>} />
-          <Route path="/admin/locations"  element={<ProtectedRoute requireAdmin><LocationsPage /></ProtectedRoute>} />
+          <Route path="/admin/locations"  element={<ProtectedRoute requireAdmin><AdminLocationsPage /></ProtectedRoute>} />
           <Route path="/admin/gallery"    element={<ProtectedRoute requireAdmin><AdminGalleryPage /></ProtectedRoute>} />
           <Route path="/admin/settings"   element={<ProtectedRoute requireAdmin><SettingsPage /></ProtectedRoute>} />
 
