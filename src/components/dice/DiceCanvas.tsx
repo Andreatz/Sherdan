@@ -9,7 +9,6 @@ interface Props {
   rolling: boolean;
 }
 
-// Numero di facce -> valori
 const FACE_VALUES: Record<DieType, number[]> = {
   4:   [1, 2, 3, 4],
   6:   [1, 2, 3, 4, 5, 6],
@@ -25,48 +24,35 @@ const DIE_COLORS: Record<DieType, string> = {
   10: '#4a0f4a', 12: '#6b3300', 20: '#0f0f6b', 100: '#3a3a00',
 };
 
-// Crea texture con numero centrato su fondo colorato
 function makeNumberTexture(num: number, bgColor: string): THREE.CanvasTexture {
   const size = 256;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-
-  // Sfondo
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d')!;
   ctx.fillStyle = bgColor;
   ctx.fillRect(0, 0, size, size);
-
-  // Bordo dorato
   ctx.strokeStyle = '#ffd700';
-  ctx.lineWidth = 12;
+  ctx.lineWidth = 10;
   ctx.strokeRect(8, 8, size - 16, size - 16);
-
-  // Numero
   const label = num === 100 ? '00' : String(num);
   ctx.fillStyle = '#ffffff';
   ctx.font = `bold ${label.length > 2 ? 80 : 110}px serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  // Ombra testo
   ctx.shadowColor = '#ffd700';
-  ctx.shadowBlur = 18;
+  ctx.shadowBlur = 20;
   ctx.fillText(label, size / 2, size / 2);
-
-  return new THREE.CanvasTexture(canvas);
+  return new THREE.CanvasTexture(c);
 }
 
-// Crea materiali per ogni faccia del dado
 function makeMaterials(sides: DieType): THREE.MeshStandardMaterial[] {
   const values = FACE_VALUES[sides];
   const bg = DIE_COLORS[sides];
-  // Per geometrie con N facce, ripeti i materiali ciclicamente
-  return values.map(v =>
-    new THREE.MeshStandardMaterial({
-      map: makeNumberTexture(v, bg),
-      metalness: 0.4,
-      roughness: 0.3,
-    })
-  );
+  return values.map(v => new THREE.MeshStandardMaterial({
+    map: makeNumberTexture(v, bg),
+    metalness: 0.45,
+    roughness: 0.25,
+  }));
 }
 
 function createGeometry(sides: DieType): THREE.BufferGeometry {
@@ -83,7 +69,7 @@ function createGeometry(sides: DieType): THREE.BufferGeometry {
 
 export const DiceCanvas: React.FC<Props> = ({ dieType, onResult, rolling }) => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number>(0);
+  const rafRef   = useRef<number>(0);
   const firedRef = useRef(false);
 
   const cleanup = useCallback(() => {
@@ -94,149 +80,169 @@ export const DiceCanvas: React.FC<Props> = ({ dieType, onResult, rolling }) => {
   useEffect(() => {
     if (!rolling) return;
     firedRef.current = false;
-    cleanup();
 
-    const container = mountRef.current!;
-    const W = container.clientWidth || window.innerWidth;
-    const H = container.clientHeight || window.innerHeight;
+    // Aspetta un frame per assicurarsi che il DOM abbia fatto layout
+    const initId = requestAnimationFrame(() => {
+      cleanup();
+      const container = mountRef.current;
+      if (!container) return;
 
-    /* Renderer */
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(W, H);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    container.appendChild(renderer.domElement);
+      // Usa sempre le dimensioni della finestra come fallback
+      const W = window.innerWidth;
+      const H = window.innerHeight;
 
-    /* Scene */
-    const scene = new THREE.Scene();
+      /* --- Renderer --- */
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      renderer.setClearColor(0x050510, 1); // sfondo quasi nero, non blu
+      renderer.setSize(W, H);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      container.appendChild(renderer.domElement);
 
-    /* Camera */
-    const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 200);
-    camera.position.set(0, 0, 18);
-    camera.lookAt(0, 0, 0);
+      /* --- Scene --- */
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x050510);
 
-    /* Luci */
-    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-    const sun = new THREE.DirectionalLight(0xffe080, 2.5);
-    sun.position.set(5, 10, 10);
-    sun.castShadow = true;
-    scene.add(sun);
-    scene.add(Object.assign(new THREE.PointLight(0xff8800, 1.0, 60), { position: new THREE.Vector3(-8, 5, 5) }));
+      /* --- Camera --- */
+      const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 200);
+      camera.position.set(0, 0, 18);
+      camera.lookAt(0, 0, 0);
 
-    /* Particelle */
-    const pPos = new Float32Array(200 * 3);
-    for (let i = 0; i < pPos.length; i++) pPos[i] = (Math.random() - 0.5) * 30;
-    const pGeo = new THREE.BufferGeometry();
-    pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
-    scene.add(new THREE.Points(pGeo, new THREE.PointsMaterial({
-      color: 0xffd700, size: 0.07, transparent: true, opacity: 0.45,
-    })));
+      /* --- Luci --- */
+      scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+      const sun = new THREE.DirectionalLight(0xffe080, 2.5);
+      sun.position.set(5, 10, 10);
+      sun.castShadow = true;
+      scene.add(sun);
+      const rim = new THREE.PointLight(0xff8800, 1.2, 60);
+      rim.position.set(-8, 5, 5);
+      scene.add(rim);
 
-    /* Dado */
-    const geo = createGeometry(dieType);
-    const mats = makeMaterials(dieType);
-    const dieMesh = new THREE.Mesh(geo, mats);
-    dieMesh.castShadow = true;
-    // Wireframe dorato
-    dieMesh.add(new THREE.LineSegments(
-      new THREE.EdgesGeometry(geo),
-      new THREE.LineBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.6 })
-    ));
-    scene.add(dieMesh);
+      /* --- Particelle dorate --- */
+      const pPos = new Float32Array(300 * 3);
+      for (let i = 0; i < pPos.length; i++) pPos[i] = (Math.random() - 0.5) * 30;
+      const pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+      scene.add(new THREE.Points(pGeo, new THREE.PointsMaterial({
+        color: 0xffd700, size: 0.08, transparent: true, opacity: 0.5,
+      })));
 
-    /* Calcolo bounds camera (frustum a z=0) */
-    const fovRad = (camera.fov * Math.PI) / 180;
-    const halfH = Math.tan(fovRad / 2) * camera.position.z;
-    const halfW = halfH * camera.aspect;
-    const BOUND_X = halfW - 1.8;
-    const BOUND_Y = halfH - 1.8;
+      /* --- Dado --- */
+      const geo  = createGeometry(dieType);
+      const mats = makeMaterials(dieType);
+      const dieMesh = new THREE.Mesh(geo, mats);
+      dieMesh.castShadow = true;
+      dieMesh.add(new THREE.LineSegments(
+        new THREE.EdgesGeometry(geo),
+        new THREE.LineBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.7 })
+      ));
+      scene.add(dieMesh);
 
-    /* Stato fisica manuale */
-    const pos = new THREE.Vector3(
-      (Math.random() - 0.5) * BOUND_X * 1.2,
-      (Math.random() - 0.5) * BOUND_Y * 1.2,
-      0
-    );
-    const vel = new THREE.Vector3(
-      (Math.random() - 0.5) * 0.28,
-      (Math.random() - 0.5) * 0.28,
-      0
-    );
-    // Velocita' angolare iniziale alta -> rallenta
-    const angVel = new THREE.Vector3(
-      (Math.random() - 0.5) * 0.45,
-      (Math.random() - 0.5) * 0.45,
-      (Math.random() - 0.5) * 0.45
-    );
+      /* --- Bounds (piano z=0 visto dalla camera) --- */
+      const fovRad = (camera.fov * Math.PI) / 180;
+      const halfH  = Math.tan(fovRad / 2) * camera.position.z;
+      const halfW  = halfH * camera.aspect;
+      const BX = halfW - 2.2;
+      const BY = halfH - 2.2;
 
-    const DAMPING_VEL = 0.988;
-    const DAMPING_ANG = 0.972;
-    const STOP_THRESHOLD = 0.0008;
-    let settleFrames = 0;
+      /* --- Stato dinamica --- */
+      const pos = new THREE.Vector3(
+        (Math.random() - 0.5) * BX,
+        (Math.random() - 0.5) * BY,
+        0
+      );
+      const vel = new THREE.Vector3(
+        (Math.random() < 0.5 ? 1 : -1) * (0.18 + Math.random() * 0.18),
+        (Math.random() < 0.5 ? 1 : -1) * (0.18 + Math.random() * 0.18),
+        0
+      );
+      const angVel = new THREE.Vector3(
+        (Math.random() - 0.5) * 0.5,
+        (Math.random() - 0.5) * 0.5,
+        (Math.random() - 0.5) * 0.5
+      );
 
-    /* Resize */
-    const onResize = () => {
-      const w = container.clientWidth, h = container.clientHeight;
-      camera.aspect = w / h; camera.updateProjectionMatrix();
-      renderer.setSize(w, h);
-    };
-    window.addEventListener('resize', onResize);
+      const DAMP_V   = 0.990;
+      const DAMP_A   = 0.975;
+      const STOP_THR = 0.0006;
+      let settleFrames = 0;
 
-    /* Loop */
-    const tick = () => {
+      /* --- Resize --- */
+      const onResize = () => {
+        const w = window.innerWidth, h = window.innerHeight;
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        renderer.setSize(w, h);
+      };
+      window.addEventListener('resize', onResize);
+
+      /* --- Loop --- */
+      const tick = () => {
+        rafRef.current = requestAnimationFrame(tick);
+
+        pos.addScaledVector(vel, 1);
+
+        if (pos.x >  BX) { pos.x =  BX; vel.x *= -0.8; angVel.z += (Math.random() - 0.5) * 0.12; }
+        if (pos.x < -BX) { pos.x = -BX; vel.x *= -0.8; angVel.z += (Math.random() - 0.5) * 0.12; }
+        if (pos.y >  BY) { pos.y =  BY; vel.y *= -0.8; angVel.x += (Math.random() - 0.5) * 0.12; }
+        if (pos.y < -BY) { pos.y = -BY; vel.y *= -0.8; angVel.x += (Math.random() - 0.5) * 0.12; }
+
+        vel.multiplyScalar(DAMP_V);
+        angVel.multiplyScalar(DAMP_A);
+
+        dieMesh.rotation.x += angVel.x;
+        dieMesh.rotation.y += angVel.y;
+        dieMesh.rotation.z += angVel.z;
+        dieMesh.position.copy(pos);
+
+        if (!firedRef.current) {
+          if (vel.length() + angVel.length() < STOP_THR) {
+            settleFrames++;
+            if (settleFrames > 50) {
+              firedRef.current = true;
+              const vals = FACE_VALUES[dieType];
+              onResult(vals[Math.floor(Math.random() * vals.length)]);
+            }
+          } else {
+            settleFrames = 0;
+          }
+        }
+
+        renderer.render(scene, camera);
+      };
       rafRef.current = requestAnimationFrame(tick);
 
-      // Aggiorna posizione
-      pos.addScaledVector(vel, 1);
+      // Cleanup interno
+      const internalCleanup = () => {
+        window.removeEventListener('resize', onResize);
+        cancelAnimationFrame(rafRef.current);
+        renderer.dispose();
+        mats.forEach(m => { m.map?.dispose(); m.dispose(); });
+        geo.dispose();
+        pGeo.dispose();
+        if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
+      };
 
-      // Rimbalzo sui bordi
-      if (pos.x > BOUND_X)  { pos.x = BOUND_X;  vel.x *= -0.75; angVel.z += (Math.random() - 0.5) * 0.15; }
-      if (pos.x < -BOUND_X) { pos.x = -BOUND_X; vel.x *= -0.75; angVel.z += (Math.random() - 0.5) * 0.15; }
-      if (pos.y > BOUND_Y)  { pos.y = BOUND_Y;  vel.y *= -0.75; angVel.x += (Math.random() - 0.5) * 0.15; }
-      if (pos.y < -BOUND_Y) { pos.y = -BOUND_Y; vel.y *= -0.75; angVel.x += (Math.random() - 0.5) * 0.15; }
-
-      // Smorzamento
-      vel.multiplyScalar(DAMPING_VEL);
-      angVel.multiplyScalar(DAMPING_ANG);
-
-      // Aggiorna rotazione
-      dieMesh.rotation.x += angVel.x;
-      dieMesh.rotation.y += angVel.y;
-      dieMesh.rotation.z += angVel.z;
-      dieMesh.position.copy(pos);
-
-      // Rilevamento fermo
-      if (!firedRef.current) {
-        const totalMotion = vel.length() + angVel.length();
-        if (totalMotion < STOP_THRESHOLD) {
-          settleFrames++;
-          if (settleFrames > 45) {
-            firedRef.current = true;
-            const values = FACE_VALUES[dieType];
-            const result = values[Math.floor(Math.random() * values.length)];
-            onResult(result);
-          }
-        } else {
-          settleFrames = 0;
-        }
-      }
-
-      renderer.render(scene, camera);
-    };
-
-    rafRef.current = requestAnimationFrame(tick);
+      // Salva cleanup nel ref per poterlo richiamare
+      (mountRef as any)._cleanup = internalCleanup;
+    });
 
     return () => {
-      window.removeEventListener('resize', onResize);
-      cancelAnimationFrame(rafRef.current);
-      renderer.dispose();
-      mats.forEach(m => { m.map?.dispose(); m.dispose(); });
-      geo.dispose();
-      if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
+      cancelAnimationFrame(initId);
+      if ((mountRef as any)._cleanup) {
+        (mountRef as any)._cleanup();
+        (mountRef as any)._cleanup = null;
+      }
+      cleanup();
     };
   }, [rolling, dieType, onResult, cleanup]);
 
   useEffect(() => () => cleanup(), [cleanup]);
 
-  return <div ref={mountRef} className="w-full h-full" />;
+  return (
+    <div
+      ref={mountRef}
+      style={{ width: '100%', height: '100%', background: '#050510' }}
+    />
+  );
 };
