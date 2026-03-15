@@ -8,14 +8,6 @@ type RollState = 'idle' | 'rolling' | 'landed';
 interface Roll  { die: DieType; result: number; ts: number; }
 interface Spark { id: number; x: number; y: number; tx: string; ty: string; }
 
-// Stile visivo condiviso (come il d6 di prima)
-const FILL   = 'rgba(15,25,60,0.97)';
-const STROKE = 'rgba(212,175,55,0.85)';
-const STROKE_W = 3;
-const TEXT_COLOR  = '#ffd700';
-const TEXT_SHADOW = '0 0 14px rgba(255,215,0,0.9)';
-const INNER_GLOW  = 'rgba(255,215,0,0.07)';
-
 function rollDie(sides: DieType): number {
   return Math.floor(Math.random() * sides) + 1;
 }
@@ -26,89 +18,158 @@ function resultColor(result: number, sides: DieType): string {
   return 'text-white';
 }
 
-// Componente SVG per ogni dado — stesso stile d6
+// Colore accent per ogni dado
+const DIE_ACCENT: Record<DieType, string> = {
+  4:   '#c0392b',
+  6:   '#2471a3',
+  8:   '#1e8449',
+  10:  '#7d3c98',
+  12:  '#d35400',
+  20:  '#1a237e',
+  100: '#4a5000',
+};
+
+// SVG distinto per ogni dado, viewBox 0 0 100 100
 const DieSVG: React.FC<{ die: DieType; size?: number }> = ({ die, size = 180 }) => {
-  const id = `die${die}`;
+  const accent = DIE_ACCENT[die];
+  const gid = `g${die}`;
 
-  // Punti polygon / path per ogni dado (viewBox 0 0 100 100)
-  const shapeByDie: Record<DieType, React.ReactNode> = {
-    // d4 — triangolo equilatero con angoli leggermente arrotondati
-    4: <polygon points="50,6 96,90 4,90"
-          fill={`url(#grad-${id})`} stroke={STROKE} strokeWidth={STROKE_W}
-          strokeLinejoin="round" paintOrder="stroke" />,
+  const defs = (
+    <defs>
+      <radialGradient id={gid} cx="38%" cy="30%" r="70%">
+        <stop offset="0%"  stopColor={accent} stopOpacity="0.9" />
+        <stop offset="60%" stopColor={accent} stopOpacity="0.6" />
+        <stop offset="100%" stopColor="#060d1f" stopOpacity="1" />
+      </radialGradient>
+    </defs>
+  );
 
-    // d6 — rettangolo arrotondato (identico a prima)
-    6: <rect x="8" y="8" width="84" height="84" rx="12"
-          fill={`url(#grad-${id})`} stroke={STROKE} strokeWidth={STROKE_W} />,
+  const gold   = 'rgba(212,175,55,0.85)';
+  const dimmed = 'rgba(212,175,55,0.30)';
+  const sw = 2.5;
 
-    // d8 — rombo
-    8: <polygon points="50,4 96,50 50,96 4,50"
-          fill={`url(#grad-${id})`} stroke={STROKE} strokeWidth={STROKE_W}
-          strokeLinejoin="round" />,
+  const shapes: Record<DieType, React.ReactNode> = {
 
-    // d10 — forma a goccia / pentagono appuntito in basso
-    10: <polygon points="50,4 94,34 76,90 24,90 6,34"
-           fill={`url(#grad-${id})`} stroke={STROKE} strokeWidth={STROKE_W}
-           strokeLinejoin="round" />,
+    // d4 — Tetraedro: triangolo grande con 3 sotto-triangoli interni
+    4: (
+      <g>
+        {defs}
+        {/* Forma esterna */}
+        <polygon points="50,5 97,91 3,91" fill={`url(#${gid})`} stroke={gold} strokeWidth={sw} strokeLinejoin="round" />
+        {/* Facce interne */}
+        <line x1="50" y1="5"  x2="50" y2="91" stroke={dimmed} strokeWidth={1.5} />
+        <line x1="50" y1="5"  x2="3"  y2="91" stroke={dimmed} strokeWidth={1.5} />
+        <line x1="50" y1="5"  x2="97" y2="91" stroke={dimmed} strokeWidth={1.5} />
+        <line x1="3"  y1="91" x2="97" y2="91" stroke={dimmed} strokeWidth={1.5} />
+        {/* Numero */}
+        <text x="50" y="75" textAnchor="middle" fontSize="22" fontWeight="900" fill="#ffd700" fontFamily="monospace">d4</text>
+      </g>
+    ),
 
-    // d12 — esagono
-    12: <polygon points="50,4 91,27 91,73 50,96 9,73 9,27"
-           fill={`url(#grad-${id})`} stroke={STROKE} strokeWidth={STROKE_W}
-           strokeLinejoin="round" />,
+    // d6 — Cubo con faccia frontale + due laterali visibili
+    6: (
+      <g>
+        {defs}
+        <rect x="10" y="10" width="80" height="80" rx="10" fill={`url(#${gid})`} stroke={gold} strokeWidth={sw} />
+        {/* Griglia punti 3x3 */}
+        {[25,50,75].map(cx => [25,50,75].map(cy => (
+          <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="4" fill={gold} opacity="0.25" />
+        )))}
+        {/* Puntini dado vero */}
+        <circle cx="30" cy="30" r="6" fill="#ffd700" opacity="0.9" />
+        <circle cx="70" cy="70" r="6" fill="#ffd700" opacity="0.9" />
+        <circle cx="70" cy="30" r="6" fill="#ffd700" opacity="0.9" />
+        <circle cx="30" cy="70" r="6" fill="#ffd700" opacity="0.9" />
+        <circle cx="50" cy="50" r="6" fill="#ffd700" opacity="0.9" />
+        <text x="50" y="56" textAnchor="middle" fontSize="0" fill="none">d6</text>
+      </g>
+    ),
 
-    // d20 — triangolo più stretto e appuntito
-    20: <polygon points="50,3 97,84 3,84"
-           fill={`url(#grad-${id})`} stroke={STROKE} strokeWidth={STROKE_W}
-           strokeLinejoin="round" />,
+    // d8 — Ottaedro: rombo con diagonali
+    8: (
+      <g>
+        {defs}
+        <polygon points="50,4 96,50 50,96 4,50" fill={`url(#${gid})`} stroke={gold} strokeWidth={sw} strokeLinejoin="round" />
+        {/* Diagonali interne */}
+        <line x1="4" y1="50" x2="96" y2="50" stroke={dimmed} strokeWidth={1.5} />
+        <line x1="50" y1="4" x2="50" y2="96" stroke={dimmed} strokeWidth={1.5} />
+        <line x1="4" y1="50" x2="50" y2="4"  stroke={dimmed} strokeWidth={1} />
+        <line x1="96" y1="50" x2="50" y2="96" stroke={dimmed} strokeWidth={1} />
+        <text x="50" y="55" textAnchor="middle" fontSize="18" fontWeight="900" fill="#ffd700" fontFamily="monospace">d8</text>
+      </g>
+    ),
 
-    // d100 — decagono
-    100: <polygon
-           points="50,4 79,13 95,38 95,62 79,87 50,96 21,87 5,62 5,38 21,13"
-           fill={`url(#grad-${id})`} stroke={STROKE} strokeWidth={STROKE_W}
-           strokeLinejoin="round" />,
+    // d10 — Pentagono a punta (forma tipica d10)
+    10: (
+      <g>
+        {defs}
+        {/* Corpo */}
+        <polygon points="50,5 93,36 76,90 24,90 7,36" fill={`url(#${gid})`} stroke={gold} strokeWidth={sw} strokeLinejoin="round" />
+        {/* Linee interne a croce */}
+        <line x1="50" y1="5"  x2="24" y2="90" stroke={dimmed} strokeWidth={1.2} />
+        <line x1="50" y1="5"  x2="76" y2="90" stroke={dimmed} strokeWidth={1.2} />
+        <line x1="50" y1="5"  x2="7"  y2="36" stroke={dimmed} strokeWidth={1.2} />
+        <line x1="50" y1="5"  x2="93" y2="36" stroke={dimmed} strokeWidth={1.2} />
+        <line x1="7"  y1="36" x2="76" y2="90" stroke={dimmed} strokeWidth={1.2} />
+        <line x1="93" y1="36" x2="24" y2="90" stroke={dimmed} strokeWidth={1.2} />
+        <text x="50" y="62" textAnchor="middle" fontSize="17" fontWeight="900" fill="#ffd700" fontFamily="monospace">d10</text>
+      </g>
+    ),
+
+    // d12 — Dodecaedro: esagono con pentagono interno
+    12: (
+      <g>
+        {defs}
+        <polygon points="50,4 91,27 91,73 50,96 9,73 9,27" fill={`url(#${gid})`} stroke={gold} strokeWidth={sw} strokeLinejoin="round" />
+        {/* Pentagono interno */}
+        <polygon points="50,22 76,40 66,70 34,70 24,40" fill="none" stroke={dimmed} strokeWidth={1.5} />
+        {/* Raggi centro */}
+        {[[50,22],[76,40],[66,70],[34,70],[24,40]].map(([x,y],i) => (
+          <line key={i} x1="50" y1="50" x2={x} y2={y} stroke={dimmed} strokeWidth={1} />
+        ))}
+        <text x="50" y="56" textAnchor="middle" fontSize="16" fontWeight="900" fill="#ffd700" fontFamily="monospace">d12</text>
+      </g>
+    ),
+
+    // d20 — Icosaedro: triangolo con suddivisione interna tipica
+    20: (
+      <g>
+        {defs}
+        {/* Triangolo esterno più grande */}
+        <polygon points="50,3 97,88 3,88" fill={`url(#${gid})`} stroke={gold} strokeWidth={sw} strokeLinejoin="round" />
+        {/* Triangolo interno rovesciato */}
+        <polygon points="50,55 26,25 74,25" fill="none" stroke={dimmed} strokeWidth={1.5} />
+        {/* Lati medi */}
+        <line x1="3"  y1="88" x2="74" y2="25" stroke={dimmed} strokeWidth={1.2} />
+        <line x1="97" y1="88" x2="26" y2="25" stroke={dimmed} strokeWidth={1.2} />
+        <line x1="26" y1="25" x2="74" y2="25" stroke={dimmed} strokeWidth={1.2} />
+        <text x="50" y="78" textAnchor="middle" fontSize="18" fontWeight="900" fill="#ffd700" fontFamily="monospace">d20</text>
+      </g>
+    ),
+
+    // d100 — Decagono (10 lati) con stella interna
+    100: (
+      <g>
+        {defs}
+        <polygon
+          points="50,4 79,13 95,38 95,62 79,87 50,96 21,87 5,62 5,38 21,13"
+          fill={`url(#${gid})`} stroke={gold} strokeWidth={sw} strokeLinejoin="round"
+        />
+        {/* Stella a 5 punte interna */}
+        <polygon
+          points="50,22 56,40 74,40 60,52 65,70 50,60 35,70 40,52 26,40 44,40"
+          fill="none" stroke={dimmed} strokeWidth={1.2}
+        />
+        <text x="50" y="58" textAnchor="middle" fontSize="14" fontWeight="900" fill="#ffd700" fontFamily="monospace">d100</text>
+      </g>
+    ),
   };
-
-  // Centro testo Y aggiustato per triangoli
-  const textY = (die === 4 || die === 20) ? 68 : 58;
-  const fontSize = die === 100 ? 20 : 24;
 
   return (
     <svg viewBox="0 0 100 100" width={size} height={size}
          xmlns="http://www.w3.org/2000/svg"
-         style={{ overflow: 'visible', display: 'block' }}>
-      <defs>
-        {/* Gradiente radiale scuro come il d6 di prima */}
-        <radialGradient id={`grad-${id}`} cx="38%" cy="32%" r="65%">
-          <stop offset="0%"   stopColor="#1e3a6e" />
-          <stop offset="50%"  stopColor="#0f1e3d" />
-          <stop offset="100%" stopColor="#060d1f" />
-        </radialGradient>
-        {/* Glow interno dorato */}
-        <radialGradient id={`glow-${id}`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%"   stopColor={INNER_GLOW} />
-          <stop offset="100%" stopColor="transparent" />
-        </radialGradient>
-      </defs>
-
-      {/* Forma principale */}
-      {shapeByDie[die]}
-
-      {/* Strato glow interno */}
-      {React.cloneElement(shapeByDie[die] as React.ReactElement, {
-        fill: `url(#glow-${id})`,
-        stroke: 'none',
-      })}
-
-      {/* Numero/tipo al centro */}
-      <text
-        x="50" y={textY}
-        textAnchor="middle" dominantBaseline="middle"
-        fontSize={fontSize} fontWeight="900"
-        fill={TEXT_COLOR}
-        style={{ fontFamily: 'monospace', textShadow: TEXT_SHADOW }}
-      >
-        d{die}
-      </text>
+         style={{ overflow: 'visible', display: 'block', filter: 'drop-shadow(0 0 10px rgba(212,175,55,0.4))' }}>
+      {shapes[die]}
     </svg>
   );
 };
@@ -132,13 +193,12 @@ export const DiceRoller: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       setState('landed');
       setResult(value);
       setHistory(prev => [{ die: selected, result: value, ts: Date.now() }, ...prev].slice(0, 20));
-      // Scintille
       setSparks(Array.from({ length: 14 }, (_, i) => ({
         id: Date.now() + i,
-        x: 90 + (Math.random() - 0.5) * 100,
-        y: 90 + (Math.random() - 0.5) * 100,
-        tx: `${(Math.random() - 0.5) * 120}px`,
-        ty: `${-(Math.random() * 80 + 30)}px`,
+        x: 80 + (Math.random() - 0.5) * 120,
+        y: 80 + (Math.random() - 0.5) * 120,
+        tx: `${(Math.random() - 0.5) * 130}px`,
+        ty: `${-(Math.random() * 90 + 30)}px`,
       })));
       setTimeout(() => setSparks([]), 900);
       setTimeout(() => setState('idle'), 1200);
@@ -155,7 +215,6 @@ export const DiceRoller: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       className="fixed inset-0 z-[300] flex flex-col items-center justify-center"
       style={{ background: 'rgba(4,7,20,0.93)', backdropFilter: 'blur(8px)' }}
     >
-      {/* Chiudi */}
       <button onClick={onClose}
         className="absolute top-5 right-5 text-slate-500 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-full p-2 transition">
         <X size={20} />
@@ -170,9 +229,10 @@ export const DiceRoller: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             onClick={() => { setSelected(d); setResult(null); setState('idle'); }}
             className={`w-14 h-14 rounded-xl text-sm font-bold border-2 transition-all ${
               selected === d
-                ? 'border-amber-500 bg-slate-700 text-amber-300 scale-110 shadow-lg shadow-amber-900/50'
+                ? 'border-amber-500 text-amber-300 scale-110 shadow-lg shadow-amber-900/50'
                 : 'border-slate-700 bg-slate-800 text-slate-400 hover:border-amber-700 hover:text-slate-200'
             }`}
+            style={selected === d ? { background: DIE_ACCENT[d] } : {}}
           >
             d{d}
           </button>
@@ -191,11 +251,7 @@ export const DiceRoller: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           />
         ))}
         <div
-          className={`
-            ${ state === 'rolling' ? 'die-rolling'
-             : state === 'landed'  ? 'die-landed'
-             : 'die-idle' }
-          `}
+          className={`${state === 'rolling' ? 'die-rolling' : state === 'landed' ? 'die-landed' : 'die-idle'}`}
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 200, height: 200 }}
         >
           <DieSVG die={selected} size={180} />
