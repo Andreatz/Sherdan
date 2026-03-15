@@ -40,8 +40,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'eshterzyli',
     name: 'Eshterzyli',
     type: 'region',
-    x: 35,  // leggermente più a destra (era 38)
-    y: 14,  // pochissimo più in basso (era 13)
+    x: 40,  // leggermente più a destra (era 38)
+    y: 14,
     r: 2,
     shortDescription: 'Il Bastione di Cenere e Sangue. Fortezza-città ai piedi di un vulcano attivo, dominata da una cultura marziale e dalle fonderie più grandi del mondo.',
     fullDescription: 'Eshterzyli sorge ai piedi del Monte Arxi. Il cielo è perennemente tinto di rosso e nero dalla cenere vulcanica. La città è organizzata come una fortezza concentrica: il Vallo di Ferro (anello esterno militare) e la Caldera Industriale (cuore produttivo con fonderie alimentate dalla lava). La circonda la Foresta Ruggine, con alberi dalla corteccia nera dura come il ferro e foglie color autunno perenne.',
@@ -62,8 +62,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'domus-nova',
     name: 'Domus Nova',
     type: 'region',
-    x: 63,  // un po' più a sinistra (era 67)
-    y: 22,  // di molto più in basso (era 11)
+    x: 64,  // un po' più a sinistra (era 67)
+    y: 26,  // di molto più in basso (era 11)
     r: 2,
     shortDescription: 'Dove il Mondo Finisce. Arcipelago anarchico di pirati e reietti, labirinto di isole tropicali dove la Fratellanza della Marea ha costruito il suo impero.',
     fullDescription: 'Domus Nova è un arcipelago di isole tropicali insidiose, coperte da giungle umide e circondate da barriere coralline affilate. È la casa della Fratellanza della Marea: marinai, operai fuggiaschi e disertori che rifiutano le leggi delle grandi nazioni. Qui vivono tutte le razze mescolate: Tiefling, Mezzorchi, Tabaxi e molti altri. La legge è solo quella del più forte.',
@@ -75,8 +75,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'ultima-dimora',
     name: 'Ultima Dimora',
     type: 'city',
-    x: 20,  // un bel po' più a destra (era 23)
-    y: 18,  // più in alto (era 21)
+    x: 25,  // un bel po' più a destra (era 23)
+    y: 17,  // più in alto (era 21)
     r: 1.2,
     shortDescription: 'Avamposto ai margini del Mare Senza Tempo, dove il ghiaccio eterno incontra la civiltà. Sopravvive grazie alla caccia alle balene e agli scambi con Tharros.',
     fullDescription: 'Ultima Dimora è l\'insediamento più settentrionale di Sherdan, situato ai margini del deserto bianco del Mare Senza Tempo. Il clima è implacabile, un inverno perenne che non concede tregua. La fauna locale è composta da orsi polari corazzati da placche ossee e dai temibili Remorhaz. Le acque gelide ospitano balene franche grandi come galeoni, cacciate per il loro grasso essenziale per lubrificare gli ingranaggi di Tharros.',
