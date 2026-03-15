@@ -3,6 +3,8 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../utils/supabase';
 import { ZoomableImage } from '../../components/shared/ImageLightbox';
+import { useCharacterSheet } from '../../hooks/useCharacterSheet';
+import { CharacterSheetTab } from '../../components/sheet/CharacterSheetTab';
 
 interface Character {
   id: string;
@@ -17,6 +19,8 @@ interface Character {
   stats_json: Record<string, unknown>;
 }
 
+type Tab = 'scheda' | 'storia' | 'segreti' | 'dnd';
+
 export const MyCharacterPage: React.FC = () => {
   const { user, isAdmin, isLoading } = useAuth();
   const navigate = useNavigate();
@@ -24,7 +28,9 @@ export const MyCharacterPage: React.FC = () => {
   const [allCharacters, setAllCharacters] = useState<Character[]>([]);
   const [loading, setLoading] = useState(true);
   const [linked, setLinked] = useState(false);
-  const [activeTab, setActiveTab] = useState<'scheda' | 'storia' | 'segreti'>('scheda');
+  const [activeTab, setActiveTab] = useState<Tab>('scheda');
+
+  const { sheet, saveStatus, updateSheet, createSheet } = useCharacterSheet(character?.id, isAdmin);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -90,9 +96,17 @@ export const MyCharacterPage: React.FC = () => {
     );
   }
 
+  const tabs: { key: Tab; label: string }[] = [
+    { key: 'scheda', label: '📜 Scheda' },
+    { key: 'storia', label: '📖 Storia' },
+    { key: 'segreti', label: '🔒 Segreti' },
+    { key: 'dnd', label: '🎲 D&D' },
+  ];
+
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <div className="fixed inset-0 bg-cover bg-center -z-10" style={{ backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`, backgroundAttachment: 'fixed' }} />
+      <div className="fixed inset-0 bg-cover bg-center -z-10"
+        style={{ backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`, backgroundAttachment: 'fixed' }} />
       <div className="fixed inset-0 bg-slate-950/85 -z-10" />
 
       <div className="relative py-16 px-6">
@@ -116,8 +130,6 @@ export const MyCharacterPage: React.FC = () => {
 
           {/* Card hero verticale */}
           <div className="rounded-3xl overflow-hidden border border-amber-700/20 bg-slate-900/80 backdrop-blur-sm">
-
-            {/* Ritratto proporzionale — niente crop */}
             {character.portrait_url ? (
               <ZoomableImage
                 src={character.portrait_url}
@@ -130,8 +142,6 @@ export const MyCharacterPage: React.FC = () => {
                 🧙
               </div>
             )}
-
-            {/* Info sotto l'immagine */}
             <div className="p-8 text-center">
               <p className="text-amber-500 uppercase tracking-widest text-xs mb-1">
                 {isAdmin ? 'Scheda Personaggio' : 'Il tuo personaggio'}
@@ -150,23 +160,22 @@ export const MyCharacterPage: React.FC = () => {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-2 border-b border-slate-700/50">
-            {(['scheda', 'storia', 'segreti'] as const).map((tab) => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`px-5 py-2.5 text-sm font-semibold rounded-t-lg transition capitalize ${
-                  activeTab === tab
+          <div className="flex gap-2 flex-wrap border-b border-slate-700/50">
+            {tabs.map((tab) => (
+              <button key={tab.key} onClick={() => setActiveTab(tab.key)}
+                className={`px-5 py-2.5 text-sm font-semibold rounded-t-lg transition ${
+                  activeTab === tab.key
                     ? 'bg-slate-800 text-amber-300 border border-b-0 border-amber-700/30'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}>
-                {tab === 'scheda' && '📜 Scheda'}
-                {tab === 'storia' && '📖 Storia'}
-                {tab === 'segreti' && '🔒 Segreti'}
+                {tab.label}
               </button>
             ))}
           </div>
 
           {/* Tab content */}
           <div className="bg-slate-900/80 backdrop-blur-sm border border-amber-700/20 rounded-2xl p-8">
+
             {activeTab === 'scheda' && (
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold text-amber-300 mb-4">Informazioni</h2>
@@ -186,12 +195,14 @@ export const MyCharacterPage: React.FC = () => {
                 </div>
               </div>
             )}
+
             {activeTab === 'storia' && (
               <div>
                 <h2 className="text-2xl font-bold text-amber-300 mb-4">Storia pubblica</h2>
                 <p className="text-slate-300 leading-8 whitespace-pre-line text-lg">{character.backstory}</p>
               </div>
             )}
+
             {activeTab === 'segreti' && (
               <div>
                 <h2 className="text-2xl font-bold text-red-400 mb-2">🔒 Note segrete</h2>
@@ -207,6 +218,30 @@ export const MyCharacterPage: React.FC = () => {
                   ? <p className="text-slate-300 leading-8 whitespace-pre-line text-lg">{character.private_notes}</p>
                   : <p className="text-slate-500 italic">Nessuna nota segreta ancora assegnata dal DM.</p>}
               </div>
+            )}
+
+            {activeTab === 'dnd' && (
+              sheet ? (
+                <CharacterSheetTab
+                  sheet={sheet}
+                  isAdmin={isAdmin}
+                  saveStatus={saveStatus}
+                  onChange={updateSheet}
+                  onCreateSheet={createSheet}
+                />
+              ) : (
+                <div className="text-center py-12 space-y-4">
+                  <p className="text-slate-400 text-lg">Scheda D&D non ancora creata per questo personaggio.</p>
+                  {isAdmin ? (
+                    <button onClick={() => void createSheet()}
+                      className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold transition">
+                      ✨ Crea scheda D&D
+                    </button>
+                  ) : (
+                    <p className="text-slate-500 text-sm">Chiedi al DM di inizializzare la tua scheda.</p>
+                  )}
+                </div>
+              )
             )}
           </div>
 
