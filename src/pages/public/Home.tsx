@@ -49,7 +49,7 @@ export const Home: React.FC = () => {
         <img
           src="/Logo Sherdan.png"
           alt="Atlante di Sherdan"
-          className="mx-auto mb-8 w-64 md:w-80 lg:w-96 h-auto object-contain animate-logo-glow"
+          className="mx-auto mb-8 w-84 md:w-100 lg:w-146 h-auto object-contain animate-logo-glow"
         />
 
         {settings?.campaign_tagline && (
