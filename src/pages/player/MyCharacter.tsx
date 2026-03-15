@@ -17,38 +17,56 @@ interface Character {
 }
 
 export const MyCharacterPage: React.FC = () => {
-  const { user, isLoading } = useAuth();
+  const { user, isAdmin, isLoading } = useAuth();
   const navigate = useNavigate();
   const [character, setCharacter] = useState<Character | null>(null);
+  const [allCharacters, setAllCharacters] = useState<Character[]>([]);
   const [loading, setLoading] = useState(true);
   const [linked, setLinked] = useState(false);
   const [activeTab, setActiveTab] = useState<'scheda' | 'storia' | 'segreti'>('scheda');
 
+  // Per i giocatori normali: collega owner
   useEffect(() => {
-    if (!user) return;
+    if (!user || isAdmin) {
+      setLinked(true);
+      return;
+    }
     const linkOwner = async () => {
       await supabase.rpc('link_character_owner');
       setLinked(true);
     };
     void linkOwner();
-  }, [user]);
+  }, [user, isAdmin]);
 
+  // Carica personaggio/i
   useEffect(() => {
     if (!user || !linked) return;
-    const fetchCharacter = async () => {
+    const fetchCharacters = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('characters')
-        .select('id, name, class, race, level, backstory, portrait_url, private_notes, sigillo, stats_json')
-        .eq('is_player_character', true)
-        .eq('owner_user_id', user.id)
-        .maybeSingle();
-      if (error) console.error('Errore caricamento personaggio:', error);
-      setCharacter(data ?? null);
+      if (isAdmin) {
+        // Admin: carica tutti i PG
+        const { data } = await supabase
+          .from('characters')
+          .select('id, name, class, race, level, backstory, portrait_url, private_notes, sigillo, stats_json')
+          .eq('is_player_character', true)
+          .order('name');
+        const list = data ?? [];
+        setAllCharacters(list);
+        setCharacter(list[0] ?? null);
+      } else {
+        // Giocatore: solo il proprio
+        const { data } = await supabase
+          .from('characters')
+          .select('id, name, class, race, level, backstory, portrait_url, private_notes, sigillo, stats_json')
+          .eq('is_player_character', true)
+          .eq('owner_user_id', user.id)
+          .maybeSingle();
+        setCharacter(data ?? null);
+      }
       setLoading(false);
     };
-    void fetchCharacter();
-  }, [user, linked]);
+    void fetchCharacters();
+  }, [user, linked, isAdmin]);
 
   if (!isLoading && !user) return <Navigate to="/auth/login" replace />;
 
@@ -64,10 +82,12 @@ export const MyCharacterPage: React.FC = () => {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-6">
         <p className="text-slate-300 text-xl text-center">Nessun personaggio associato a questo account.</p>
-        <p className="text-slate-500 text-sm">
-          Chiedi al DM di assegnare il tuo PG all&apos;email:{' '}
-          <span className="text-amber-400">{user?.email}</span>
-        </p>
+        {!isAdmin && (
+          <p className="text-slate-500 text-sm">
+            Chiedi al DM di assegnare il tuo PG all&apos;email:{' '}
+            <span className="text-amber-400">{user?.email}</span>
+          </p>
+        )}
       </div>
     );
   }
@@ -87,6 +107,26 @@ export const MyCharacterPage: React.FC = () => {
       <div className="relative py-16 px-6">
         <div className="max-w-5xl mx-auto space-y-10">
 
+          {/* Selettore personaggio per admin */}
+          {isAdmin && allCharacters.length > 1 && (
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-slate-400 text-sm mr-2">Stai visualizzando:</span>
+              {allCharacters.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => { setCharacter(c); setActiveTab('scheda'); }}
+                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition ${
+                    character.id === c.id
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-slate-800 text-amber-200 hover:bg-slate-700'
+                  }`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Hero header */}
           <div className="relative rounded-3xl overflow-hidden border border-amber-700/20 bg-slate-900/80 backdrop-blur-sm">
             {character.portrait_url && (
@@ -104,7 +144,9 @@ export const MyCharacterPage: React.FC = () => {
                 )}
               </div>
               <div className="text-center md:text-left">
-                <p className="text-amber-500 uppercase tracking-widest text-xs mb-1">Il tuo personaggio</p>
+                <p className="text-amber-500 uppercase tracking-widest text-xs mb-1">
+                  {isAdmin ? 'Scheda Personaggio' : 'Il tuo personaggio'}
+                </p>
                 <h1 className="text-4xl md:text-5xl font-bold text-amber-300 mb-2">{character.name}</h1>
                 <p className="text-slate-300 text-lg">
                   {character.class} &bull; {character.race} &bull; Livello {character.level}
@@ -168,7 +210,10 @@ export const MyCharacterPage: React.FC = () => {
             {activeTab === 'segreti' && (
               <div>
                 <h2 className="text-2xl font-bold text-red-400 mb-2">🔒 Note segrete</h2>
-                <p className="text-slate-500 text-sm mb-6">Queste informazioni sono visibili solo a te.</p>
+                {isAdmin && (
+                  <p className="text-amber-500/70 text-xs mb-4 italic">👁️ Vista Admin — stai leggendo le note private di {character.name}.</p>
+                )}
+                <p className="text-slate-500 text-sm mb-6">Queste informazioni sono visibili solo a te{isAdmin ? ' e al DM' : ''}.</p>
                 {character.private_notes ? (
                   <p className="text-slate-300 leading-8 whitespace-pre-line text-lg">{character.private_notes}</p>
                 ) : (
@@ -179,24 +224,38 @@ export const MyCharacterPage: React.FC = () => {
           </div>
 
           {/* Link rapidi */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            <button
-              onClick={() => navigate('/#characters')}
-              className="bg-slate-800/80 hover:bg-slate-700 border border-amber-700/20 rounded-2xl p-5 text-left transition group"
-            >
-              <p className="text-2xl mb-2">⚔️</p>
-              <p className="text-amber-300 font-semibold text-lg group-hover:text-amber-200">Il gruppo</p>
-              <p className="text-slate-400 text-sm">Vedi i tuoi compagni di avventura</p>
-            </button>
-            <button
-              onClick={() => navigate('/missioni')}
-              className="bg-slate-800/80 hover:bg-slate-700 border border-amber-700/20 rounded-2xl p-5 text-left transition group"
-            >
-              <p className="text-2xl mb-2">⚔️</p>
-              <p className="text-amber-300 font-semibold text-lg group-hover:text-amber-200">Missioni</p>
-              <p className="text-slate-400 text-sm">Consulta le missioni attive</p>
-            </button>
-          </div>
+          {!isAdmin && (
+            <div className="grid sm:grid-cols-2 gap-4">
+              <button
+                onClick={() => navigate('/#characters')}
+                className="bg-slate-800/80 hover:bg-slate-700 border border-amber-700/20 rounded-2xl p-5 text-left transition group"
+              >
+                <p className="text-2xl mb-2">⚔️</p>
+                <p className="text-amber-300 font-semibold text-lg group-hover:text-amber-200">Il gruppo</p>
+                <p className="text-slate-400 text-sm">Vedi i tuoi compagni di avventura</p>
+              </button>
+              <button
+                onClick={() => navigate('/missioni')}
+                className="bg-slate-800/80 hover:bg-slate-700 border border-amber-700/20 rounded-2xl p-5 text-left transition group"
+              >
+                <p className="text-2xl mb-2">📜</p>
+                <p className="text-amber-300 font-semibold text-lg group-hover:text-amber-200">Missioni</p>
+                <p className="text-slate-400 text-sm">Consulta le missioni attive</p>
+              </button>
+            </div>
+          )}
+
+          {/* Link admin per tornare al pannello */}
+          {isAdmin && (
+            <div className="text-center">
+              <button
+                onClick={() => navigate('/admin/characters')}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-amber-700/20 hover:bg-amber-700/40 border border-amber-600/30 text-amber-300 font-semibold rounded-xl transition"
+              >
+                ← Torna alla gestione personaggi
+              </button>
+            </div>
+          )}
 
         </div>
       </div>
