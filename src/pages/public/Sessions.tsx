@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { it } from '../../content/texts';
 import { supabase } from '../../utils/supabase';
 
@@ -16,22 +17,40 @@ export const SessionsPage: React.FC = () => {
   const [sessions, setSessions] = useState<SessionLog[]>([]);
   const [openSession, setOpenSession] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     const fetchSessions = async () => {
       setLoading(true);
-
       const { data } = await supabase
         .from('session_logs')
         .select('id, session_number, title, date, summary, detailed_narrative, featured_image_url')
         .order('session_number', { ascending: true });
-
       setSessions(data ?? []);
       setLoading(false);
     };
-
     void fetchSessions();
   }, []);
+
+  // Scroll all'anchor dopo che i dati sono caricati
+  useEffect(() => {
+    if (loading) return;
+    const hash = location.hash; // es. #session-2
+    if (!hash) return;
+
+    // Apri automaticamente la sessione corrispondente
+    const sessionNumber = parseInt(hash.replace('#session-', ''), 10);
+    if (!isNaN(sessionNumber)) {
+      const target = sessions.find(s => s.session_number === sessionNumber);
+      if (target) setOpenSession(target.id);
+    }
+
+    // Scroll con piccolo delay per dare tempo al DOM di renderizzare
+    setTimeout(() => {
+      const el = document.getElementById(hash.replace('#', ''));
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }, [loading, location.hash, sessions]);
 
   return (
     <section id="sessions" className="py-24 px-6 bg-slate-900">
@@ -46,7 +65,7 @@ export const SessionsPage: React.FC = () => {
         </div>
 
         {loading ? (
-          <p className="text-center text-slate-300 text-lg">
+          <p className="text-center text-slate-300 text-lg animate-pulse">
             {it.sessionsPublic.loading}
           </p>
         ) : sessions.length === 0 ? (
@@ -61,7 +80,8 @@ export const SessionsPage: React.FC = () => {
               return (
                 <div
                   key={session.id}
-                  className="border border-amber-700/20 rounded-2xl bg-slate-950 overflow-hidden shadow-lg"
+                  id={`session-${session.session_number}`}
+                  className="border border-amber-700/20 rounded-2xl bg-slate-950 overflow-hidden shadow-lg scroll-mt-24"
                 >
                   <button
                     onClick={() => setOpenSession(isOpen ? null : session.id)}
@@ -97,7 +117,6 @@ export const SessionsPage: React.FC = () => {
                             className="w-full h-72 object-cover rounded-xl mb-6"
                           />
                         )}
-
                         <h4 className="text-xl font-semibold text-amber-200 mb-3">
                           {it.sessionsPublic.fullAccount}
                         </h4>
