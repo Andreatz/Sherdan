@@ -75,7 +75,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'ultima-dimora',
     name: 'Ultima Dimora',
     type: 'city',
-    x: 27,  // un bel po' più a destra (era 23)
+    x: 26.7,  // un bel po' più a destra (era 23)
     y: 17,  // più in alto (era 21)
     r: 1.2,
     shortDescription: 'Avamposto ai margini del Mare Senza Tempo, dove il ghiaccio eterno incontra la civiltà. Sopravvive grazie alla caccia alle balene e agli scambi con Tharros.',
@@ -85,8 +85,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'porto-antico',
     name: 'Porto Antico',
     type: 'city',
-    x: 47,  // un bel po' più a destra (era 39)
-    y: 27,  // più in alto (era 33)
+    x: 41,  // un bel po' più a destra (era 39)
+    y: 29,  // più in alto (era 33)
     r: 1.2,
     shortDescription: 'Scalo commerciale strategico tra Tharros e il continente orientale. Porto trafficato dove si incrociano merci lecite e traffici clandestini.',
     fullDescription: 'Porto Antico è uno degli snodi commerciali più importanti della Madre. Situato sulla costa tra Tharros e il cuore del continente, accoglie navi mercantili da entrambi gli emisferi. È un luogo cosmopolita e spesso caotico, dove le dogane di Tharros cercano di mantenere il controllo su un flusso inarrestabile di merci, persone e segreti.',
@@ -95,8 +95,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'luxia',
     name: 'Luxia',
     type: 'city',
-    x: 28.7,  // di poco più a sinistra (era 30)
-    y: 35,  // un po' più in alto (era 40)
+    x: 28.8,  // di poco più a sinistra (era 30)
+    y: 35.2,  // un po' più in alto (era 40)
     r: 1.2,
     shortDescription: 'Il cancello delle Pianure Verdi. Città agricola meccanizzata che funge da porta d\'accesso alle fertili terre intorno a Tharros.',
     fullDescription: 'Luxia funge da cancello per le Pianure Verdi, un tempo praterie sconfinate oggi segnate dalle cicatrici del progresso. È circondata da campi coltivati in modo intensivo grazie a macchine agricole semoventi. La popolazione è cosmopolita, con una prevalenza di Umani, Gnomi inventori e Halfling. La fauna locale mostra spesso segni di mutazione dovuta alle scorie di Obsidium.',
@@ -105,7 +105,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'solitaria',
     name: 'Solitaria',
     type: 'city',
-    x: 9.7,   // leggermente più a sinistra (era 11)
+    x: 9.5,   // leggermente più a sinistra (era 11)
     y: 53.1,  // leggermente più in alto (era 55)
     r: 1.2,
     shortDescription: 'Città isolata sulle scogliere di granito grigio della costa ovest, avvolta da nebbie perenni. I suoi abitanti vivono di pesca e leggende antiche.',
@@ -116,7 +116,7 @@ export const MAP_LOCATIONS: MapLocation[] = [
     name: 'Bonorxili',
     type: 'city',
     x: 21.3,  // di poco più a sinistra (era 22)
-    y: 71.8,  // un po' più in alto (era 75)
+    y: 71.7,  // un po' più in alto (era 75)
     r: 1.2,
     shortDescription: 'Ultimo avamposto della natura selvaggia a sud-ovest. Foreste antiche e oscure, abitate da Treant e reietti che rifiutano la tecnologia di Tharros.',
     fullDescription: 'Bonorxili si trova nell\'estremo sud, dove le foreste sono fitte, scure e antiche, simili a quelle che coprivano il mondo prima della Scissione. Gli abitanti sono spesso Mezzelfi o Umani reietti che rifiutano la tecnologia di Tharros, vivendo in simbiosi con la boscaglia. Si dice che in queste foreste si nascondano ancora i Treant e Orsigufi particolarmente aggressivi.',
