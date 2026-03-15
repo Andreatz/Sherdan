@@ -15,6 +15,7 @@ interface Character {
   portrait_position: string | null;
   is_player_character: boolean;
   is_revealed: boolean;
+  zone: string | null;
 }
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
@@ -78,13 +79,9 @@ const NpcNotes: React.FC<{ characterId: string }> = ({ characterId }) => {
           {status === 'idle' && '·'}
         </span>
       </div>
-      <textarea
-        value={note}
-        onChange={(e) => setNote(e.target.value)}
-        rows={4}
+      <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={4}
         placeholder="Scrivi qui le tue impressioni su questo personaggio... Solo tu puoi vederle."
-        className="w-full bg-slate-800/80 border border-slate-600/50 rounded-xl px-4 py-3 text-sm text-slate-300 placeholder-slate-500 focus:outline-none focus:border-amber-600/50 resize-none leading-6 transition"
-      />
+        className="w-full bg-slate-800/80 border border-slate-600/50 rounded-xl px-4 py-3 text-sm text-slate-300 placeholder-slate-500 focus:outline-none focus:border-amber-600/50 resize-none leading-6 transition" />
     </div>
   );
 };
@@ -95,13 +92,14 @@ export const CharactersPage: React.FC = () => {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeZone, setActiveZone] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCharacters = async () => {
       setLoading(true);
       const { data } = await supabase
         .from('characters')
-        .select('id, name, class, race, level, backstory, portrait_url, portrait_position, is_player_character, is_revealed')
+        .select('id, name, class, race, level, backstory, portrait_url, portrait_position, is_player_character, is_revealed, zone')
         .or('is_player_character.eq.true,is_revealed.eq.true')
         .order('is_player_character', { ascending: false })
         .order('level', { ascending: false })
@@ -117,18 +115,22 @@ export const CharactersPage: React.FC = () => {
     setSelectedCharacter(character);
   };
 
+  // Zone uniche ricavate dagli NPC (i PG non hanno zona di filtro)
+  const zones = Array.from(
+    new Set(characters.filter((c) => !c.is_player_character && c.zone).map((c) => c.zone as string))
+  ).sort();
+
   const pgs = characters.filter((c) => c.is_player_character);
-  const npcs = characters.filter((c) => !c.is_player_character);
+  const npcs = characters.filter((c) => {
+    if (c.is_player_character) return false;
+    if (activeZone) return c.zone === activeZone;
+    return true;
+  });
 
   return (
     <section id="characters" className="relative py-24 px-6 overflow-hidden">
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`,
-          backgroundAttachment: 'fixed',
-        }}
-      />
+      <div className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`, backgroundAttachment: 'fixed' }} />
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-950/80 to-slate-950/95" />
 
       <div className="relative z-10 max-w-6xl mx-auto">
@@ -136,10 +138,8 @@ export const CharactersPage: React.FC = () => {
           <h2 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4">{it.charactersPublic.title}</h2>
           <p className="text-slate-300 text-lg">{it.charactersPublic.subtitle}</p>
           {user && (
-            <button
-              onClick={() => navigate('/personaggio')}
-              className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold transition"
-            >
+            <button onClick={() => navigate('/personaggio')}
+              className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold transition">
               🧙 Il mio personaggio
             </button>
           )}
@@ -151,14 +151,15 @@ export const CharactersPage: React.FC = () => {
           <p className="text-center text-slate-400 text-lg">{it.charactersPublic.empty}</p>
         ) : (
           <div className="space-y-14">
+
+            {/* PG */}
             {pgs.length > 0 && (
               <div>
                 <h3 className="text-2xl font-bold text-amber-400 mb-6 border-b border-amber-700/30 pb-2">⚔️ Personaggi Giocanti</h3>
                 <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
                   {pgs.map((character) => (
                     <button key={character.id} onClick={() => handleCardClick(character)}
-                      className="text-left rounded-2xl overflow-hidden border border-amber-600/30 bg-slate-900/80 backdrop-blur-sm hover:-translate-y-1 hover:shadow-2xl transition"
-                    >
+                      className="text-left rounded-2xl overflow-hidden border border-amber-600/30 bg-slate-900/80 backdrop-blur-sm hover:-translate-y-1 hover:shadow-2xl transition">
                       <div className="h-72 bg-slate-800 overflow-hidden">
                         {character.portrait_url
                           ? <PortraitImg src={character.portrait_url} alt={character.name} position={character.portrait_position} />
@@ -176,33 +177,61 @@ export const CharactersPage: React.FC = () => {
                 </div>
               </div>
             )}
-            {npcs.length > 0 && (
+
+            {/* NPC con filtro zona */}
+            {npcs.length > 0 || zones.length > 0 ? (
               <div>
-                <h3 className="text-2xl font-bold text-slate-300 mb-6 border-b border-slate-700/50 pb-2">👥 Personaggi Incontrati</h3>
-                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-                  {npcs.map((character) => (
-                    <button key={character.id} onClick={() => handleCardClick(character)}
-                      className="text-left rounded-2xl overflow-hidden border border-amber-700/20 bg-slate-900/80 backdrop-blur-sm hover:-translate-y-1 hover:shadow-2xl transition"
-                    >
-                      <div className="h-72 bg-slate-800 overflow-hidden">
-                        {character.portrait_url
-                          ? <PortraitImg src={character.portrait_url} alt={character.name} position={character.portrait_position} />
-                          : <div className="w-full h-full flex items-center justify-center text-slate-400">{it.charactersPublic.noPortrait}</div>}
-                      </div>
-                      <div className="p-6 space-y-2">
-                        <h3 className="text-2xl font-bold text-amber-300">{character.name}</h3>
-                        <p className="text-slate-200">{it.charactersPublic.class}: {character.class}</p>
-                        <p className="text-slate-200">{it.charactersPublic.race}: {character.race}</p>
-                        {user && <span className="inline-block text-xs text-slate-500 border border-slate-700/40 rounded px-2 py-0.5 mt-1">📝 Note personali</span>}
-                      </div>
-                    </button>
-                  ))}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
+                  <h3 className="text-2xl font-bold text-slate-300 border-b border-slate-700/50 pb-2 sm:border-0 sm:pb-0">👥 Personaggi Incontrati</h3>
+                  {zones.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        onClick={() => setActiveZone(null)}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
+                          activeZone === null ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-600/40'
+                        }`}>
+                        Tutte le zone
+                      </button>
+                      {zones.map((z) => (
+                        <button key={z} onClick={() => setActiveZone(z === activeZone ? null : z)}
+                          className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
+                            activeZone === z ? 'bg-sky-600 text-white' : 'bg-slate-800 text-sky-300 hover:bg-slate-700 border border-sky-700/30'
+                          }`}>
+                          🗺️ {z}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
+                {npcs.length === 0 ? (
+                  <p className="text-slate-500 italic text-sm">Nessun personaggio trovato in questa zona.</p>
+                ) : (
+                  <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+                    {npcs.map((character) => (
+                      <button key={character.id} onClick={() => handleCardClick(character)}
+                        className="text-left rounded-2xl overflow-hidden border border-amber-700/20 bg-slate-900/80 backdrop-blur-sm hover:-translate-y-1 hover:shadow-2xl transition">
+                        <div className="h-72 bg-slate-800 overflow-hidden">
+                          {character.portrait_url
+                            ? <PortraitImg src={character.portrait_url} alt={character.name} position={character.portrait_position} />
+                            : <div className="w-full h-full flex items-center justify-center text-slate-400">{it.charactersPublic.noPortrait}</div>}
+                        </div>
+                        <div className="p-6 space-y-2">
+                          <h3 className="text-2xl font-bold text-amber-300">{character.name}</h3>
+                          <p className="text-slate-200">{it.charactersPublic.class}: {character.class}</p>
+                          <p className="text-slate-200">{it.charactersPublic.race}: {character.race}</p>
+                          {character.zone && <span className="inline-block text-xs text-sky-400 border border-sky-700/30 rounded px-2 py-0.5">🗺️ {character.zone}</span>}
+                          {user && <span className="inline-block text-xs text-slate-500 border border-slate-700/40 rounded px-2 py-0.5">📝 Note personali</span>}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+            ) : null}
           </div>
         )}
 
+        {/* Modal NPC */}
         {selectedCharacter && !selectedCharacter.is_player_character && (
           <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4" onClick={() => setSelectedCharacter(null)}>
             <div className="max-w-3xl w-full bg-slate-900 border border-amber-700/30 rounded-2xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -213,11 +242,12 @@ export const CharactersPage: React.FC = () => {
                     : <div className="w-full h-full flex items-center justify-center text-slate-400">{it.charactersPublic.noPortrait}</div>}
                 </div>
                 <div className="p-8 overflow-y-auto max-h-[80vh]">
-                  <h3 className="text-3xl font-bold text-amber-300 mb-4">{selectedCharacter.name}</h3>
+                  <h3 className="text-3xl font-bold text-amber-300 mb-1">{selectedCharacter.name}</h3>
+                  {selectedCharacter.zone && <p className="text-sky-400 text-xs mb-4">🗺️ {selectedCharacter.zone}</p>}
                   <div className="space-y-2 text-slate-200 mb-4">
                     <p>{it.charactersPublic.class}: {selectedCharacter.class}</p>
                     <p>{it.charactersPublic.race}: {selectedCharacter.race}</p>
-                  </div>
+  </div>
                   {selectedCharacter.backstory && (
                     <>
                       <h4 className="text-base font-semibold text-amber-200 mb-2">{it.charactersPublic.backstory}</h4>
@@ -225,14 +255,8 @@ export const CharactersPage: React.FC = () => {
                     </>
                   )}
                   <NpcNotes characterId={selectedCharacter.id} />
-                  {!user && (
-                    <p className="mt-6 text-slate-500 text-xs italic border-t border-slate-700/40 pt-4">
-                      🔒 Accedi per aggiungere note personali su questo personaggio.
-                    </p>
-                  )}
-                  <button onClick={() => setSelectedCharacter(null)} className="mt-6 px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded transition text-sm">
-                    {it.charactersPublic.close}
-                  </button>
+                  {!user && <p className="mt-6 text-slate-500 text-xs italic border-t border-slate-700/40 pt-4">🔒 Accedi per aggiungere note personali su questo personaggio.</p>}
+                  <button onClick={() => setSelectedCharacter(null)} className="mt-6 px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded transition text-sm">{it.charactersPublic.close}</button>
                 </div>
               </div>
             </div>

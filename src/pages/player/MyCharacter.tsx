@@ -25,12 +25,13 @@ export const MyCharacterPage: React.FC = () => {
   const [linked, setLinked] = useState(false);
   const [activeTab, setActiveTab] = useState<'scheda' | 'storia' | 'segreti'>('scheda');
 
-  // Per i giocatori normali: collega owner
+  // Scroll to top all'apertura della pagina
   useEffect(() => {
-    if (!user || isAdmin) {
-      setLinked(true);
-      return;
-    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
+  useEffect(() => {
+    if (!user || isAdmin) { setLinked(true); return; }
     const linkOwner = async () => {
       await supabase.rpc('link_character_owner');
       setLinked(true);
@@ -38,13 +39,11 @@ export const MyCharacterPage: React.FC = () => {
     void linkOwner();
   }, [user, isAdmin]);
 
-  // Carica personaggio/i
   useEffect(() => {
     if (!user || !linked) return;
     const fetchCharacters = async () => {
       setLoading(true);
       if (isAdmin) {
-        // Admin: carica tutti i PG
         const { data } = await supabase
           .from('characters')
           .select('id, name, class, race, level, backstory, portrait_url, private_notes, sigillo, stats_json')
@@ -54,7 +53,6 @@ export const MyCharacterPage: React.FC = () => {
         setAllCharacters(list);
         setCharacter(list[0] ?? null);
       } else {
-        // Giocatore: solo il proprio
         const { data } = await supabase
           .from('characters')
           .select('id, name, class, race, level, backstory, portrait_url, private_notes, sigillo, stats_json')
@@ -94,14 +92,7 @@ export const MyCharacterPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      {/* Parallax background */}
-      <div
-        className="fixed inset-0 bg-cover bg-center -z-10"
-        style={{
-          backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`,
-          backgroundAttachment: 'fixed',
-        }}
-      />
+      <div className="fixed inset-0 bg-cover bg-center -z-10" style={{ backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`, backgroundAttachment: 'fixed' }} />
       <div className="fixed inset-0 bg-slate-950/85 -z-10" />
 
       <div className="relative py-16 px-6">
@@ -116,9 +107,7 @@ export const MyCharacterPage: React.FC = () => {
                   key={c.id}
                   onClick={() => { setCharacter(c); setActiveTab('scheda'); }}
                   className={`px-4 py-1.5 rounded-full text-sm font-semibold transition ${
-                    character.id === c.id
-                      ? 'bg-amber-600 text-white'
-                      : 'bg-slate-800 text-amber-200 hover:bg-slate-700'
+                    character.id === c.id ? 'bg-amber-600 text-white' : 'bg-slate-800 text-amber-200 hover:bg-slate-700'
                   }`}
                 >
                   {c.name}
@@ -130,27 +119,18 @@ export const MyCharacterPage: React.FC = () => {
           {/* Hero header */}
           <div className="relative rounded-3xl overflow-hidden border border-amber-700/20 bg-slate-900/80 backdrop-blur-sm">
             {character.portrait_url && (
-              <div
-                className="absolute inset-0 bg-cover bg-center opacity-20 blur-sm"
-                style={{ backgroundImage: `url(${character.portrait_url})` }}
-              />
+              <div className="absolute inset-0 bg-cover bg-center opacity-20 blur-sm" style={{ backgroundImage: `url(${character.portrait_url})` }} />
             )}
             <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 p-8">
               <div className="w-36 h-36 md:w-48 md:h-48 rounded-2xl overflow-hidden border-2 border-amber-600/50 flex-shrink-0 shadow-2xl">
-                {character.portrait_url ? (
-                  <img src={character.portrait_url} alt={character.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full bg-slate-800 flex items-center justify-center text-slate-500 text-4xl">🧙</div>
-                )}
+                {character.portrait_url
+                  ? <img src={character.portrait_url} alt={character.name} className="w-full h-full object-cover" />
+                  : <div className="w-full h-full bg-slate-800 flex items-center justify-center text-slate-500 text-4xl">🧙</div>}
               </div>
               <div className="text-center md:text-left">
-                <p className="text-amber-500 uppercase tracking-widest text-xs mb-1">
-                  {isAdmin ? 'Scheda Personaggio' : 'Il tuo personaggio'}
-                </p>
+                <p className="text-amber-500 uppercase tracking-widest text-xs mb-1">{isAdmin ? 'Scheda Personaggio' : 'Il tuo personaggio'}</p>
                 <h1 className="text-4xl md:text-5xl font-bold text-amber-300 mb-2">{character.name}</h1>
-                <p className="text-slate-300 text-lg">
-                  {character.class} &bull; {character.race} &bull; Livello {character.level}
-                </p>
+                <p className="text-slate-300 text-lg">{character.class} &bull; {character.race} &bull; Livello {character.level}</p>
                 {character.sigillo && (
                   <div className="mt-4 inline-flex items-center gap-2 bg-amber-900/30 border border-amber-700/40 rounded-xl px-4 py-2">
                     <span className="text-amber-400 text-lg">🔮</span>
@@ -164,13 +144,9 @@ export const MyCharacterPage: React.FC = () => {
           {/* Tabs */}
           <div className="flex gap-2 border-b border-slate-700/50">
             {(['scheda', 'storia', 'segreti'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
+              <button key={tab} onClick={() => setActiveTab(tab)}
                 className={`px-5 py-2.5 text-sm font-semibold rounded-t-lg transition capitalize ${
-                  activeTab === tab
-                    ? 'bg-slate-800 text-amber-300 border border-b-0 border-amber-700/30'
-                    : 'text-slate-400 hover:text-slate-200'
+                  activeTab === tab ? 'bg-slate-800 text-amber-300 border border-b-0 border-amber-700/30' : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
                 {tab === 'scheda' && '📜 Scheda'}
@@ -210,34 +186,23 @@ export const MyCharacterPage: React.FC = () => {
             {activeTab === 'segreti' && (
               <div>
                 <h2 className="text-2xl font-bold text-red-400 mb-2">🔒 Note segrete</h2>
-                {isAdmin && (
-                  <p className="text-amber-500/70 text-xs mb-4 italic">👁️ Vista Admin — stai leggendo le note private di {character.name}.</p>
-                )}
+                {isAdmin && <p className="text-amber-500/70 text-xs mb-4 italic">👁️ Vista Admin — stai leggendo le note private di {character.name}.</p>}
                 <p className="text-slate-500 text-sm mb-6">Queste informazioni sono visibili solo a te{isAdmin ? ' e al DM' : ''}.</p>
-                {character.private_notes ? (
-                  <p className="text-slate-300 leading-8 whitespace-pre-line text-lg">{character.private_notes}</p>
-                ) : (
-                  <p className="text-slate-500 italic">Nessuna nota segreta ancora assegnata dal DM.</p>
-                )}
+                {character.private_notes
+                  ? <p className="text-slate-300 leading-8 whitespace-pre-line text-lg">{character.private_notes}</p>
+                  : <p className="text-slate-500 italic">Nessuna nota segreta ancora assegnata dal DM.</p>}
               </div>
             )}
           </div>
 
-          {/* Link rapidi */}
           {!isAdmin && (
             <div className="grid sm:grid-cols-2 gap-4">
-              <button
-                onClick={() => navigate('/#characters')}
-                className="bg-slate-800/80 hover:bg-slate-700 border border-amber-700/20 rounded-2xl p-5 text-left transition group"
-              >
+              <button onClick={() => navigate('/#characters')} className="bg-slate-800/80 hover:bg-slate-700 border border-amber-700/20 rounded-2xl p-5 text-left transition group">
                 <p className="text-2xl mb-2">⚔️</p>
                 <p className="text-amber-300 font-semibold text-lg group-hover:text-amber-200">Il gruppo</p>
                 <p className="text-slate-400 text-sm">Vedi i tuoi compagni di avventura</p>
               </button>
-              <button
-                onClick={() => navigate('/missioni')}
-                className="bg-slate-800/80 hover:bg-slate-700 border border-amber-700/20 rounded-2xl p-5 text-left transition group"
-              >
+              <button onClick={() => navigate('/missioni')} className="bg-slate-800/80 hover:bg-slate-700 border border-amber-700/20 rounded-2xl p-5 text-left transition group">
                 <p className="text-2xl mb-2">📜</p>
                 <p className="text-amber-300 font-semibold text-lg group-hover:text-amber-200">Missioni</p>
                 <p className="text-slate-400 text-sm">Consulta le missioni attive</p>
@@ -245,18 +210,13 @@ export const MyCharacterPage: React.FC = () => {
             </div>
           )}
 
-          {/* Link admin per tornare al pannello */}
           {isAdmin && (
             <div className="text-center">
-              <button
-                onClick={() => navigate('/admin/characters')}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-amber-700/20 hover:bg-amber-700/40 border border-amber-600/30 text-amber-300 font-semibold rounded-xl transition"
-              >
+              <button onClick={() => navigate('/admin/characters')} className="inline-flex items-center gap-2 px-6 py-3 bg-amber-700/20 hover:bg-amber-700/40 border border-amber-600/30 text-amber-300 font-semibold rounded-xl transition">
                 ← Torna alla gestione personaggi
               </button>
             </div>
           )}
-
         </div>
       </div>
     </div>
