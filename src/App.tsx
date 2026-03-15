@@ -17,6 +17,7 @@ import { SessionsPreview } from './pages/public/SessionsPreview';
 import { SessionsPage } from './pages/public/Sessions';
 import { MapPage } from './pages/public/Map';
 import { GalleryPage } from './pages/public/Gallery';
+import { RegionPage } from './pages/public/RegionPage';
 
 // Player Pages
 import { MyCharacterPage } from './pages/player/MyCharacter';
@@ -64,6 +65,18 @@ function App() {
               <>
                 <Navigation />
                 <SessionsPage />
+                <Footer />
+              </>
+            }
+          />
+
+          {/* Pagine regione */}
+          <Route
+            path="/mappa/:regionSlug"
+            element={
+              <>
+                <Navigation />
+                <RegionPage />
                 <Footer />
               </>
             }
