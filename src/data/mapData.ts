@@ -18,8 +18,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'tharros',
     name: 'Tharros',
     type: 'region',
-    x: 27,
-    y: 54,
+    x: 28,
+    y: 51,
     r: 2,
     shortDescription: 'Il Gioiello d\'Ottone e Vapore. Metropoli verticale dominata dall\'ingegneria e dall\'Obsidium raffinato, governata dal Consiglio del Progresso.',
     fullDescription: 'Tharros è costruita su un massiccio promontorio di granito bianco che si affaccia sulla Madre. L\'aria ha un sapore metallico di rame e ozono, il suono è un ronzio costante di ingranaggi e pistoni. La società è divisa in tre livelli verticali: Aurea (élite), Il Meccanismo (classe lavoratrice) e Il Ventre (gli scarti). Governa il Consiglio del Progresso, sette individui scelti per il valore dei loro brevetti.',
@@ -95,8 +95,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'luxia',
     name: 'Luxia',
     type: 'city',
-    x: 28,  // di poco più a sinistra (era 30)
-    y: 37,  // un po' più in alto (era 40)
+    x: 29,  // di poco più a sinistra (era 30)
+    y: 36,  // un po' più in alto (era 40)
     r: 1.2,
     shortDescription: 'Il cancello delle Pianure Verdi. Città agricola meccanizzata che funge da porta d\'accesso alle fertili terre intorno a Tharros.',
     fullDescription: 'Luxia funge da cancello per le Pianure Verdi, un tempo praterie sconfinate oggi segnate dalle cicatrici del progresso. È circondata da campi coltivati in modo intensivo grazie a macchine agricole semoventi. La popolazione è cosmopolita, con una prevalenza di Umani, Gnomi inventori e Halfling. La fauna locale mostra spesso segni di mutazione dovuta alle scorie di Obsidium.',
@@ -105,8 +105,8 @@ export const MAP_LOCATIONS: MapLocation[] = [
     id: 'solitaria',
     name: 'Solitaria',
     type: 'city',
-    x: 9,   // leggermente più a sinistra (era 11)
-    y: 52,  // leggermente più in alto (era 55)
+    x: 10,   // leggermente più a sinistra (era 11)
+    y: 53,  // leggermente più in alto (era 55)
     r: 1.2,
     shortDescription: 'Città isolata sulle scogliere di granito grigio della costa ovest, avvolta da nebbie perenni. I suoi abitanti vivono di pesca e leggende antiche.',
     fullDescription: 'Solitaria è isolata dalle montagne e si affaccia sul mare aperto, circondata da scogliere di granito grigio e nebbie perenni. È un luogo malinconico dove la gente vive di pesca e leggende. Lontana dall\'influsso diretto di Tharros, conserva antiche tradizioni e un senso di malinconica indipendenza.',
