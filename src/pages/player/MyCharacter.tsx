@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../utils/supabase';
+import { ZoomableImage } from '../../components/shared/ImageLightbox';
 
 interface Character {
   id: string;
@@ -25,7 +26,6 @@ export const MyCharacterPage: React.FC = () => {
   const [linked, setLinked] = useState(false);
   const [activeTab, setActiveTab] = useState<'scheda' | 'storia' | 'segreti'>('scheda');
 
-  // Scroll to top all'apertura della pagina
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
@@ -98,25 +98,22 @@ export const MyCharacterPage: React.FC = () => {
       <div className="relative py-16 px-6">
         <div className="max-w-5xl mx-auto space-y-10">
 
-          {/* Selettore personaggio per admin */}
           {isAdmin && allCharacters.length > 1 && (
             <div className="flex flex-wrap gap-2 items-center">
               <span className="text-slate-400 text-sm mr-2">Stai visualizzando:</span>
               {allCharacters.map((c) => (
-                <button
-                  key={c.id}
+                <button key={c.id}
                   onClick={() => { setCharacter(c); setActiveTab('scheda'); }}
                   className={`px-4 py-1.5 rounded-full text-sm font-semibold transition ${
                     character.id === c.id ? 'bg-amber-600 text-white' : 'bg-slate-800 text-amber-200 hover:bg-slate-700'
-                  }`}
-                >
+                  }`}>
                   {c.name}
                 </button>
               ))}
             </div>
           )}
 
-          {/* Hero header */}
+          {/* Hero con ritratto zoomabile */}
           <div className="relative rounded-3xl overflow-hidden border border-amber-700/20 bg-slate-900/80 backdrop-blur-sm">
             {character.portrait_url && (
               <div className="absolute inset-0 bg-cover bg-center opacity-20 blur-sm" style={{ backgroundImage: `url(${character.portrait_url})` }} />
@@ -124,7 +121,14 @@ export const MyCharacterPage: React.FC = () => {
             <div className="relative z-10 flex flex-col md:flex-row items-center gap-8 p-8">
               <div className="w-36 h-36 md:w-48 md:h-48 rounded-2xl overflow-hidden border-2 border-amber-600/50 flex-shrink-0 shadow-2xl">
                 {character.portrait_url
-                  ? <img src={character.portrait_url} alt={character.name} className="w-full h-full object-cover" />
+                  ? (
+                    <ZoomableImage
+                      src={character.portrait_url}
+                      alt={character.name}
+                      className="w-full h-full"
+                      imgClassName="w-full h-full object-cover"
+                    />
+                  )
                   : <div className="w-full h-full bg-slate-800 flex items-center justify-center text-slate-500 text-4xl">🧙</div>}
               </div>
               <div className="text-center md:text-left">
@@ -147,8 +151,7 @@ export const MyCharacterPage: React.FC = () => {
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className={`px-5 py-2.5 text-sm font-semibold rounded-t-lg transition capitalize ${
                   activeTab === tab ? 'bg-slate-800 text-amber-300 border border-b-0 border-amber-700/30' : 'text-slate-400 hover:text-slate-200'
-                }`}
-              >
+                }`}>
                 {tab === 'scheda' && '📜 Scheda'}
                 {tab === 'storia' && '📖 Storia'}
                 {tab === 'segreti' && '🔒 Segreti'}

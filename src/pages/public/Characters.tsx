@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { it } from '../../content/texts';
 import { supabase } from '../../utils/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { ZoomableImage } from '../../components/shared/ImageLightbox';
 
 interface Character {
   id: string;
@@ -115,7 +116,6 @@ export const CharactersPage: React.FC = () => {
     setSelectedCharacter(character);
   };
 
-  // Zone uniche ricavate dagli NPC (i PG non hanno zona di filtro)
   const zones = Array.from(
     new Set(characters.filter((c) => !c.is_player_character && c.zone).map((c) => c.zone as string))
   ).sort();
@@ -151,8 +151,6 @@ export const CharactersPage: React.FC = () => {
           <p className="text-center text-slate-400 text-lg">{it.charactersPublic.empty}</p>
         ) : (
           <div className="space-y-14">
-
-            {/* PG */}
             {pgs.length > 0 && (
               <div>
                 <h3 className="text-2xl font-bold text-amber-400 mb-6 border-b border-amber-700/30 pb-2">⚔️ Personaggi Giocanti</h3>
@@ -178,15 +176,13 @@ export const CharactersPage: React.FC = () => {
               </div>
             )}
 
-            {/* NPC con filtro zona */}
             {npcs.length > 0 || zones.length > 0 ? (
               <div>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-6">
                   <h3 className="text-2xl font-bold text-slate-300 border-b border-slate-700/50 pb-2 sm:border-0 sm:pb-0">👥 Personaggi Incontrati</h3>
                   {zones.length > 0 && (
                     <div className="flex flex-wrap gap-2">
-                      <button
-                        onClick={() => setActiveZone(null)}
+                      <button onClick={() => setActiveZone(null)}
                         className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
                           activeZone === null ? 'bg-amber-600 text-white' : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-600/40'
                         }`}>
@@ -231,14 +227,22 @@ export const CharactersPage: React.FC = () => {
           </div>
         )}
 
-        {/* Modal NPC */}
+        {/* Modal NPC — immagine zoomabile */}
         {selectedCharacter && !selectedCharacter.is_player_character && (
           <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4" onClick={() => setSelectedCharacter(null)}>
             <div className="max-w-3xl w-full bg-slate-900 border border-amber-700/30 rounded-2xl overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
               <div className="grid md:grid-cols-2">
                 <div className="bg-slate-800 min-h-[320px]">
                   {selectedCharacter.portrait_url
-                    ? <PortraitImg src={selectedCharacter.portrait_url} alt={selectedCharacter.name} position={selectedCharacter.portrait_position} />
+                    ? (
+                      <ZoomableImage
+                        src={selectedCharacter.portrait_url}
+                        alt={selectedCharacter.name}
+                        className="w-full h-full min-h-[320px]"
+                        imgClassName="w-full h-full object-cover"
+                        style={{ objectPosition: selectedCharacter.portrait_position ?? 'center' }}
+                      />
+                    )
                     : <div className="w-full h-full flex items-center justify-center text-slate-400">{it.charactersPublic.noPortrait}</div>}
                 </div>
                 <div className="p-8 overflow-y-auto max-h-[80vh]">
@@ -247,7 +251,7 @@ export const CharactersPage: React.FC = () => {
                   <div className="space-y-2 text-slate-200 mb-4">
                     <p>{it.charactersPublic.class}: {selectedCharacter.class}</p>
                     <p>{it.charactersPublic.race}: {selectedCharacter.race}</p>
-  </div>
+                  </div>
                   {selectedCharacter.backstory && (
                     <>
                       <h4 className="text-base font-semibold text-amber-200 mb-2">{it.charactersPublic.backstory}</h4>
