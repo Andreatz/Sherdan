@@ -13,6 +13,7 @@ interface Character {
   backstory: string;
   portrait_url: string | null;
   is_player_character: boolean;
+  is_revealed: boolean;
 }
 
 export const CharactersPage: React.FC = () => {
@@ -25,10 +26,13 @@ export const CharactersPage: React.FC = () => {
   useEffect(() => {
     const fetchCharacters = async () => {
       setLoading(true);
-      // RLS restituisce automaticamente solo NPC + il proprio PG se loggato
+
+      // Carica PG (sempre visibili) + NPC rivelati
       const { data } = await supabase
         .from('characters')
-        .select('id, name, class, race, level, backstory, portrait_url, is_player_character')
+        .select('id, name, class, race, level, backstory, portrait_url, is_player_character, is_revealed')
+        .or('is_player_character.eq.true,is_revealed.eq.true')
+        .order('is_player_character', { ascending: false })
         .order('level', { ascending: false })
         .order('name', { ascending: true });
 
@@ -40,14 +44,15 @@ export const CharactersPage: React.FC = () => {
   }, [user]);
 
   const handleCardClick = (character: Character) => {
-    // Se è un PG e l'utente è loggato, va alla pagina privata
     if (character.is_player_character && user) {
       navigate('/personaggio');
       return;
     }
-    // Altrimenti apre il modale pubblico
     setSelectedCharacter(character);
   };
+
+  const pgs = characters.filter((c) => c.is_player_character);
+  const npcs = characters.filter((c) => !c.is_player_character);
 
   return (
     <section id="characters" className="py-24 px-6 bg-slate-950">
@@ -78,51 +83,91 @@ export const CharactersPage: React.FC = () => {
             {it.charactersPublic.empty}
           </p>
         ) : (
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
-            {characters.map((character) => (
-              <button
-                key={character.id}
-                onClick={() => handleCardClick(character)}
-                className="text-left rounded-2xl overflow-hidden border border-amber-700/20 bg-slate-900 hover:-translate-y-1 hover:shadow-2xl transition"
-              >
-                <div className="h-72 bg-slate-800 overflow-hidden">
-                  {character.portrait_url ? (
-                    <img
-                      src={character.portrait_url}
-                      alt={character.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-400">
-                      {it.charactersPublic.noPortrait}
-                    </div>
-                  )}
-                </div>
+          <div className="space-y-14">
 
-                <div className="p-6 space-y-2">
-                  <h3 className="text-2xl font-bold text-amber-300">
-                    {character.name}
-                  </h3>
-                  <p className="text-slate-200">
-                    {it.charactersPublic.class}: {character.class}
-                  </p>
-                  <p className="text-slate-200">
-                    {it.charactersPublic.race}: {character.race}
-                  </p>
-                  <p className="text-slate-200">
-                    {it.charactersPublic.level}: {character.level}
-                  </p>
-                  {character.is_player_character && (
-                    <span className="inline-block text-xs text-amber-500 border border-amber-700/40 rounded px-2 py-0.5 mt-1">
-                      Personaggio Giocante
-                    </span>
-                  )}
+            {/* Sezione PG */}
+            {pgs.length > 0 && (
+              <div>
+                <h3 className="text-2xl font-bold text-amber-400 mb-6 border-b border-amber-700/30 pb-2">
+                  ⚔️ Personaggi Giocanti
+                </h3>
+                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {pgs.map((character) => (
+                    <button
+                      key={character.id}
+                      onClick={() => handleCardClick(character)}
+                      className="text-left rounded-2xl overflow-hidden border border-amber-600/30 bg-slate-900 hover:-translate-y-1 hover:shadow-2xl transition"
+                    >
+                      <div className="h-72 bg-slate-800 overflow-hidden">
+                        {character.portrait_url ? (
+                          <img
+                            src={character.portrait_url}
+                            alt={character.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-400">
+                            {it.charactersPublic.noPortrait}
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-6 space-y-2">
+                        <h3 className="text-2xl font-bold text-amber-300">{character.name}</h3>
+                        <p className="text-slate-200">{it.charactersPublic.class}: {character.class}</p>
+                        <p className="text-slate-200">{it.charactersPublic.race}: {character.race}</p>
+                        <p className="text-slate-200">{it.charactersPublic.level}: {character.level}</p>
+                        <span className="inline-block text-xs text-amber-500 border border-amber-700/40 rounded px-2 py-0.5 mt-1">
+                          Personaggio Giocante
+                        </span>
+                      </div>
+                    </button>
+                  ))}
                 </div>
-              </button>
-            ))}
+              </div>
+            )}
+
+            {/* Sezione NPC */}
+            {npcs.length > 0 && (
+              <div>
+                <h3 className="text-2xl font-bold text-slate-300 mb-6 border-b border-slate-700/50 pb-2">
+                  👥 Personaggi Incontrati
+                </h3>
+                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-8">
+                  {npcs.map((character) => (
+                    <button
+                      key={character.id}
+                      onClick={() => handleCardClick(character)}
+                      className="text-left rounded-2xl overflow-hidden border border-amber-700/20 bg-slate-900 hover:-translate-y-1 hover:shadow-2xl transition"
+                    >
+                      <div className="h-72 bg-slate-800 overflow-hidden">
+                        {character.portrait_url ? (
+                          <img
+                            src={character.portrait_url}
+                            alt={character.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-400">
+                            {it.charactersPublic.noPortrait}
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-6 space-y-2">
+                        <h3 className="text-2xl font-bold text-amber-300">{character.name}</h3>
+                        <p className="text-slate-200">{it.charactersPublic.class}: {character.class}</p>
+                        <p className="text-slate-200">{it.charactersPublic.race}: {character.race}</p>
+                        <p className="text-slate-200">{it.charactersPublic.level}: {character.level}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
           </div>
         )}
 
+        {/* Modale dettaglio NPC */}
         {selectedCharacter && !selectedCharacter.is_player_character && (
           <div
             className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center px-4"
@@ -146,25 +191,21 @@ export const CharactersPage: React.FC = () => {
                     </div>
                   )}
                 </div>
-
                 <div className="p-8">
                   <h3 className="text-3xl font-bold text-amber-300 mb-4">
                     {selectedCharacter.name}
                   </h3>
-
                   <div className="space-y-2 text-slate-200 mb-6">
                     <p>{it.charactersPublic.class}: {selectedCharacter.class}</p>
                     <p>{it.charactersPublic.race}: {selectedCharacter.race}</p>
                     <p>{it.charactersPublic.level}: {selectedCharacter.level}</p>
                   </div>
-
                   <h4 className="text-xl font-semibold text-amber-200 mb-3">
                     {it.charactersPublic.backstory}
                   </h4>
                   <p className="text-slate-300 leading-7 whitespace-pre-line">
                     {selectedCharacter.backstory}
                   </p>
-
                   <button
                     onClick={() => setSelectedCharacter(null)}
                     className="mt-8 px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded transition"
