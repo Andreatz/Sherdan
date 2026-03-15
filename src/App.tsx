@@ -19,6 +19,7 @@ import { MapPage } from './pages/public/Map';
 import { GalleryPage } from './pages/public/Gallery';
 import { RegionPage } from './pages/public/RegionPage';
 import { LocationsPage } from './pages/public/Locations';
+import { BestiaryPage } from './pages/public/Bestiary';
 
 // Player Pages
 import { MyCharacterPage } from './pages/player/MyCharacter';
@@ -32,11 +33,10 @@ import { MissionsAdminPage } from './pages/admin/Missions';
 import { LocationsPage as AdminLocationsPage } from './pages/admin/Locations';
 import { GalleryPage as AdminGalleryPage } from './pages/admin/Gallery';
 import { SettingsPage } from './pages/admin/Settings';
+import { BestiaryAdminPage } from './pages/admin/Bestiary';
 
-// Componente interno che gestisce lo scroll automatico via location.state
 const ScrollToSection: React.FC = () => {
   const location = useLocation();
-
   useEffect(() => {
     const state = location.state as { scrollTo?: string } | null;
     if (state?.scrollTo) {
@@ -44,7 +44,6 @@ const ScrollToSection: React.FC = () => {
         const el = document.getElementById(state.scrollTo!);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // Pulisce lo state per evitare scroll ripetuti
           window.history.replaceState({}, '');
         } else if (attempts < 10) {
           setTimeout(() => tryScroll(attempts + 1), 150);
@@ -53,7 +52,6 @@ const ScrollToSection: React.FC = () => {
       tryScroll();
     }
   }, [location.state]);
-
   return null;
 };
 
@@ -63,95 +61,66 @@ function App() {
       <AuthProvider>
         <ScrollToSection />
         <Routes>
-          {/* Auth Routes */}
-          <Route path="/auth/login" element={<Login />} />
+          {/* Auth */}
+          <Route path="/auth/login"  element={<Login />} />
           <Route path="/auth/signup" element={<Signup />} />
 
           {/* Home */}
-          <Route
-            path="/"
-            element={
-              <>
-                <Navigation />
-                <div className="bg-slate-900">
-                  <Home />
-                  <CampaignPage />
-                  <CharactersPage />
-                  <SessionsPreview />
-                  <MapPage />
-                  <GalleryPage />
-                </div>
-                <Footer />
-              </>
-            }
-          />
+          <Route path="/" element={
+            <>
+              <Navigation />
+              <div className="bg-slate-900">
+                <Home />
+                <CampaignPage />
+                <CharactersPage />
+                <SessionsPreview />
+                <MapPage />
+                <GalleryPage />
+              </div>
+              <Footer />
+            </>
+          } />
 
-          {/* Sessioni — solo utenti loggati */}
-          <Route
-            path="/sessioni"
-            element={
-              <ProtectedRoute>
-                <Navigation />
-                <SessionsPage />
-                <Footer />
-              </ProtectedRoute>
-            }
-          />
+          {/* Sessioni */}
+          <Route path="/sessioni" element={
+            <ProtectedRoute>
+              <Navigation /><SessionsPage /><Footer />
+            </ProtectedRoute>
+          } />
 
           {/* Luoghi */}
-          <Route
-            path="/luoghi"
-            element={
-              <>
-                <Navigation />
-                <LocationsPage />
-                <Footer />
-              </>
-            }
-          />
+          <Route path="/luoghi" element={
+            <><Navigation /><LocationsPage /><Footer /></>
+          } />
 
-          {/* Pagine regione */}
-          <Route
-            path="/mappa/:regionSlug"
-            element={
-              <>
-                <Navigation />
-                <RegionPage />
-                <Footer />
-              </>
-            }
-          />
+          {/* Regioni */}
+          <Route path="/mappa/:regionSlug" element={
+            <><Navigation /><RegionPage /><Footer /></>
+          } />
 
-          {/* Player Routes */}
-          <Route
-            path="/personaggio"
-            element={
-              <ProtectedRoute>
-                <Navigation />
-                <MyCharacterPage />
-                <Footer />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/missioni"
-            element={
-              <ProtectedRoute>
-                <MissionsPage />
-              </ProtectedRoute>
-            }
-          />
+          {/* Bestiario */}
+          <Route path="/bestiario" element={
+            <><Navigation /><BestiaryPage /><Footer /></>
+          } />
 
-          {/* Admin Routes */}
-          <Route path="/admin"            element={<ProtectedRoute requireAdmin><DashboardPage /></ProtectedRoute>} />
-          <Route path="/admin/characters" element={<ProtectedRoute requireAdmin><AdminCharactersPage /></ProtectedRoute>} />
-          <Route path="/admin/sessions"   element={<ProtectedRoute requireAdmin><AdminSessionsPage /></ProtectedRoute>} />
-          <Route path="/admin/missions"   element={<ProtectedRoute requireAdmin><MissionsAdminPage /></ProtectedRoute>} />
-          <Route path="/admin/locations"  element={<ProtectedRoute requireAdmin><AdminLocationsPage /></ProtectedRoute>} />
-          <Route path="/admin/gallery"    element={<ProtectedRoute requireAdmin><AdminGalleryPage /></ProtectedRoute>} />
-          <Route path="/admin/settings"   element={<ProtectedRoute requireAdmin><SettingsPage /></ProtectedRoute>} />
+          {/* Player */}
+          <Route path="/personaggio" element={
+            <ProtectedRoute><Navigation /><MyCharacterPage /><Footer /></ProtectedRoute>
+          } />
+          <Route path="/missioni" element={
+            <ProtectedRoute><MissionsPage /></ProtectedRoute>
+          } />
 
-          {/* Catch all */}
+          {/* Admin */}
+          <Route path="/admin"             element={<ProtectedRoute requireAdmin><DashboardPage /></ProtectedRoute>} />
+          <Route path="/admin/characters"  element={<ProtectedRoute requireAdmin><AdminCharactersPage /></ProtectedRoute>} />
+          <Route path="/admin/sessions"    element={<ProtectedRoute requireAdmin><AdminSessionsPage /></ProtectedRoute>} />
+          <Route path="/admin/missions"    element={<ProtectedRoute requireAdmin><MissionsAdminPage /></ProtectedRoute>} />
+          <Route path="/admin/locations"   element={<ProtectedRoute requireAdmin><AdminLocationsPage /></ProtectedRoute>} />
+          <Route path="/admin/gallery"     element={<ProtectedRoute requireAdmin><AdminGalleryPage /></ProtectedRoute>} />
+          <Route path="/admin/settings"    element={<ProtectedRoute requireAdmin><SettingsPage /></ProtectedRoute>} />
+          <Route path="/admin/bestiary"    element={<ProtectedRoute requireAdmin><BestiaryAdminPage /></ProtectedRoute>} />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
