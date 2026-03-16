@@ -24,6 +24,7 @@ import { BestiaryPage } from './pages/public/Bestiary';
 // Player Pages
 import { MyCharacterPage } from './pages/player/MyCharacter';
 import { MissionsPage } from './pages/player/Missions';
+import { SessionNotesPage } from './pages/player/SessionNotes';
 
 // Admin Pages
 import { DashboardPage } from './pages/admin/Dashboard';
@@ -83,9 +84,7 @@ function App() {
 
           {/* Sessioni */}
           <Route path="/sessioni" element={
-            <ProtectedRoute>
-              <Navigation /><SessionsPage /><Footer />
-            </ProtectedRoute>
+            <ProtectedRoute><Navigation /><SessionsPage /><Footer /></ProtectedRoute>
           } />
 
           {/* Luoghi */}
@@ -110,16 +109,19 @@ function App() {
           <Route path="/missioni" element={
             <ProtectedRoute><MissionsPage /></ProtectedRoute>
           } />
+          <Route path="/note" element={
+            <ProtectedRoute><SessionNotesPage /></ProtectedRoute>
+          } />
 
           {/* Admin */}
-          <Route path="/admin"             element={<ProtectedRoute requireAdmin><DashboardPage /></ProtectedRoute>} />
-          <Route path="/admin/characters"  element={<ProtectedRoute requireAdmin><AdminCharactersPage /></ProtectedRoute>} />
-          <Route path="/admin/sessions"    element={<ProtectedRoute requireAdmin><AdminSessionsPage /></ProtectedRoute>} />
-          <Route path="/admin/missions"    element={<ProtectedRoute requireAdmin><MissionsAdminPage /></ProtectedRoute>} />
-          <Route path="/admin/locations"   element={<ProtectedRoute requireAdmin><AdminLocationsPage /></ProtectedRoute>} />
-          <Route path="/admin/gallery"     element={<ProtectedRoute requireAdmin><AdminGalleryPage /></ProtectedRoute>} />
-          <Route path="/admin/settings"    element={<ProtectedRoute requireAdmin><SettingsPage /></ProtectedRoute>} />
-          <Route path="/admin/bestiary"    element={<ProtectedRoute requireAdmin><BestiaryAdminPage /></ProtectedRoute>} />
+          <Route path="/admin"            element={<ProtectedRoute requireAdmin><DashboardPage /></ProtectedRoute>} />
+          <Route path="/admin/characters" element={<ProtectedRoute requireAdmin><AdminCharactersPage /></ProtectedRoute>} />
+          <Route path="/admin/sessions"   element={<ProtectedRoute requireAdmin><AdminSessionsPage /></ProtectedRoute>} />
+          <Route path="/admin/missions"   element={<ProtectedRoute requireAdmin><MissionsAdminPage /></ProtectedRoute>} />
+          <Route path="/admin/locations"  element={<ProtectedRoute requireAdmin><AdminLocationsPage /></ProtectedRoute>} />
+          <Route path="/admin/gallery"    element={<ProtectedRoute requireAdmin><AdminGalleryPage /></ProtectedRoute>} />
+          <Route path="/admin/settings"   element={<ProtectedRoute requireAdmin><SettingsPage /></ProtectedRoute>} />
+          <Route path="/admin/bestiary"   element={<ProtectedRoute requireAdmin><BestiaryAdminPage /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
