@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, BookOpen, Map, Image, Settings, Skull, Shield, UserCircle } from 'lucide-react';
+import { Users, BookOpen, Map, Image, Settings, Skull, Shield, UserCircle , Book, Clock} from 'lucide-react';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { supabase } from '../../utils/supabase';
 import { it } from '../../content/texts';
@@ -61,6 +61,8 @@ export const DashboardPage: React.FC = () => {
     { title: 'NPC',        text: 'Gestisci i personaggi non giocanti della campagna.', path: '/admin/npc',      icon: UserCircle },
     { title: 'Fazioni',    text: 'Gestisci le fazioni e la reputazione del party.',   path: '/admin/factions', icon: Shield     },
     { title: it.dashboard.cards.settingsTitle,   text: it.dashboard.cards.settingsText,   path: '/admin/settings',   icon: Settings  },
+        { title: 'Cronistoria',  text: 'Gestisci gli eventi della timeline della campagna.', path: '/admin/timeline', icon: Clock },
+    { title: 'Diario del DM', text: 'Note private, segreti e appunti del Dungeon Master.', path: '/admin/diary',    icon: Book  },
   ];
   return (
     <AdminLayout>
