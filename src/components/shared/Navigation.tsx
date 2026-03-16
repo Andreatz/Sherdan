@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, LogOut, Settings, Scroll, Sword, MapPin, Skull, ChevronDown, BookOpen, Map, Home, Image, Users, Shield } from 'lucide-react';
+import { Menu, X, LogOut, Settings, Scroll, Sword, MapPin, Skull, ChevronDown, BookOpen, Map, Home, Image, Users, Shield, Type } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { it } from '../../content/texts';
@@ -11,11 +11,12 @@ const EXPLORE_LINKS = [
   { label: 'Galleria',   href: '/#gallery',      icon: Image    },
 ];
 const WORLD_LINKS = [
-  { label: 'Mappa',     href: '/#map',       icon: Map    },
-  { label: 'Luoghi',    href: '/luoghi',     icon: MapPin },
-  { label: 'NPC',       href: '/npc',        icon: Users  },
-  { label: 'Bestiario', href: '/bestiario',  icon: Skull  },
-  { label: 'Fazioni',   href: '/fazioni',    icon: Shield },
+  { label: 'Mappa',              href: '/#map',        icon: Map    },
+  { label: 'Luoghi',             href: '/luoghi',      icon: MapPin },
+  { label: 'NPC',                href: '/npc',         icon: Users  },
+  { label: 'Bestiario',          href: '/bestiario',   icon: Skull  },
+  { label: 'Fazioni',            href: '/fazioni',     icon: Shield },
+  { label: 'Alfabeto Primordiale', href: '/alfabeto',  icon: Type   },
 ];
 const Dropdown: React.FC<{
   label: string;
@@ -44,7 +45,7 @@ const Dropdown: React.FC<{
         {label} <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+        <div className="absolute top-full left-0 mt-2 w-52 bg-slate-900 border border-slate-700 rounded-xl shadow-xl z-50 py-1 overflow-hidden">
           {links.map(l => { const Icon = l.icon; return (
             <button key={l.href} onClick={() => handleNav(l.href)} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-800 hover:text-amber-300 transition text-left">
               <Icon className="w-4 h-4" /> {l.label}

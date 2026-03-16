@@ -21,6 +21,7 @@ import { BestiaryPage } from './pages/public/Bestiary';
 import { NpcPage } from './pages/public/NPC';
 import { FactionsPage } from './pages/public/Factions';
 import { TimelinePage } from './pages/public/Timeline';
+import { AlphabetPage } from './pages/public/Alphabet';
 // Player
 import { MyCharacterPage } from './pages/player/MyCharacter';
 import { MissionsPage } from './pages/player/Missions';
@@ -74,6 +75,7 @@ function App() {
           <Route path="/npc" element={<><Navigation /><NpcPage /><Footer /></>} />
           <Route path="/fazioni" element={<><Navigation /><FactionsPage /><Footer /></>} />
           <Route path="/cronistoria" element={<><Navigation /><TimelinePage /><Footer /></>} />
+          <Route path="/alfabeto" element={<><Navigation /><AlphabetPage /><Footer /></>} />
           <Route path="/mappa/:regionSlug" element={<><Navigation /><RegionPage /><Footer /></>} />
           <Route path="/personaggio" element={<ProtectedRoute><Navigation /><MyCharacterPage /><Footer /></ProtectedRoute>} />
           <Route path="/missioni" element={<ProtectedRoute><MissionsPage /></ProtectedRoute>} />
@@ -89,7 +91,7 @@ function App() {
           <Route path="/admin/npc" element={<ProtectedRoute requireAdmin><NpcAdminPage /></ProtectedRoute>} />
           <Route path="/admin/factions" element={<ProtectedRoute requireAdmin><FactionAdminPage /></ProtectedRoute>} />
           <Route path="/admin/timeline" element={<ProtectedRoute requireAdmin><TimelineAdminPage /></ProtectedRoute>} />
-                  <Route path="/admin/diary" element={<ProtectedRoute requireAdmin><DiaryPage /></ProtectedRoute>} />
+          <Route path="/admin/diary" element={<ProtectedRoute requireAdmin><DiaryPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
