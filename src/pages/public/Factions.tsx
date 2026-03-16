@@ -1,55 +1,67 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../utils/supabase';
-import { Faction, FactionCategory, CATEGORY_CONFIG } from '../../types/faction';
+import { Faction, FactionCategory, CATEGORY_CONFIG, reputationLabel } from '../../types/faction';
 import { Search, Shield, X } from 'lucide-react';
 
-/* ------------------------------------------------------------------ */
-/*  Card                                                                */
-/* ------------------------------------------------------------------ */
+/* ── helpers ───────────────────────────────────────────────────── */
+function colorBorder(hex: string) {
+  return `border-[${hex}]/40`;
+}
+
+/* ── Card ──────────────────────────────────────────────────────── */
 const FactionCard: React.FC<{ faction: Faction; onClick: () => void }> = ({ faction, onClick }) => {
   const cfg = CATEGORY_CONFIG[faction.category];
+  const rep = reputationLabel(faction.reputation);
+
   return (
     <button onClick={onClick}
-      className={`group text-left rounded-2xl overflow-hidden border ${cfg.border} bg-slate-900/80 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 cursor-pointer w-full`}>
-      {/* Immagine */}
-      <div className="relative h-52 bg-slate-800 overflow-hidden">
-        {faction.image_url ? (
-          <img src={faction.image_url} alt={faction.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        ) : (
-          <div className={`w-full h-full flex items-center justify-center bg-gradient-to-b ${cfg.color} to-slate-900`}>
-            <span className="text-6xl opacity-60">{faction.symbol_emoji ?? '🏴'}</span>
-          </div>
-        )}
+      className={`group text-left rounded-2xl overflow-hidden border ${cfg.border} bg-slate-900/80 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 w-full`}>
+
+      {/* Fascia colore + iniziale */}
+      <div className="h-2 w-full" style={{ backgroundColor: faction.color }} />
+      <div className="px-5 pt-5 pb-4">
         {/* Badge categoria */}
-        <span className={`absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full border ${cfg.badge} backdrop-blur-sm`}>
+        <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${cfg.badge} mb-3 inline-block`}>
           {cfg.emoji} {cfg.label}
         </span>
-      </div>
-      {/* Contenuto */}
-      <div className="p-5">
-        <h3 className="text-xl font-bold text-amber-300 mb-1 leading-tight">{faction.name}</h3>
-        {faction.tagline && (
-          <p className="text-xs italic text-slate-500 mb-2">"{faction.tagline}"</p>
+
+        {/* Nome */}
+        <h3 className="text-xl font-bold text-amber-300 leading-tight">{faction.name}</h3>
+        {faction.subtitle && (
+          <p className="text-xs text-slate-500 mt-0.5">{faction.subtitle}</p>
         )}
+
+        {/* Motto */}
+        {faction.motto && (
+          <p className="text-xs italic text-slate-500 mt-2 border-l-2 pl-2" style={{ borderColor: faction.color }}>
+            "{faction.motto}"
+          </p>
+        )}
+
+        {/* Base */}
         {faction.base && (
-          <p className="text-xs text-slate-500 mb-2">📍 {faction.base}</p>
+          <p className="text-xs text-slate-500 mt-2">📍 {faction.base}</p>
         )}
+
+        {/* Descrizione breve */}
         {faction.description && (
-          <p className="text-sm text-slate-400 line-clamp-3 leading-relaxed">{faction.description}</p>
+          <p className="text-sm text-slate-400 mt-3 line-clamp-3 leading-relaxed">{faction.description}</p>
         )}
-        <p className="text-xs text-amber-600 mt-3 font-semibold">Leggi tutto →</p>
+
+        {/* Reputazione + cta */}
+        <div className="flex items-center justify-between mt-4">
+          <span className={`text-xs font-semibold ${rep.color}`}>{rep.label}</span>
+          <span className="text-xs text-amber-600 font-semibold">Leggi tutto →</span>
+        </div>
       </div>
     </button>
   );
 };
 
-/* ------------------------------------------------------------------ */
-/*  Modal dettaglio                                                     */
-/* ------------------------------------------------------------------ */
+/* ── Modal dettaglio ───────────────────────────────────────────── */
 const FactionModal: React.FC<{ faction: Faction; onClose: () => void }> = ({ faction, onClose }) => {
   const cfg = CATEGORY_CONFIG[faction.category];
+  const rep = reputationLabel(faction.reputation);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -58,48 +70,57 @@ const FactionModal: React.FC<{ faction: Faction; onClose: () => void }> = ({ fac
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', handler); };
   }, [onClose]);
 
+  const repPct = ((faction.reputation + 100) / 200) * 100;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div onClick={e => e.stopPropagation()}
         className={`relative bg-slate-900 border ${cfg.border} rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl`}>
 
-        {/* Header immagine */}
-        {faction.image_url ? (
-          <div className="h-64 overflow-hidden rounded-t-2xl">
-            <img src={faction.image_url} alt={faction.name} className="w-full h-full object-cover" />
-          </div>
-        ) : (
-          <div className={`h-40 flex items-center justify-center bg-gradient-to-b ${cfg.color} to-slate-900 rounded-t-2xl`}>
-            <span className="text-8xl opacity-50">{faction.symbol_emoji ?? '🏴'}</span>
-          </div>
-        )}
+        {/* Fascia colore in cima */}
+        <div className="h-3 w-full rounded-t-2xl" style={{ backgroundColor: faction.color }} />
 
         {/* Close */}
         <button onClick={onClose}
-          className="absolute top-4 right-4 bg-slate-800/90 hover:bg-slate-700 text-slate-300 rounded-full p-2 transition">
+          className="absolute top-5 right-4 bg-slate-800/90 hover:bg-slate-700 text-slate-300 rounded-full p-2 transition">
           <X size={18} />
         </button>
 
-        {/* Corpo */}
         <div className="p-6 space-y-4">
-          <div>
-            <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${cfg.badge}`}>{cfg.emoji} {cfg.label}</span>
-          </div>
+          {/* Badge + nome */}
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${cfg.badge}`}>{cfg.emoji} {cfg.label}</span>
           <h2 className="text-3xl font-bold text-amber-300">{faction.name}</h2>
+          {faction.subtitle && <p className="text-slate-400 text-sm -mt-2">{faction.subtitle}</p>}
 
-          {faction.tagline && (
-            <p className="text-base italic text-slate-400 border-l-2 border-amber-700/50 pl-3">"{faction.tagline}"</p>
+          {/* Motto */}
+          {faction.motto && (
+            <p className="text-base italic text-slate-400 border-l-2 pl-3" style={{ borderColor: faction.color }}>
+              "{faction.motto}"
+            </p>
           )}
 
+          {/* Base */}
           {faction.base && (
-            <p className="text-sm text-slate-400"><span className="text-slate-500">Base:</span> {faction.base}</p>
+            <p className="text-sm text-slate-400"><span className="text-slate-500">Sede:</span> {faction.base}</p>
           )}
 
-          {faction.description && (
-            <div className="prose prose-invert prose-sm max-w-none">
-              <p className="text-slate-300 leading-7 whitespace-pre-line">{faction.description}</p>
+          {/* Barra reputazione */}
+          <div>
+            <div className="flex justify-between text-xs text-slate-500 mb-1">
+              <span>Nemica</span>
+              <span className={`font-semibold ${rep.color}`}>{rep.label} ({faction.reputation > 0 ? '+' : ''}{faction.reputation})</span>
+              <span>Alleata</span>
             </div>
+            <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+              <div className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${repPct}%`, backgroundColor: faction.color }} />
+            </div>
+          </div>
+
+          {/* Descrizione */}
+          {faction.description && (
+            <p className="text-slate-300 leading-7 whitespace-pre-line text-sm">{faction.description}</p>
           )}
         </div>
       </div>
@@ -107,15 +128,13 @@ const FactionModal: React.FC<{ faction: Faction; onClose: () => void }> = ({ fac
   );
 };
 
-/* ------------------------------------------------------------------ */
-/*  Pagina principale                                                   */
-/* ------------------------------------------------------------------ */
+/* ── Pagina principale ─────────────────────────────────────────── */
 export const FactionsPage: React.FC = () => {
-  const [factions, setFactions]       = useState<Faction[]>([]);
-  const [loading, setLoading]         = useState(true);
-  const [search, setSearch]           = useState('');
-  const [filterCat, setFilterCat]     = useState<FactionCategory | 'tutti'>('tutti');
-  const [selected, setSelected]       = useState<Faction | null>(null);
+  const [factions, setFactions]   = useState<Faction[]>([]);
+  const [loading, setLoading]     = useState(true);
+  const [search, setSearch]       = useState('');
+  const [filterCat, setFilterCat] = useState<FactionCategory | 'tutti'>('tutti');
+  const [selected, setSelected]   = useState<Faction | null>(null);
 
   useEffect(() => {
     supabase.from('factions').select('*').eq('revealed', true)
@@ -125,14 +144,16 @@ export const FactionsPage: React.FC = () => {
 
   const filtered = factions.filter(f => {
     const q = search.toLowerCase();
-    const matchSearch = !q || f.name.toLowerCase().includes(q) ||
+    const matchSearch = !q ||
+      f.name.toLowerCase().includes(q) ||
       (f.description ?? '').toLowerCase().includes(q) ||
-      (f.tagline ?? '').toLowerCase().includes(q);
+      (f.motto ?? '').toLowerCase().includes(q) ||
+      (f.subtitle ?? '').toLowerCase().includes(q);
     const matchCat = filterCat === 'tutti' || f.category === filterCat;
     return matchSearch && matchCat;
   });
 
-  const CAT_FILTERS: (FactionCategory | 'tutti')[] = ['tutti', 'mare', 'continente', 'ombra'];
+  const CAT_FILTERS: (FactionCategory | 'tutti')[] = ['tutti', 'signori_del_mare', 'istituzioni', 'societa_segrete', 'altro'];
 
   return (
     <div className="min-h-screen bg-slate-900 pt-20 pb-16">
@@ -141,9 +162,7 @@ export const FactionsPage: React.FC = () => {
         <div className="absolute inset-0 bg-cover bg-center opacity-20"
           style={{ backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`, backgroundAttachment: 'fixed' }} />
         <div className="relative z-10 text-center max-w-3xl mx-auto">
-          <div className="flex justify-center mb-4">
-            <Shield size={40} className="text-amber-500" />
-          </div>
+          <Shield size={40} className="mx-auto mb-4 text-amber-500" />
           <h1 className="text-5xl font-bold text-amber-300 mb-4">Le Fazioni di Sherdan</h1>
           <p className="text-slate-400 text-lg">
             Il potere su Sherdan non è mai monolitico. È frammentato, conteso e sporco di grasso o sangue.
@@ -195,7 +214,6 @@ export const FactionsPage: React.FC = () => {
         )}
       </div>
 
-      {/* Modal */}
       {selected && <FactionModal faction={selected} onClose={() => setSelected(null)} />}
     </div>
   );

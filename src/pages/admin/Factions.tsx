@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../utils/supabase';
-import { Faction, FactionCategory, CATEGORY_CONFIG } from '../../types/faction';
+import { Faction, FactionCategory, CATEGORY_CONFIG, reputationLabel } from '../../types/faction';
 import { AdminLayout } from '../../components/admin/AdminLayout';
 import { Plus, Pencil, Trash2, Eye, EyeOff, Shield } from 'lucide-react';
 
 const EMPTY: Omit<Faction, 'id' | 'created_at'> = {
-  name: '', category: 'mare', tagline: null, description: null,
-  base: null, image_url: null, symbol_emoji: null,
-  revealed: false, dm_notes: null,
+  name: '', subtitle: null, description: null,
+  category: 'altro', color: '#6b7280',
+  motto: null, base: null,
+  reputation: 0, revealed: false, dm_notes: null,
 };
 
 export const FactionAdminPage: React.FC = () => {
@@ -26,18 +27,19 @@ export const FactionAdminPage: React.FC = () => {
   useEffect(() => { void load(); }, []);
 
   const handleSave = async () => {
-    if (!editing || !editing.name) return;
+    if (!editing?.name) return;
     setError(''); setSaving(true);
     const payload = {
-      name:         editing.name,
-      category:     editing.category     ?? 'mare',
-      tagline:      editing.tagline      || null,
-      description:  editing.description  || null,
-      base:         editing.base         || null,
-      image_url:    editing.image_url    || null,
-      symbol_emoji: editing.symbol_emoji || null,
-      revealed:     editing.revealed     ?? false,
-      dm_notes:     editing.dm_notes     || null,
+      name:        editing.name,
+      subtitle:    editing.subtitle    || null,
+      description: editing.description || null,
+      category:    editing.category    ?? 'altro',
+      color:       editing.color       || '#6b7280',
+      motto:       editing.motto       || null,
+      base:        editing.base        || null,
+      reputation:  editing.reputation  ?? 0,
+      revealed:    editing.revealed    ?? false,
+      dm_notes:    editing.dm_notes    || null,
     };
     const { error: err } = editing.id
       ? await supabase.from('factions').update(payload).eq('id', editing.id)
@@ -57,8 +59,7 @@ export const FactionAdminPage: React.FC = () => {
   };
 
   const filtered = factions.filter(f => filter === 'tutti' || f.category === filter);
-
-  const CATS: (FactionCategory | 'tutti')[] = ['tutti', 'mare', 'continente', 'ombra'];
+  const CATS: (FactionCategory | 'tutti')[] = ['tutti', 'signori_del_mare', 'istituzioni', 'societa_segrete', 'altro'];
 
   return (
     <AdminLayout>
@@ -83,58 +84,79 @@ export const FactionAdminPage: React.FC = () => {
                 <input value={editing.name || ''} onChange={e => setEditing(p => ({ ...p!, name: e.target.value }))}
                   className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none" />
               </div>
+              {/* Sottotitolo */}
+              <div className="sm:col-span-2">
+                <label className="text-xs text-slate-400 mb-1 block">Sottotitolo</label>
+                <input value={editing.subtitle || ''} onChange={e => setEditing(p => ({ ...p!, subtitle: e.target.value }))}
+                  placeholder="es. La ciurma femminile"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none" />
+              </div>
               {/* Categoria */}
               <div>
                 <label className="text-xs text-slate-400 mb-1 block">Categoria</label>
-                <select value={editing.category || 'mare'} onChange={e => setEditing(p => ({ ...p!, category: e.target.value as FactionCategory }))}
+                <select value={editing.category || 'altro'}
+                  onChange={e => setEditing(p => ({ ...p!, category: e.target.value as FactionCategory }))}
                   className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none">
-                  <option value="mare">⚓ Signori del Mare</option>
-                  <option value="continente">🏛️ Giganti del Continente</option>
-                  <option value="ombra">🕯️ Mani nell'Ombra</option>
+                  <option value="signori_del_mare">⚓ Signori del Mare</option>
+                  <option value="istituzioni">🏛️ Giganti del Continente</option>
+                  <option value="societa_segrete">🕯️ Mani nell'Ombra</option>
+                  <option value="altro">🔰 Altra Fazione</option>
                 </select>
               </div>
-              {/* Symbol emoji */}
+              {/* Colore */}
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">Emoji simbolo (se senza immagine)</label>
-                <input value={editing.symbol_emoji || ''} onChange={e => setEditing(p => ({ ...p!, symbol_emoji: e.target.value }))}
-                  placeholder="es. ⚓ 🔥 💀"
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none" />
+                <label className="text-xs text-slate-400 mb-1 block">Colore identificativo</label>
+                <div className="flex items-center gap-2">
+                  <input type="color" value={editing.color || '#6b7280'}
+                    onChange={e => setEditing(p => ({ ...p!, color: e.target.value }))}
+                    className="w-10 h-10 rounded cursor-pointer border border-slate-600 bg-transparent p-0.5" />
+                  <input value={editing.color || ''} onChange={e => setEditing(p => ({ ...p!, color: e.target.value }))}
+                    className="flex-1 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none font-mono text-sm" />
+                </div>
               </div>
               {/* Motto */}
               <div className="sm:col-span-2">
-                <label className="text-xs text-slate-400 mb-1 block">Motto / Tagline</label>
-                <input value={editing.tagline || ''} onChange={e => setEditing(p => ({ ...p!, tagline: e.target.value }))}
+                <label className="text-xs text-slate-400 mb-1 block">Motto</label>
+                <input value={editing.motto || ''} onChange={e => setEditing(p => ({ ...p!, motto: e.target.value }))}
                   placeholder="es. Nessun padrone, nessun marito, solo il mare"
                   className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none" />
               </div>
-              {/* Base */}
+              {/* Sede */}
               <div>
                 <label className="text-xs text-slate-400 mb-1 block">Sede / Base</label>
                 <input value={editing.base || ''} onChange={e => setEditing(p => ({ ...p!, base: e.target.value }))}
                   placeholder="es. L'Isola della Vedova"
                   className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none" />
               </div>
-              {/* URL immagine */}
+              {/* Reputazione */}
               <div>
-                <label className="text-xs text-slate-400 mb-1 block">URL Immagine</label>
-                <input value={editing.image_url || ''} onChange={e => setEditing(p => ({ ...p!, image_url: e.target.value }))}
-                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none" />
+                <label className="text-xs text-slate-400 mb-1 block">
+                  Reputazione: <span className={`font-semibold ${reputationLabel(editing.reputation ?? 0).color}`}>
+                    {editing.reputation ?? 0} — {reputationLabel(editing.reputation ?? 0).label}
+                  </span>
+                </label>
+                <input type="range" min={-100} max={100} step={5}
+                  value={editing.reputation ?? 0}
+                  onChange={e => setEditing(p => ({ ...p!, reputation: Number(e.target.value) }))}
+                  className="w-full accent-amber-500" />
               </div>
               {/* Descrizione pubblica */}
               <div className="sm:col-span-2">
                 <label className="text-xs text-slate-400 mb-1 block">Descrizione pubblica</label>
-                <textarea value={editing.description || ''} onChange={e => setEditing(p => ({ ...p!, description: e.target.value }))}
+                <textarea value={editing.description || ''}
+                  onChange={e => setEditing(p => ({ ...p!, description: e.target.value }))}
                   rows={5} placeholder="Storia, caratteristiche, modus operandi..."
                   className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none resize-none" />
               </div>
               {/* Note DM */}
               <div className="sm:col-span-2">
                 <label className="text-xs text-red-400 mb-1 block">🔒 Note segrete DM</label>
-                <textarea value={editing.dm_notes || ''} onChange={e => setEditing(p => ({ ...p!, dm_notes: e.target.value }))}
+                <textarea value={editing.dm_notes || ''}
+                  onChange={e => setEditing(p => ({ ...p!, dm_notes: e.target.value }))}
                   rows={3} placeholder="Obiettivi segreti, legami con altre fazioni, trame future..."
                   className="w-full px-3 py-2 bg-slate-900/60 border border-red-900/40 rounded-lg text-white focus:border-red-600 outline-none resize-none" />
               </div>
-              {/* Reveal */}
+              {/* Revealed */}
               <div className="sm:col-span-2">
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input type="checkbox" checked={editing.revealed ?? false}
@@ -183,15 +205,16 @@ export const FactionAdminPage: React.FC = () => {
           <div className="space-y-2">
             {filtered.map(f => {
               const cfg = CATEGORY_CONFIG[f.category];
+              const rep = reputationLabel(f.reputation);
               return (
                 <div key={f.id} className="flex items-center gap-3 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3">
-                  {f.image_url
-                    ? <img src={f.image_url} alt={f.name} className="w-11 h-11 rounded-lg object-cover border border-slate-600 flex-shrink-0" />
-                    : <div className={`w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0 text-2xl bg-slate-700`}>{f.symbol_emoji ?? '🏴'}</div>}
+                  {/* Dot colore */}
+                  <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: f.color }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-amber-300 font-semibold truncate">{f.name}</p>
                     <p className="text-xs text-slate-500 truncate">{cfg.emoji} {cfg.label}{f.base ? ` · ${f.base}` : ''}</p>
                   </div>
+                  <span className={`text-xs font-semibold hidden sm:block ${rep.color}`}>{rep.label}</span>
                   <span className={`text-xs px-2 py-0.5 rounded-full border hidden sm:block ${
                     f.revealed ? 'text-green-400 border-green-700/40' : 'text-slate-500 border-slate-700'
                   }`}>{f.revealed ? 'Visibile' : 'Nascosta'}</span>
