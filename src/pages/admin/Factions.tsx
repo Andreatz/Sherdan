@@ -1,170 +1,214 @@
-import React, { useEffect, useState } from 'react'
-import { supabase } from '../../utils/supabase'
-import { Faction } from '../../types/faction'
-import { AdminLayout } from '../../components/admin/AdminLayout'
-import { Plus, Pencil, Trash2, Eye, EyeOff } from 'lucide-react'
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../../utils/supabase';
+import { Faction, FactionCategory, CATEGORY_CONFIG } from '../../types/faction';
+import { AdminLayout } from '../../components/admin/AdminLayout';
+import { Plus, Pencil, Trash2, Eye, EyeOff, Shield } from 'lucide-react';
 
 const EMPTY: Omit<Faction, 'id' | 'created_at'> = {
-  name: '', subtitle: null, description: null, category: 'altro',
-  color: '#f59e0b', motto: null, base: null, reputation: 0,
+  name: '', category: 'mare', tagline: null, description: null,
+  base: null, image_url: null, symbol_emoji: null,
   revealed: false, dm_notes: null,
-}
+};
 
 export const FactionAdminPage: React.FC = () => {
-  const [factions, setFactions] = useState<Faction[]>([])
-  const [form, setForm] = useState<Omit<Faction, 'id' | 'created_at'>>(EMPTY)
-  const [editing, setEditing] = useState<string | null>(null)
-  const [showForm, setShowForm] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [factions, setFactions] = useState<Faction[]>([]);
+  const [loading, setLoading]   = useState(true);
+  const [editing, setEditing]   = useState<Partial<Faction> | null>(null);
+  const [saving, setSaving]     = useState(false);
+  const [error, setError]       = useState('');
+  const [filter, setFilter]     = useState<FactionCategory | 'tutti'>('tutti');
 
   const load = async () => {
-    const { data } = await supabase.from('factions').select('*').order('name')
-    setFactions(data ?? [])
-    setLoading(false)
-  }
-
-  useEffect(() => { void load() }, [])
+    const { data } = await supabase.from('factions').select('*').order('category').order('name');
+    setFactions((data as Faction[]) ?? []);
+    setLoading(false);
+  };
+  useEffect(() => { void load(); }, []);
 
   const handleSave = async () => {
-    if (!form.name.trim()) return
-    if (editing) {
-      await supabase.from('factions').update(form).eq('id', editing)
-    } else {
-      await supabase.from('factions').insert(form)
-    }
-    setForm(EMPTY); setEditing(null); setShowForm(false); void load()
-  }
+    if (!editing || !editing.name) return;
+    setError(''); setSaving(true);
+    const payload = {
+      name:         editing.name,
+      category:     editing.category     ?? 'mare',
+      tagline:      editing.tagline      || null,
+      description:  editing.description  || null,
+      base:         editing.base         || null,
+      image_url:    editing.image_url    || null,
+      symbol_emoji: editing.symbol_emoji || null,
+      revealed:     editing.revealed     ?? false,
+      dm_notes:     editing.dm_notes     || null,
+    };
+    const { error: err } = editing.id
+      ? await supabase.from('factions').update(payload).eq('id', editing.id)
+      : await supabase.from('factions').insert(payload);
+    setSaving(false);
+    if (err) { setError(err.message); return; }
+    setEditing(null); load();
+  };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Eliminare questa fazione?')) return
-    await supabase.from('factions').delete().eq('id', id)
-    void load()
-  }
+    if (!confirm('Eliminare questa fazione?')) return;
+    await supabase.from('factions').delete().eq('id', id); load();
+  };
 
   const toggleReveal = async (f: Faction) => {
-    await supabase.from('factions').update({ revealed: !f.revealed }).eq('id', f.id)
-    void load()
-  }
+    await supabase.from('factions').update({ revealed: !f.revealed }).eq('id', f.id); load();
+  };
 
-  const startEdit = (f: Faction) => {
-    const { id, created_at, ...rest } = f
-    setForm(rest); setEditing(id); setShowForm(true)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+  const filtered = factions.filter(f => filter === 'tutti' || f.category === filter);
 
-  const set = (k: keyof typeof form, v: string | number | boolean | null) =>
-    setForm(prev => ({ ...prev, [k]: v }))
+  const CATS: (FactionCategory | 'tutti')[] = ['tutti', 'mare', 'continente', 'ombra'];
 
   return (
     <AdminLayout>
-      <div className="p-6 max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="font-pirata text-3xl text-amber-400">Gestione Fazioni</h1>
-          <button
-            onClick={() => { setForm(EMPTY); setEditing(null); setShowForm(true) }}
-            className="flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg transition-colors"
-          >
-            <Plus className="w-4 h-4" /> Nuova Fazione
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl text-amber-300 flex items-center gap-2"><Shield size={24} /> Fazioni</h1>
+          <button onClick={() => setEditing({ ...EMPTY })}
+            className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl transition">
+            <Plus size={16} /> Aggiungi
           </button>
         </div>
 
-        {showForm && (
-          <div className="bg-gray-800 border border-gray-600 rounded-xl p-6 mb-8">
-            <h2 className="text-amber-300 font-semibold mb-4">{editing ? 'Modifica Fazione' : 'Nuova Fazione'}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {([
-                { k: 'name', label: 'Nome *', type: 'text' },
-                { k: 'subtitle', label: 'Sottotitolo', type: 'text' },
-                { k: 'category', label: 'Categoria', type: 'text' },
-                { k: 'base', label: 'Sede', type: 'text' },
-                { k: 'motto', label: 'Motto', type: 'text' },
-                { k: 'reputation', label: 'Reputazione (-100 / +100)', type: 'number' },
-              ] as { k: keyof typeof form; label: string; type: string }[]).map(({ k, label, type }) => (
-                <div key={k}>
-                  <label className="block text-xs text-gray-400 mb-1">{label}</label>
-                  <input
-                    type={type}
-                    value={String(form[k] ?? '')}
-                    onChange={e => set(k, type === 'number' ? Number(e.target.value) : e.target.value || null)}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:border-amber-500 outline-none"
-                  />
-                </div>
-              ))}
+        {/* Form inline */}
+        {editing && (
+          <div className="mb-8 bg-slate-800 border border-amber-700/30 rounded-2xl p-6">
+            <h2 className="text-xl text-amber-300 mb-4">{editing.id ? 'Modifica' : 'Nuova'} Fazione</h2>
+            {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Nome */}
+              <div className="sm:col-span-2">
+                <label className="text-xs text-slate-400 mb-1 block">Nome *</label>
+                <input value={editing.name || ''} onChange={e => setEditing(p => ({ ...p!, name: e.target.value }))}
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none" />
+              </div>
+              {/* Categoria */}
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Colore badge</label>
-                <div className="flex items-center gap-3">
-                  <input type="color" value={form.color ?? '#f59e0b'} onChange={e => set('color', e.target.value)}
-                    className="w-10 h-10 rounded cursor-pointer bg-transparent border-0" />
-                  <span className="text-gray-400 text-sm">{form.color}</span>
-                </div>
+                <label className="text-xs text-slate-400 mb-1 block">Categoria</label>
+                <select value={editing.category || 'mare'} onChange={e => setEditing(p => ({ ...p!, category: e.target.value as FactionCategory }))}
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none">
+                  <option value="mare">⚓ Signori del Mare</option>
+                  <option value="continente">🏛️ Giganti del Continente</option>
+                  <option value="ombra">🕯️ Mani nell'Ombra</option>
+                </select>
               </div>
-              <div className="flex items-center gap-3 pt-4">
-                <input type="checkbox" id="revealed" checked={form.revealed} onChange={e => set('revealed', e.target.checked)}
-                  className="w-4 h-4 accent-amber-500" />
-                <label htmlFor="revealed" className="text-gray-300 text-sm">Visibile ai giocatori</label>
+              {/* Symbol emoji */}
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Emoji simbolo (se senza immagine)</label>
+                <input value={editing.symbol_emoji || ''} onChange={e => setEditing(p => ({ ...p!, symbol_emoji: e.target.value }))}
+                  placeholder="es. ⚓ 🔥 💀"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none" />
+              </div>
+              {/* Motto */}
+              <div className="sm:col-span-2">
+                <label className="text-xs text-slate-400 mb-1 block">Motto / Tagline</label>
+                <input value={editing.tagline || ''} onChange={e => setEditing(p => ({ ...p!, tagline: e.target.value }))}
+                  placeholder="es. Nessun padrone, nessun marito, solo il mare"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none" />
+              </div>
+              {/* Base */}
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">Sede / Base</label>
+                <input value={editing.base || ''} onChange={e => setEditing(p => ({ ...p!, base: e.target.value }))}
+                  placeholder="es. L'Isola della Vedova"
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none" />
+              </div>
+              {/* URL immagine */}
+              <div>
+                <label className="text-xs text-slate-400 mb-1 block">URL Immagine</label>
+                <input value={editing.image_url || ''} onChange={e => setEditing(p => ({ ...p!, image_url: e.target.value }))}
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none" />
+              </div>
+              {/* Descrizione pubblica */}
+              <div className="sm:col-span-2">
+                <label className="text-xs text-slate-400 mb-1 block">Descrizione pubblica</label>
+                <textarea value={editing.description || ''} onChange={e => setEditing(p => ({ ...p!, description: e.target.value }))}
+                  rows={5} placeholder="Storia, caratteristiche, modus operandi..."
+                  className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:border-amber-600 outline-none resize-none" />
+              </div>
+              {/* Note DM */}
+              <div className="sm:col-span-2">
+                <label className="text-xs text-red-400 mb-1 block">🔒 Note segrete DM</label>
+                <textarea value={editing.dm_notes || ''} onChange={e => setEditing(p => ({ ...p!, dm_notes: e.target.value }))}
+                  rows={3} placeholder="Obiettivi segreti, legami con altre fazioni, trame future..."
+                  className="w-full px-3 py-2 bg-slate-900/60 border border-red-900/40 rounded-lg text-white focus:border-red-600 outline-none resize-none" />
+              </div>
+              {/* Reveal */}
+              <div className="sm:col-span-2">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" checked={editing.revealed ?? false}
+                    onChange={e => setEditing(p => ({ ...p!, revealed: e.target.checked }))}
+                    className="accent-amber-500 w-4 h-4" />
+                  <span className="text-slate-300 text-sm">Visibile ai giocatori</span>
+                </label>
               </div>
             </div>
-            <div className="mt-4">
-              <label className="block text-xs text-gray-400 mb-1">Descrizione</label>
-              <textarea
-                rows={4}
-                value={form.description ?? ''}
-                onChange={e => set('description', e.target.value || null)}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:border-amber-500 outline-none resize-none"
-              />
-            </div>
-            <div className="mt-4">
-              <label className="block text-xs text-gray-400 mb-1">Note DM (private)</label>
-              <textarea
-                rows={3}
-                value={form.dm_notes ?? ''}
-                onChange={e => set('dm_notes', e.target.value || null)}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:border-amber-500 outline-none resize-none"
-              />
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button onClick={handleSave} className="bg-amber-600 hover:bg-amber-500 text-white px-6 py-2 rounded-lg transition-colors">Salva</button>
-              <button onClick={() => { setShowForm(false); setEditing(null); setForm(EMPTY) }}
-                className="border border-gray-600 text-gray-400 hover:text-white px-6 py-2 rounded-lg transition-colors">Annulla</button>
+            <div className="flex gap-3 mt-5">
+              <button onClick={handleSave} disabled={saving}
+                className="bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white px-6 py-2 rounded-xl font-semibold transition">
+                {saving ? 'Salvo...' : 'Salva'}
+              </button>
+              <button onClick={() => setEditing(null)}
+                className="bg-slate-700 hover:bg-slate-600 text-slate-200 px-6 py-2 rounded-xl transition">Annulla</button>
             </div>
           </div>
         )}
 
+        {/* Filtri */}
+        <div className="flex flex-wrap gap-2 mb-5">
+          {CATS.map(c => {
+            const cfg = c !== 'tutti' ? CATEGORY_CONFIG[c] : null;
+            return (
+              <button key={c} onClick={() => setFilter(c)}
+                className={`px-3 py-1 rounded-full text-xs border transition ${
+                  filter === c ? 'bg-amber-600 border-amber-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-amber-700'
+                }`}>
+                {c === 'tutti' ? 'Tutte' : `${cfg!.emoji} ${cfg!.label}`}
+              </button>
+            );
+          })}
+          <span className="ml-auto text-xs text-slate-600 self-center">{filtered.length} fazioni</span>
+        </div>
+
+        {/* Lista */}
         {loading ? (
-          <p className="text-gray-500 text-center py-12">Caricamento...</p>
-        ) : factions.length === 0 ? (
-          <p className="text-gray-500 text-center py-12">Nessuna fazione creata.</p>
+          <p className="text-slate-500 text-center py-12">Caricamento...</p>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-16">
+            <Shield size={40} className="mx-auto text-slate-700 mb-3" />
+            <p className="text-slate-500">Nessuna fazione. Aggiungine una!</p>
+          </div>
         ) : (
-          <div className="space-y-3">
-            {factions.map(f => (
-              <div key={f.id} className="bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center justify-between gap-4">
-                <div className="flex items-center gap-4 flex-1 min-w-0">
-                  <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: f.color ?? '#6b7280' }} />
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-pirata text-lg text-amber-300 truncate">{f.name}</p>
-                      {!f.revealed && <span className="text-xs bg-gray-700 text-gray-400 px-2 py-0.5 rounded-full">Nascosta</span>}
-                    </div>
-                    <p className="text-xs text-gray-500">{f.category ?? ''} {f.base ? `· ${f.base}` : ''} · Rep: {f.reputation ?? 0}</p>
+          <div className="space-y-2">
+            {filtered.map(f => {
+              const cfg = CATEGORY_CONFIG[f.category];
+              return (
+                <div key={f.id} className="flex items-center gap-3 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3">
+                  {f.image_url
+                    ? <img src={f.image_url} alt={f.name} className="w-11 h-11 rounded-lg object-cover border border-slate-600 flex-shrink-0" />
+                    : <div className={`w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0 text-2xl bg-slate-700`}>{f.symbol_emoji ?? '🏴'}</div>}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-amber-300 font-semibold truncate">{f.name}</p>
+                    <p className="text-xs text-slate-500 truncate">{cfg.emoji} {cfg.label}{f.base ? ` · ${f.base}` : ''}</p>
+                  </div>
+                  <span className={`text-xs px-2 py-0.5 rounded-full border hidden sm:block ${
+                    f.revealed ? 'text-green-400 border-green-700/40' : 'text-slate-500 border-slate-700'
+                  }`}>{f.revealed ? 'Visibile' : 'Nascosta'}</span>
+                  <div className="flex gap-1">
+                    <button onClick={() => toggleReveal(f)} title={f.revealed ? 'Nascondi' : 'Rivela'}
+                      className="p-2 text-slate-400 hover:text-amber-300 transition">
+                      {f.revealed ? <EyeOff size={15} /> : <Eye size={15} />}
+                    </button>
+                    <button onClick={() => setEditing({ ...f })} className="p-2 text-slate-400 hover:text-amber-300 transition"><Pencil size={15} /></button>
+                    <button onClick={() => handleDelete(f.id)} className="p-2 text-slate-400 hover:text-red-400 transition"><Trash2 size={15} /></button>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <button onClick={() => toggleReveal(f)} title={f.revealed ? 'Nascondi' : 'Rivela'}
-                    className={`p-2 rounded-lg transition-colors ${ f.revealed ? 'text-green-400 hover:bg-green-900/30' : 'text-gray-500 hover:bg-gray-700' }`}>
-                    {f.revealed ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-                  </button>
-                  <button onClick={() => startEdit(f)} className="p-2 text-blue-400 hover:bg-blue-900/30 rounded-lg transition-colors">
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handleDelete(f.id)} className="p-2 text-red-400 hover:bg-red-900/30 rounded-lg transition-colors">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
     </AdminLayout>
-  )
-}
+  );
+};

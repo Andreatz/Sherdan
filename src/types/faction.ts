@@ -1,30 +1,21 @@
+export type FactionCategory = 'mare' | 'continente' | 'ombra';
+
 export interface Faction {
-  id: string
-  name: string
-  subtitle: string | null
-  description: string | null
-  category: string | null
-  color: string | null
-  motto: string | null
-  base: string | null
-  reputation: number | null
-  revealed: boolean
-  dm_notes: string | null
-  created_at: string
+  id: string;
+  name: string;
+  category: FactionCategory;
+  tagline: string | null;        // motto o slogan breve
+  description: string | null;    // testo pubblico lungo
+  base: string | null;           // es. "L'Isola della Vedova"
+  image_url: string | null;
+  symbol_emoji: string | null;   // emoji rapida se non c'è immagine
+  revealed: boolean;
+  dm_notes: string | null;
+  created_at: string;
 }
 
-export const REPUTATION_LABELS: Record<string, { label: string; color: string }> = {
-  alleata:  { label: 'Alleata',  color: 'text-green-400 border-green-400' },
-  amica:    { label: 'Amica',    color: 'text-blue-400 border-blue-400' },
-  neutrale: { label: 'Neutrale', color: 'text-gray-400 border-gray-400' },
-  ostile:   { label: 'Ostile',   color: 'text-orange-400 border-orange-400' },
-  nemica:   { label: 'Nemica',   color: 'text-red-400 border-red-400' },
-}
-
-export function reputationLevel(rep: number): string {
-  if (rep >= 75)  return 'alleata'
-  if (rep >= 25)  return 'amica'
-  if (rep >= -24) return 'neutrale'
-  if (rep >= -74) return 'ostile'
-  return 'nemica'
-}
+export const CATEGORY_CONFIG: Record<FactionCategory, { label: string; color: string; border: string; badge: string; emoji: string }> = {
+  mare:       { label: 'Signori del Mare',            color: 'from-sky-950/60',    border: 'border-sky-700/40',    badge: 'bg-sky-900/60 text-sky-300 border-sky-700/50',    emoji: '⚓' },
+  continente: { label: 'Giganti del Continente',      color: 'from-amber-950/60',  border: 'border-amber-700/40',  badge: 'bg-amber-900/60 text-amber-300 border-amber-700/50', emoji: '🏛️' },
+  ombra:      { label: 'Mani nell\'Ombra',            color: 'from-purple-950/60', border: 'border-purple-700/40', badge: 'bg-purple-900/60 text-purple-300 border-purple-700/50', emoji: '🕯️' },
+};
