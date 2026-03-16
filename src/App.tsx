@@ -37,6 +37,7 @@ import { BestiaryAdminPage } from './pages/admin/Bestiary';
 import { NpcAdminPage } from './pages/admin/NPC';
 import { FactionAdminPage } from './pages/admin/Factions';
 import { TimelineAdminPage } from './pages/admin/Timeline';
+import { DiaryPage } from './pages/admin/Diary';
 const ScrollToSection: React.FC = () => {
   const location = useLocation();
   useEffect(() => {
@@ -88,6 +89,7 @@ function App() {
           <Route path="/admin/npc" element={<ProtectedRoute requireAdmin><NpcAdminPage /></ProtectedRoute>} />
           <Route path="/admin/factions" element={<ProtectedRoute requireAdmin><FactionAdminPage /></ProtectedRoute>} />
           <Route path="/admin/timeline" element={<ProtectedRoute requireAdmin><TimelineAdminPage /></ProtectedRoute>} />
+                  <Route path="/admin/diary" element={<ProtectedRoute requireAdmin><DiaryPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
