@@ -1,22 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, LogOut, Settings, Scroll, Sword, MapPin, Skull, ChevronDown, BookOpen, Map, Home, Image } from 'lucide-react';
+import { Menu, X, LogOut, Settings, Scroll, Sword, MapPin, Skull, ChevronDown, BookOpen, Map, Home, Image, Users } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { it } from '../../content/texts';
 import { DiceRoller } from './DiceRoller';
 
-// Gruppi di link desktop
 const EXPLORE_LINKS = [
-  { label: 'Campagna',  href: '/#campaign',   icon: BookOpen },
-  { label: 'Personaggi', href: '/#characters', icon: Scroll  },
-  { label: 'Sessioni',  href: '/#sessions',   icon: BookOpen },
-  { label: 'Galleria',  href: '/#gallery',    icon: Image   },
+  { label: 'Campagna',    href: '/#campaign',   icon: BookOpen },
+  { label: 'Personaggi', href: '/#characters',  icon: Scroll   },
+  { label: 'Sessioni',   href: '/#sessions',    icon: BookOpen },
+  { label: 'Galleria',   href: '/#gallery',     icon: Image    },
 ];
 
 const WORLD_LINKS = [
-  { label: 'Mappa',     href: '/#map',        icon: Map     },
-  { label: 'Luoghi',    href: '/luoghi',      icon: MapPin  },
-  { label: 'Bestiario', href: '/bestiario',   icon: Skull   },
+  { label: 'Mappa',      href: '/#map',         icon: Map      },
+  { label: 'Luoghi',     href: '/luoghi',       icon: MapPin   },
+  { label: 'NPC',        href: '/npc',          icon: Users    },
+  { label: 'Bestiario',  href: '/bestiario',    icon: Skull    },
 ];
 
 const Dropdown: React.FC<{
@@ -40,19 +40,15 @@ const Dropdown: React.FC<{
     if (href.startsWith('/#')) {
       if (window.location.pathname !== '/') { navigate('/', { state: { scrollTo: href.slice(2) } }); }
       else { document.getElementById(href.slice(2))?.scrollIntoView({ behavior: 'smooth' }); }
-    } else {
-      navigate(href);
-    }
+    } else { navigate(href); }
   };
 
   return (
     <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen(v => !v)}
+      <button onClick={() => setOpen(v => !v)}
         className={`flex items-center gap-1 text-sm font-medium transition ${
           open ? 'text-amber-300' : 'text-slate-200 hover:text-amber-300'
-        }`}
-      >
+        }`}>
         {label} <ChevronDown size={13} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
@@ -79,10 +75,8 @@ export const Navigation: React.FC = () => {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    try { await signOut(); navigate('/'); }
-    catch (e) { console.error(e); }
+    try { await signOut(); navigate('/'); } catch (e) { console.error(e); }
   };
-
   const close = () => setIsOpen(false);
 
   return (
@@ -91,19 +85,17 @@ export const Navigation: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between h-16">
 
-            {/* Logo */}
             <button onClick={() => navigate('/')} className="flex items-center hover:opacity-80 transition" aria-label="Home">
               <img src="/Logo Sherdan.png" alt="Logo Sherdan" className="h-24 w-auto object-contain" />
             </button>
 
-            {/* Desktop nav */}
+            {/* Desktop */}
             <div className="hidden md:flex items-center gap-5">
               <button onClick={() => navigate('/')} className="flex items-center gap-1 text-sm text-slate-200 hover:text-amber-300 transition">
                 <Home size={14} /> Home
               </button>
               <Dropdown label="Campagna" links={EXPLORE_LINKS} />
               <Dropdown label="Mondo"    links={WORLD_LINKS}   />
-
               {user && !isAdmin && (
                 <>
                   <button onClick={() => navigate('/personaggio')}
@@ -122,14 +114,11 @@ export const Navigation: React.FC = () => {
               )}
             </div>
 
-            {/* Desktop: dado + auth */}
             <div className="hidden md:flex items-center gap-2">
-              <button onClick={() => setShowDice(v => !v)} title="Tiro dadi"
+              <button onClick={() => setShowDice(v => !v)}
                 className={`text-lg px-3 py-1.5 rounded-lg transition ${
                   showDice ? 'bg-amber-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-amber-300'
-                }`}>
-                🎲
-              </button>
+                }`}>🎲</button>
               {!user && (
                 <button onClick={() => navigate('/auth/login')}
                   className="bg-slate-700 hover:bg-slate-600 text-amber-100 px-3 py-1.5 rounded-lg text-sm transition">
@@ -162,7 +151,6 @@ export const Navigation: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile menu */}
           {isOpen && (
             <div className="md:hidden pb-4 pt-3 space-y-1 border-t border-amber-700/20">
               <p className="px-4 pt-1 pb-0.5 text-xs text-slate-600 uppercase tracking-widest">Campagna</p>

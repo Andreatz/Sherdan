@@ -5,11 +5,11 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Navigation } from './components/shared/Navigation';
 import { Footer } from './components/shared/Footer';
 
-// Auth Pages
+// Auth
 import { Login } from './pages/auth/Login';
 import { Signup } from './pages/auth/Signup';
 
-// Public Pages
+// Public
 import { Home } from './pages/public/Home';
 import { CampaignPage } from './pages/public/Campaign';
 import { CharactersPage } from './pages/public/Characters';
@@ -20,13 +20,14 @@ import { GalleryPage } from './pages/public/Gallery';
 import { RegionPage } from './pages/public/RegionPage';
 import { LocationsPage } from './pages/public/Locations';
 import { BestiaryPage } from './pages/public/Bestiary';
+import { NpcPage } from './pages/public/NPC';
 
-// Player Pages
+// Player
 import { MyCharacterPage } from './pages/player/MyCharacter';
 import { MissionsPage } from './pages/player/Missions';
 import { SessionNotesPage } from './pages/player/SessionNotes';
 
-// Admin Pages
+// Admin
 import { DashboardPage } from './pages/admin/Dashboard';
 import { CharactersPage as AdminCharactersPage } from './pages/admin/Characters';
 import { SessionsPage as AdminSessionsPage } from './pages/admin/Sessions';
@@ -35,6 +36,7 @@ import { LocationsPage as AdminLocationsPage } from './pages/admin/Locations';
 import { GalleryPage as AdminGalleryPage } from './pages/admin/Gallery';
 import { SettingsPage } from './pages/admin/Settings';
 import { BestiaryAdminPage } from './pages/admin/Bestiary';
+import { NpcAdminPage } from './pages/admin/NPC';
 
 const ScrollToSection: React.FC = () => {
   const location = useLocation();
@@ -43,12 +45,8 @@ const ScrollToSection: React.FC = () => {
     if (state?.scrollTo) {
       const tryScroll = (attempts = 0) => {
         const el = document.getElementById(state.scrollTo!);
-        if (el) {
-          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          window.history.replaceState({}, '');
-        } else if (attempts < 10) {
-          setTimeout(() => tryScroll(attempts + 1), 150);
-        }
+        if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); window.history.replaceState({}, ''); }
+        else if (attempts < 10) { setTimeout(() => tryScroll(attempts + 1), 150); }
       };
       tryScroll();
     }
@@ -62,58 +60,27 @@ function App() {
       <AuthProvider>
         <ScrollToSection />
         <Routes>
-          {/* Auth */}
           <Route path="/auth/login"  element={<Login />} />
           <Route path="/auth/signup" element={<Signup />} />
 
-          {/* Home */}
           <Route path="/" element={
-            <>
-              <Navigation />
+            <><Navigation />
               <div className="bg-slate-900">
-                <Home />
-                <CampaignPage />
-                <CharactersPage />
-                <SessionsPreview />
-                <MapPage />
-                <GalleryPage />
+                <Home /><CampaignPage /><CharactersPage /><SessionsPreview /><MapPage /><GalleryPage />
               </div>
-              <Footer />
-            </>
+              <Footer /></>
           } />
 
-          {/* Sessioni */}
-          <Route path="/sessioni" element={
-            <ProtectedRoute><Navigation /><SessionsPage /><Footer /></ProtectedRoute>
-          } />
+          <Route path="/sessioni"  element={<ProtectedRoute><Navigation /><SessionsPage /><Footer /></ProtectedRoute>} />
+          <Route path="/luoghi"    element={<><Navigation /><LocationsPage /><Footer /></>} />
+          <Route path="/bestiario" element={<><Navigation /><BestiaryPage /><Footer /></>} />
+          <Route path="/npc"       element={<><Navigation /><NpcPage /><Footer /></>} />
+          <Route path="/mappa/:regionSlug" element={<><Navigation /><RegionPage /><Footer /></>} />
 
-          {/* Luoghi */}
-          <Route path="/luoghi" element={
-            <><Navigation /><LocationsPage /><Footer /></>
-          } />
+          <Route path="/personaggio" element={<ProtectedRoute><Navigation /><MyCharacterPage /><Footer /></ProtectedRoute>} />
+          <Route path="/missioni"    element={<ProtectedRoute><MissionsPage /></ProtectedRoute>} />
+          <Route path="/note"        element={<ProtectedRoute><SessionNotesPage /></ProtectedRoute>} />
 
-          {/* Regioni */}
-          <Route path="/mappa/:regionSlug" element={
-            <><Navigation /><RegionPage /><Footer /></>
-          } />
-
-          {/* Bestiario */}
-          <Route path="/bestiario" element={
-            <><Navigation /><BestiaryPage /><Footer /></>
-          } />
-
-          {/* Player */}
-          <Route path="/personaggio" element={
-            <ProtectedRoute><Navigation /><MyCharacterPage /><Footer /></ProtectedRoute>
-          } />
-          <Route path="/missioni" element={
-            <ProtectedRoute><MissionsPage /></ProtectedRoute>
-          } />
-          <Route path="/note" element={
-            <ProtectedRoute><SessionNotesPage /></ProtectedRoute>
-          } />
-
-          {/* Admin */}
           <Route path="/admin"            element={<ProtectedRoute requireAdmin><DashboardPage /></ProtectedRoute>} />
           <Route path="/admin/characters" element={<ProtectedRoute requireAdmin><AdminCharactersPage /></ProtectedRoute>} />
           <Route path="/admin/sessions"   element={<ProtectedRoute requireAdmin><AdminSessionsPage /></ProtectedRoute>} />
@@ -122,6 +89,7 @@ function App() {
           <Route path="/admin/gallery"    element={<ProtectedRoute requireAdmin><AdminGalleryPage /></ProtectedRoute>} />
           <Route path="/admin/settings"   element={<ProtectedRoute requireAdmin><SettingsPage /></ProtectedRoute>} />
           <Route path="/admin/bestiary"   element={<ProtectedRoute requireAdmin><BestiaryAdminPage /></ProtectedRoute>} />
+          <Route path="/admin/npc"        element={<ProtectedRoute requireAdmin><NpcAdminPage /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
