@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../utils/supabase';
 import { NPC, NpcRelationship, NpcStatus, REL_LABELS, STATUS_LABELS } from '../../types/npc';
-import { Search, Users, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Search, Users, X } from 'lucide-react';
 
 /* ── Modal NPC ─────────────────────────────────────────────────── */
 const NpcModal: React.FC<{ npc: NPC; onClose: () => void }> = ({ npc, onClose }) => {
@@ -20,13 +20,10 @@ const NpcModal: React.FC<{ npc: NPC; onClose: () => void }> = ({ npc, onClose })
       <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
       <div onClick={e => e.stopPropagation()}
         className="relative bg-slate-900 border border-amber-700/30 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
-
-        {/* Immagine hero */}
         {npc.image_url ? (
           <div className="relative h-72 overflow-hidden rounded-t-2xl">
             <img src={npc.image_url} alt={npc.name} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
-            {/* Badge su immagine */}
             <span className={`absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full border ${rel.color} bg-slate-900/80`}>
               {rel.emoji} {rel.label}
             </span>
@@ -41,15 +38,11 @@ const NpcModal: React.FC<{ npc: NPC; onClose: () => void }> = ({ npc, onClose })
             <Users size={36} className="text-slate-700" />
           </div>
         )}
-
-        {/* Close */}
         <button onClick={onClose}
           className="absolute top-4 right-4 bg-slate-800/90 hover:bg-slate-700 text-slate-300 rounded-full p-1.5 transition z-10">
           <X size={16} />
         </button>
-
         <div className="p-6 space-y-4">
-          {/* Header */}
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-3xl font-bold text-amber-300">{npc.name}</h2>
@@ -63,28 +56,20 @@ const NpcModal: React.FC<{ npc: NPC; onClose: () => void }> = ({ npc, onClose })
               {status.label}
             </span>
           </div>
-
-          {/* Badge relazione (se no immagine) */}
           {!npc.image_url && (
             <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${rel.color}`}>
               {rel.emoji} {rel.label}
             </span>
           )}
-
-          {/* Descrizione completa */}
           {npc.description && (
             <p className="text-slate-300 leading-7 text-sm whitespace-pre-line">{npc.description}</p>
           )}
-
-          {/* Tratti fisici */}
           {npc.physical_traits && (
             <div>
               <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Aspetto</h4>
               <p className="text-sm text-slate-400">{npc.physical_traits}</p>
             </div>
           )}
-
-          {/* Personalità */}
           {npc.personality && (
             <div>
               <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Personalità</h4>
@@ -105,8 +90,6 @@ const NpcCard: React.FC<{ npc: NPC; onClick: () => void }> = ({ npc, onClick }) 
   return (
     <button onClick={onClick}
       className="group text-left bg-slate-800/70 border border-amber-700/20 rounded-2xl overflow-hidden hover:border-amber-600/40 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 w-full">
-
-      {/* Immagine */}
       <div className="relative h-56 bg-slate-900 overflow-hidden">
         {npc.image_url ? (
           <img src={npc.image_url} alt={npc.name}
@@ -125,8 +108,6 @@ const NpcCard: React.FC<{ npc: NPC; onClick: () => void }> = ({ npc, onClick }) 
           </span>
         )}
       </div>
-
-      {/* Contenuto */}
       <div className="p-4">
         <div className="flex items-start justify-between gap-2 mb-1">
           <h3 className="text-lg font-bold text-amber-300 leading-tight">{npc.name}</h3>
@@ -134,19 +115,14 @@ const NpcCard: React.FC<{ npc: NPC; onClick: () => void }> = ({ npc, onClick }) 
             {status.label}
           </span>
         </div>
-
         {(npc.role || npc.faction) && (
           <p className="text-xs text-slate-500 mb-2">
             {npc.role}{npc.role && npc.faction ? ' · ' : ''}{npc.faction}
           </p>
         )}
-
         {npc.description && (
-          <p className="text-sm text-slate-300 leading-relaxed line-clamp-3">
-            {npc.description}
-          </p>
+          <p className="text-sm text-slate-300 leading-relaxed line-clamp-3">{npc.description}</p>
         )}
-
         <p className="mt-2 text-xs text-amber-600 font-semibold">Leggi tutto →</p>
       </div>
     </button>
@@ -186,16 +162,23 @@ export const NpcPage: React.FC = () => {
   const STATUS_FILTERS: (NpcStatus | 'tutti')[]    = ['tutti','vivo','morto','sconosciuto'];
 
   return (
-    <div className="min-h-screen bg-slate-900 pt-24 pb-16 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-5xl mb-3">Personaggi Incontrati</h1>
-          <p className="text-slate-400 max-w-xl mx-auto">
+    <div className="min-h-screen bg-slate-900 pb-16">
+      {/* Hero con parallax */}
+      <div className="relative py-24 px-6 overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-20"
+          style={{ backgroundImage: `url('/backgrounds/Landing Page Sherdan.png')`, backgroundAttachment: 'fixed' }}
+        />
+        <div className="relative z-10 text-center max-w-3xl mx-auto">
+          <Users size={40} className="mx-auto mb-4 text-amber-500" />
+          <h1 className="text-4xl md:text-5xl font-bold text-amber-300 mb-4">Personaggi Incontrati</h1>
+          <p className="text-slate-400 text-lg max-w-xl mx-auto">
             Gli NPC che la compagnia ha conosciuto durante il viaggio. Aggiornato dal DM dopo ogni sessione.
           </p>
         </div>
+      </div>
 
+      <div className="max-w-6xl mx-auto px-4">
         {/* Filtri */}
         <div className="space-y-3 mb-10">
           <div className="relative">
@@ -204,7 +187,6 @@ export const NpcPage: React.FC = () => {
               value={search} onChange={e => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-600 transition" />
           </div>
-
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-xs text-slate-600 mr-1">Relazione:</span>
             {REL_FILTERS.map(f => (
@@ -216,7 +198,6 @@ export const NpcPage: React.FC = () => {
               </button>
             ))}
           </div>
-
           <div className="flex flex-wrap gap-2 items-center">
             <span className="text-xs text-slate-600 mr-1">Stato:</span>
             {STATUS_FILTERS.map(f => (
@@ -228,7 +209,6 @@ export const NpcPage: React.FC = () => {
               </button>
             ))}
           </div>
-
           {zones.length > 1 && (
             <div className="flex flex-wrap gap-2 items-center">
               <span className="text-xs text-slate-600 mr-1">Zona:</span>
