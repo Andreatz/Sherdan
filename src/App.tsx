@@ -21,10 +21,13 @@ import { BestiaryPage } from './pages/public/Bestiary';
 import { NpcPage } from './pages/public/NPC';
 import { FactionsPage } from './pages/public/Factions';
 import { TimelinePage } from './pages/public/Timeline';
+import { LorePage } from './pages/public/Lore';
+import { InteractiveMapPage } from './pages/public/InteractiveMap';
 // Player
 import { MyCharacterPage } from './pages/player/MyCharacter';
 import { MissionsPage } from './pages/player/Missions';
 import { SessionNotesPage } from './pages/player/SessionNotes';
+import { CharacterDiaryPage } from './pages/player/CharacterDiary';
 // Admin
 import { DashboardPage } from './pages/admin/Dashboard';
 import { CharactersPage as AdminCharactersPage } from './pages/admin/Characters';
@@ -38,6 +41,8 @@ import { NpcAdminPage } from './pages/admin/NPC';
 import { FactionAdminPage } from './pages/admin/Factions';
 import { TimelineAdminPage } from './pages/admin/Timeline';
 import { DiaryPage } from './pages/admin/Diary';
+import { LoreAdminPage } from './pages/admin/Lore';
+
 const ScrollToSection: React.FC = () => {
   const location = useLocation();
   useEffect(() => {
@@ -53,6 +58,7 @@ const ScrollToSection: React.FC = () => {
   }, [location.state]);
   return null;
 };
+
 function App() {
   return (
     <Router>
@@ -75,9 +81,12 @@ function App() {
           <Route path="/fazioni" element={<><Navigation /><FactionsPage /><Footer /></>} />
           <Route path="/cronistoria" element={<><Navigation /><TimelinePage /><Footer /></>} />
           <Route path="/mappa/:regionSlug" element={<><Navigation /><RegionPage /><Footer /></>} />
+          <Route path="/lore" element={<LorePage />} />
+          <Route path="/mappa-mondo" element={<InteractiveMapPage />} />
           <Route path="/personaggio" element={<ProtectedRoute><Navigation /><MyCharacterPage /><Footer /></ProtectedRoute>} />
           <Route path="/missioni" element={<ProtectedRoute><MissionsPage /></ProtectedRoute>} />
           <Route path="/note" element={<ProtectedRoute><SessionNotesPage /></ProtectedRoute>} />
+          <Route path="/diario" element={<ProtectedRoute><CharacterDiaryPage /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute requireAdmin><DashboardPage /></ProtectedRoute>} />
           <Route path="/admin/characters" element={<ProtectedRoute requireAdmin><AdminCharactersPage /></ProtectedRoute>} />
           <Route path="/admin/sessions" element={<ProtectedRoute requireAdmin><AdminSessionsPage /></ProtectedRoute>} />
@@ -90,6 +99,7 @@ function App() {
           <Route path="/admin/factions" element={<ProtectedRoute requireAdmin><FactionAdminPage /></ProtectedRoute>} />
           <Route path="/admin/timeline" element={<ProtectedRoute requireAdmin><TimelineAdminPage /></ProtectedRoute>} />
           <Route path="/admin/diary" element={<ProtectedRoute requireAdmin><DiaryPage /></ProtectedRoute>} />
+          <Route path="/admin/lore" element={<ProtectedRoute requireAdmin><LoreAdminPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
