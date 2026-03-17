@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, LogOut, Settings, Scroll, Sword, MapPin, Skull, ChevronDown, BookOpen, Map, Home, Image, Users, Shield, BookMarked, Book } from 'lucide-react';
+import { Menu, X, LogOut, Settings, Scroll, Sword, MapPin, Skull, ChevronDown, BookOpen, Map, Home, Image, Users, Shield, BookMarked, Book, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { it } from '../../content/texts';
@@ -13,12 +13,13 @@ const EXPLORE_LINKS = [
   { label: 'Galleria',   href: '/#gallery',      icon: Image    },
 ];
 const WORLD_LINKS = [
-  { label: 'Mappa Interattiva', href: '/mappa-mondo', icon: Map       },
-  { label: 'Luoghi',            href: '/luoghi',      icon: MapPin    },
+  { label: 'Mappa Interattiva', href: '/mappa-mondo', icon: Map        },
+  { label: 'Luoghi',            href: '/luoghi',      icon: MapPin     },
   { label: 'Lore',              href: '/lore',        icon: BookMarked },
-  { label: 'NPC',               href: '/npc',         icon: Users     },
-  { label: 'Bestiario',         href: '/bestiario',   icon: Skull     },
-  { label: 'Fazioni',           href: '/fazioni',     icon: Shield    },
+  { label: 'Cronistoria',       href: '/cronistoria', icon: BookOpen   },
+  { label: 'NPC',               href: '/npc',         icon: Users      },
+  { label: 'Bestiario',         href: '/bestiario',   icon: Skull      },
+  { label: 'Fazioni',           href: '/fazioni',     icon: Shield     },
 ];
 
 const Dropdown: React.FC<{
@@ -83,6 +84,7 @@ export const Navigation: React.FC = () => {
             <Dropdown label="Mondo" links={WORLD_LINKS} />
             {user && !isAdmin && (
               <>
+                <button onClick={() => navigate('/dashboard')} className="flex items-center gap-1.5 text-sm text-amber-400 hover:text-amber-300 font-semibold transition"><LayoutDashboard className="w-4 h-4" /> Dashboard</button>
                 <button onClick={() => navigate('/personaggio')} className="flex items-center gap-1.5 text-sm text-amber-400 hover:text-amber-300 font-semibold transition"><Scroll className="w-4 h-4" /> Il mio PG</button>
                 <button onClick={() => navigate('/missioni')} className="flex items-center gap-1.5 text-sm text-amber-400 hover:text-amber-300 font-semibold transition"><Sword className="w-4 h-4" /> Missioni</button>
                 <button onClick={() => navigate('/note')} className="flex items-center gap-1.5 text-sm text-amber-400 hover:text-amber-300 font-semibold transition"><BookOpen className="w-4 h-4" /> Note</button>
@@ -119,6 +121,7 @@ export const Navigation: React.FC = () => {
             {user && !isAdmin && (
               <>
                 <p className="text-xs text-slate-500 uppercase tracking-widest px-4 mt-4 mb-2">Il mio personaggio</p>
+                <button onClick={() => { navigate('/dashboard'); close(); }} className="w-full text-left flex items-center gap-2 px-4 py-2 text-amber-400 hover:bg-slate-800 rounded text-sm">Dashboard</button>
                 <button onClick={() => { navigate('/personaggio'); close(); }} className="w-full text-left flex items-center gap-2 px-4 py-2 text-amber-400 hover:bg-slate-800 rounded text-sm">Il mio PG</button>
                 <button onClick={() => { navigate('/missioni'); close(); }} className="w-full text-left flex items-center gap-2 px-4 py-2 text-amber-400 hover:bg-slate-800 rounded text-sm">Missioni</button>
                 <button onClick={() => { navigate('/note'); close(); }} className="w-full text-left flex items-center gap-2 px-4 py-2 text-amber-400 hover:bg-slate-800 rounded text-sm">Note</button>

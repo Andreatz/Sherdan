@@ -23,11 +23,13 @@ import { FactionsPage } from './pages/public/Factions';
 import { TimelinePage } from './pages/public/Timeline';
 import { LorePage } from './pages/public/Lore';
 import { InteractiveMapPage } from './pages/public/InteractiveMap';
+import { CharacterProfilePage } from './pages/public/CharacterProfile';
 // Player
 import { MyCharacterPage } from './pages/player/MyCharacter';
 import { MissionsPage } from './pages/player/Missions';
 import { SessionNotesPage } from './pages/player/SessionNotes';
 import { CharacterDiaryPage } from './pages/player/CharacterDiary';
+import { PlayerDashboard } from './pages/player/Dashboard';
 // Admin
 import { DashboardPage } from './pages/admin/Dashboard';
 import { CharactersPage as AdminCharactersPage } from './pages/admin/Characters';
@@ -84,10 +86,12 @@ function App() {
           <Route path="/mappa/:regionSlug" element={<><Navigation /><RegionPage /><Footer /></>} />
           <Route path="/lore" element={<LorePage />} />
           <Route path="/mappa-mondo" element={<InteractiveMapPage />} />
+          <Route path="/personaggi/:slug" element={<CharacterProfilePage />} />
           <Route path="/personaggio" element={<ProtectedRoute><Navigation /><MyCharacterPage /><Footer /></ProtectedRoute>} />
           <Route path="/missioni" element={<ProtectedRoute><MissionsPage /></ProtectedRoute>} />
           <Route path="/note" element={<ProtectedRoute><SessionNotesPage /></ProtectedRoute>} />
           <Route path="/diario" element={<ProtectedRoute><CharacterDiaryPage /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><PlayerDashboard /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute requireAdmin><DashboardPage /></ProtectedRoute>} />
           <Route path="/admin/characters" element={<ProtectedRoute requireAdmin><AdminCharactersPage /></ProtectedRoute>} />
           <Route path="/admin/sessions" element={<ProtectedRoute requireAdmin><AdminSessionsPage /></ProtectedRoute>} />
