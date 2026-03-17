@@ -4,16 +4,16 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Navigation } from '../../components/shared/Navigation';
 import { Footer } from '../../components/shared/Footer';
 import { CharacterNote } from '../../types/characterNote';
-import { BookOpen, Save, Plus, Trash2, ChevronDown, ChevronUp, Lock, Pin } from 'lucide-react';
+import { BookOpen, Save, Plus, Trash2, ChevronDown, ChevronUp, Pin, Lock } from 'lucide-react';
 
 const NoteCard: React.FC<{
   note: CharacterNote;
-  onSave: (id: string, title: string, content: string, pinned: boolean) => Promise<void>;
+  onSave: (id: string, title: string, content: string, is_pinned: boolean) => Promise<void>;
   onDelete: (id: string) => void;
 }> = ({ note, onSave, onDelete }) => {
   const [title, setTitle]     = useState(note.title);
   const [content, setContent] = useState(note.content);
-  const [pinned, setPinned]   = useState(note.pinned);
+  const [pinned, setPinned]   = useState(note.is_pinned);
   const [open, setOpen]       = useState(false);
   const [dirty, setDirty]     = useState(false);
   const [saving, setSaving]   = useState(false);
@@ -38,8 +38,9 @@ const NoteCard: React.FC<{
     }`}>
       <div
         className="flex items-center gap-3 px-4 py-3 cursor-pointer select-none"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setOpen(v => !v)}
       >
+        {pinned && <Pin size={13} className="text-amber-400 fill-amber-400 shrink-0" />}
         <BookOpen size={16} className={pinned ? 'text-amber-400' : 'text-slate-500'} />
         <span className="flex-1 font-semibold text-slate-100 truncate">{title || 'Voce senza titolo'}</span>
         <span className="text-xs text-slate-600">{ago}</span>
@@ -50,26 +51,26 @@ const NoteCard: React.FC<{
         <div className="px-4 pb-4 space-y-3 border-t border-slate-700/40">
           <input
             value={title}
-            onChange={(e) => change(setTitle)(e.target.value)}
-            placeholder="Titolo voce del diario..."
+            onChange={e => change(setTitle)(e.target.value)}
+            placeholder="Titolo voce..."
             className="w-full mt-3 px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-slate-100 placeholder-slate-500 focus:border-amber-600 outline-none text-sm"
           />
           <textarea
             value={content}
-            onChange={(e) => change(setContent)(e.target.value)}
-            rows={8}
-            placeholder="Scrivi qui i pensieri del tuo personaggio, segreti scoperti, alleanze strette..."
-            className="w-full px-3 py-2 bg-slate-900/60 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:border-amber-600 outline-none text-sm resize-y leading-relaxed font-serif"
+            onChange={e => change(setContent)(e.target.value)}
+            rows={7}
+            placeholder="Cosa ha vissuto il tuo personaggio? Segreti, riflessioni, obiettivi..."
+            className="w-full px-3 py-2 bg-slate-900/60 border border-slate-700 rounded-lg text-slate-200 placeholder-slate-600 focus:border-amber-600 outline-none text-sm resize-y leading-relaxed"
           />
           <div className="flex items-center justify-between">
             <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-slate-400 hover:text-amber-300 transition">
               <input
                 type="checkbox"
                 checked={pinned}
-                onChange={(e) => change(setPinned)(e.target.checked)}
+                onChange={e => change(setPinned)(e.target.checked)}
                 className="accent-amber-500 w-4 h-4"
               />
-              <Pin size={13} /> In evidenza
+              📌 In evidenza
             </label>
             <div className="flex gap-2">
               <button
@@ -110,7 +111,7 @@ export const CharacterDiaryPage: React.FC = () => {
       .from('character_notes')
       .select('*')
       .eq('user_id', user.id)
-      .order('pinned', { ascending: false })
+      .order('is_pinned', { ascending: false })
       .order('updated_at', { ascending: false });
     setNotes((data as CharacterNote[]) || []);
     setLoading(false);
@@ -122,20 +123,19 @@ export const CharacterDiaryPage: React.FC = () => {
     if (!user) return;
     setCreating(true);
     await supabase.from('character_notes').insert({
-      user_id:        user.id,
-      character_name: '',
-      title:          'Nuova voce',
-      content:        '',
-      pinned:         false,
+      user_id: user.id,
+      title:   'Nuova voce del diario',
+      content: '',
+      is_pinned: false,
     });
     await load();
     setCreating(false);
   };
 
-  const handleSave = async (id: string, title: string, content: string, pinned: boolean) => {
+  const handleSave = async (id: string, title: string, content: string, is_pinned: boolean) => {
     await supabase
       .from('character_notes')
-      .update({ title, content, pinned, updated_at: new Date().toISOString() })
+      .update({ title, content, is_pinned, updated_at: new Date().toISOString() })
       .eq('id', id);
     await load();
   };
@@ -148,8 +148,8 @@ export const CharacterDiaryPage: React.FC = () => {
 
   if (!user) return null;
 
-  const pinned   = notes.filter((n) => n.pinned);
-  const unpinned = notes.filter((n) => !n.pinned);
+  const pinned   = notes.filter(n => n.is_pinned);
+  const unpinned = notes.filter(n => !n.is_pinned);
 
   return (
     <>
@@ -177,23 +177,19 @@ export const CharacterDiaryPage: React.FC = () => {
           ) : notes.length === 0 ? (
             <div className="text-center py-20">
               <BookOpen size={48} className="mx-auto text-slate-700 mb-4" />
-              <p className="text-slate-500 mb-2">Il diario è ancora vuoto.</p>
-              <p className="text-slate-600 text-sm">Inizia a scrivere i pensieri del tuo personaggio, i segreti che custodisce e le avventure vissute.</p>
+              <p className="text-slate-500 mb-2">Il diario è vuoto.</p>
+              <p className="text-slate-600 text-sm">Scrivi le avventure, i segreti e i pensieri del tuo personaggio.</p>
             </div>
           ) : (
             <div className="space-y-3">
               {pinned.length > 0 && (
                 <>
                   <p className="text-xs text-amber-700 uppercase tracking-widest px-1 pb-1">📌 In evidenza</p>
-                  {pinned.map((n) => (
-                    <NoteCard key={n.id} note={n} onSave={handleSave} onDelete={handleDelete} />
-                  ))}
+                  {pinned.map(n => <NoteCard key={n.id} note={n} onSave={handleSave} onDelete={handleDelete} />)}
                   {unpinned.length > 0 && <div className="border-t border-slate-800 my-2" />}
                 </>
               )}
-              {unpinned.map((n) => (
-                <NoteCard key={n.id} note={n} onSave={handleSave} onDelete={handleDelete} />
-              ))}
+              {unpinned.map(n => <NoteCard key={n.id} note={n} onSave={handleSave} onDelete={handleDelete} />)}
             </div>
           )}
         </div>
