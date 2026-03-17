@@ -1,23 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../utils/supabase';
-import { Faction, FactionCategory, CATEGORY_CONFIG, reputationLabel } from '../../types/faction';
+import { Faction, FactionCategory, CATEGORY_CONFIG } from '../../types/faction';
 import { Search, Shield, X } from 'lucide-react';
-
-/* ── helpers ───────────────────────────────────────────────────── */
-function colorBorder(hex: string) {
-  return `border-[${hex}]/40`;
-}
 
 /* ── Card ──────────────────────────────────────────────────────── */
 const FactionCard: React.FC<{ faction: Faction; onClick: () => void }> = ({ faction, onClick }) => {
   const cfg = CATEGORY_CONFIG[faction.category];
-  const rep = reputationLabel(faction.reputation);
 
   return (
     <button onClick={onClick}
       className={`group text-left rounded-2xl overflow-hidden border ${cfg.border} bg-slate-900/80 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 w-full`}>
 
-      {/* Fascia colore + iniziale */}
+      {/* Fascia colore */}
       <div className="h-2 w-full" style={{ backgroundColor: faction.color }} />
       <div className="px-5 pt-5 pb-4">
         {/* Badge categoria */}
@@ -48,11 +42,7 @@ const FactionCard: React.FC<{ faction: Faction; onClick: () => void }> = ({ fact
           <p className="text-sm text-slate-400 mt-3 line-clamp-3 leading-relaxed">{faction.description}</p>
         )}
 
-        {/* Reputazione + cta */}
-        <div className="flex items-center justify-between mt-4">
-          <span className={`text-xs font-semibold ${rep.color}`}>{rep.label}</span>
-          <span className="text-xs text-amber-600 font-semibold">Leggi tutto →</span>
-        </div>
+        <p className="mt-4 text-xs text-amber-600 font-semibold">Leggi tutto →</p>
       </div>
     </button>
   );
@@ -61,7 +51,6 @@ const FactionCard: React.FC<{ faction: Faction; onClick: () => void }> = ({ fact
 /* ── Modal dettaglio ───────────────────────────────────────────── */
 const FactionModal: React.FC<{ faction: Faction; onClose: () => void }> = ({ faction, onClose }) => {
   const cfg = CATEGORY_CONFIG[faction.category];
-  const rep = reputationLabel(faction.reputation);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -70,15 +59,13 @@ const FactionModal: React.FC<{ faction: Faction; onClose: () => void }> = ({ fac
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', handler); };
   }, [onClose]);
 
-  const repPct = ((faction.reputation + 100) / 200) * 100;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div onClick={e => e.stopPropagation()}
         className={`relative bg-slate-900 border ${cfg.border} rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl`}>
 
-        {/* Fascia colore in cima */}
+        {/* Fascia colore */}
         <div className="h-3 w-full rounded-t-2xl" style={{ backgroundColor: faction.color }} />
 
         {/* Close */}
@@ -104,19 +91,6 @@ const FactionModal: React.FC<{ faction: Faction; onClose: () => void }> = ({ fac
           {faction.base && (
             <p className="text-sm text-slate-400"><span className="text-slate-500">Sede:</span> {faction.base}</p>
           )}
-
-          {/* Barra reputazione */}
-          <div>
-            <div className="flex justify-between text-xs text-slate-500 mb-1">
-              <span>Nemica</span>
-              <span className={`font-semibold ${rep.color}`}>{rep.label} ({faction.reputation > 0 ? '+' : ''}{faction.reputation})</span>
-              <span>Alleata</span>
-            </div>
-            <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${repPct}%`, backgroundColor: faction.color }} />
-            </div>
-          </div>
 
           {/* Descrizione */}
           {faction.description && (

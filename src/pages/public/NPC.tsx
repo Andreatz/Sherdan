@@ -1,15 +1,111 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../utils/supabase';
 import { NPC, NpcRelationship, NpcStatus, REL_LABELS, STATUS_LABELS } from '../../types/npc';
-import { Search, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Users, ChevronDown, ChevronUp, X } from 'lucide-react';
 
-const NpcCard: React.FC<{ npc: NPC }> = ({ npc }) => {
-  const [expanded, setExpanded] = useState(false);
+/* ── Modal NPC ─────────────────────────────────────────────────── */
+const NpcModal: React.FC<{ npc: NPC; onClose: () => void }> = ({ npc, onClose }) => {
+  const status = STATUS_LABELS[npc.status];
+  const rel    = REL_LABELS[npc.relationship];
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', handler); };
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" />
+      <div onClick={e => e.stopPropagation()}
+        className="relative bg-slate-900 border border-amber-700/30 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+
+        {/* Immagine hero */}
+        {npc.image_url ? (
+          <div className="relative h-72 overflow-hidden rounded-t-2xl">
+            <img src={npc.image_url} alt={npc.name} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+            {/* Badge su immagine */}
+            <span className={`absolute top-4 right-4 text-xs font-bold px-2.5 py-1 rounded-full border ${rel.color} bg-slate-900/80`}>
+              {rel.emoji} {rel.label}
+            </span>
+            {npc.zone && (
+              <span className="absolute top-4 left-4 text-xs text-sky-300/90 bg-slate-900/70 px-2 py-1 rounded-full border border-sky-700/30">
+                🗺️ {npc.zone}
+              </span>
+            )}
+          </div>
+        ) : (
+          <div className="h-24 bg-slate-800 rounded-t-2xl flex items-center justify-center">
+            <Users size={36} className="text-slate-700" />
+          </div>
+        )}
+
+        {/* Close */}
+        <button onClick={onClose}
+          className="absolute top-4 right-4 bg-slate-800/90 hover:bg-slate-700 text-slate-300 rounded-full p-1.5 transition z-10">
+          <X size={16} />
+        </button>
+
+        <div className="p-6 space-y-4">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-3xl font-bold text-amber-300">{npc.name}</h2>
+              {(npc.role || npc.faction) && (
+                <p className="text-sm text-slate-500 mt-0.5">
+                  {npc.role}{npc.role && npc.faction ? ' · ' : ''}{npc.faction}
+                </p>
+              )}
+            </div>
+            <span className={`shrink-0 text-xs px-2.5 py-1 rounded-full border ${status.color}`}>
+              {status.label}
+            </span>
+          </div>
+
+          {/* Badge relazione (se no immagine) */}
+          {!npc.image_url && (
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${rel.color}`}>
+              {rel.emoji} {rel.label}
+            </span>
+          )}
+
+          {/* Descrizione completa */}
+          {npc.description && (
+            <p className="text-slate-300 leading-7 text-sm whitespace-pre-line">{npc.description}</p>
+          )}
+
+          {/* Tratti fisici */}
+          {npc.physical_traits && (
+            <div>
+              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Aspetto</h4>
+              <p className="text-sm text-slate-400">{npc.physical_traits}</p>
+            </div>
+          )}
+
+          {/* Personalità */}
+          {npc.personality && (
+            <div>
+              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Personalità</h4>
+              <p className="text-sm text-slate-400">{npc.personality}</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ── Card NPC ─────────────────────────────────────────────────── */
+const NpcCard: React.FC<{ npc: NPC; onClick: () => void }> = ({ npc, onClick }) => {
   const status = STATUS_LABELS[npc.status];
   const rel    = REL_LABELS[npc.relationship];
 
   return (
-    <div className="bg-slate-800/70 border border-amber-700/20 rounded-2xl overflow-hidden hover:border-amber-600/40 transition-all group">
+    <button onClick={onClick}
+      className="group text-left bg-slate-800/70 border border-amber-700/20 rounded-2xl overflow-hidden hover:border-amber-600/40 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 w-full">
+
       {/* Immagine */}
       <div className="relative h-56 bg-slate-900 overflow-hidden">
         {npc.image_url ? (
@@ -20,11 +116,9 @@ const NpcCard: React.FC<{ npc: NPC }> = ({ npc }) => {
             <Users size={44} className="text-slate-700" />
           </div>
         )}
-        {/* Badge relazione */}
         <span className={`absolute top-3 right-3 text-xs font-bold px-2.5 py-1 rounded-full border ${rel.color} bg-slate-900/80`}>
           {rel.emoji} {rel.label}
         </span>
-        {/* Badge zona */}
         {npc.zone && (
           <span className="absolute top-3 left-3 text-xs text-sky-300/90 bg-slate-900/70 px-2 py-1 rounded-full border border-sky-700/30">
             🗺️ {npc.zone}
@@ -48,23 +142,18 @@ const NpcCard: React.FC<{ npc: NPC }> = ({ npc }) => {
         )}
 
         {npc.description && (
-          <>
-            <p className={`text-sm text-slate-300 leading-relaxed ${expanded ? '' : 'line-clamp-3'}`}>
-              {npc.description}
-            </p>
-            {npc.description.length > 130 && (
-              <button onClick={() => setExpanded(v => !v)}
-                className="mt-1.5 flex items-center gap-1 text-xs text-amber-600 hover:text-amber-400 transition">
-                {expanded ? <><ChevronUp size={11} /> Mostra meno</> : <><ChevronDown size={11} /> Leggi tutto</>}
-              </button>
-            )}
-          </>
+          <p className="text-sm text-slate-300 leading-relaxed line-clamp-3">
+            {npc.description}
+          </p>
         )}
+
+        <p className="mt-2 text-xs text-amber-600 font-semibold">Leggi tutto →</p>
       </div>
-    </div>
+    </button>
   );
 };
 
+/* ── Pagina principale ─────────────────────────────────────────── */
 export const NpcPage: React.FC = () => {
   const [npcs, setNpcs]       = useState<NPC[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +161,7 @@ export const NpcPage: React.FC = () => {
   const [filterRel,    setFilterRel]    = useState<NpcRelationship | 'tutti'>('tutti');
   const [filterStatus, setFilterStatus] = useState<NpcStatus | 'tutti'>('tutti');
   const [filterZone,   setFilterZone]   = useState<string>('tutti');
+  const [selected,     setSelected]     = useState<NPC | null>(null);
 
   useEffect(() => {
     supabase.from('npcs').select('*').eq('revealed', true)
@@ -108,7 +198,6 @@ export const NpcPage: React.FC = () => {
 
         {/* Filtri */}
         <div className="space-y-3 mb-10">
-          {/* Ricerca */}
           <div className="relative">
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
             <input type="text" placeholder="Cerca per nome, fazione, descrizione..."
@@ -117,7 +206,6 @@ export const NpcPage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap gap-2 items-center">
-            {/* Relazione */}
             <span className="text-xs text-slate-600 mr-1">Relazione:</span>
             {REL_FILTERS.map(f => (
               <button key={f} onClick={() => setFilterRel(f)}
@@ -130,7 +218,6 @@ export const NpcPage: React.FC = () => {
           </div>
 
           <div className="flex flex-wrap gap-2 items-center">
-            {/* Stato */}
             <span className="text-xs text-slate-600 mr-1">Stato:</span>
             {STATUS_FILTERS.map(f => (
               <button key={f} onClick={() => setFilterStatus(f)}
@@ -171,10 +258,12 @@ export const NpcPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {filtered.map(n => <NpcCard key={n.id} npc={n} />)}
+            {filtered.map(n => <NpcCard key={n.id} npc={n} onClick={() => setSelected(n)} />)}
           </div>
         )}
       </div>
+
+      {selected && <NpcModal npc={selected} onClose={() => setSelected(null)} />}
     </div>
   );
 };
