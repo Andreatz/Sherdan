@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '../../utils/supabase';
 import { useAuth } from '../../contexts/AuthContext';
-import { useNotifications } from '../../contexts/NotificationContext';
 import { Navigation } from '../../components/shared/Navigation';
 import { Footer } from '../../components/shared/Footer';
-import { Scroll, Sword, BookOpen, Bell, Clock, Map, ChevronRight, Book } from 'lucide-react';
+import { Scroll, Sword, BookOpen, Clock, ChevronRight, Book, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Mission { id: string; title: string; status: string; description: string | null; }
@@ -32,7 +31,6 @@ const QuickCard: React.FC<{
 
 export const PlayerDashboard: React.FC = () => {
   const { user } = useAuth();
-  const { notifications, unreadCount, markRead } = useNotifications();
   const navigate = useNavigate();
 
   const [missions, setMissions] = useState<Mission[]>([]);
@@ -55,8 +53,6 @@ export const PlayerDashboard: React.FC = () => {
 
   useEffect(() => { void load(); }, [load]);
 
-  const recentNotifs = notifications.slice(0, 5);
-
   return (
     <>
       <Navigation />
@@ -66,17 +62,17 @@ export const PlayerDashboard: React.FC = () => {
           {/* Hero saluto */}
           <div className="py-8 border-b border-slate-800 mb-8">
             <p className="text-slate-500 text-sm uppercase tracking-widest mb-1">Benvenuto di nuovo</p>
-            <h1 className="text-3xl font-bold text-white">
-              🗡️ {user?.email?.split('@')[0] ?? 'Avventuriero'}
+            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+              <LayoutDashboard className="w-8 h-8 text-amber-400" />
+              {user?.email?.split('@')[0] ?? 'Avventuriero'}
             </h1>
             <p className="text-slate-400 mt-1">Cosa succede nel mondo di Sherdan oggi?</p>
           </div>
 
           {/* Quick stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-10">
             <QuickCard icon={<Sword className="w-6 h-6" />} label="Missioni attive" value={missions.length} onClick={() => navigate('/missioni')} />
-            <QuickCard icon={<BookOpen className="w-6 h-6" />} label="Sessioni totali" value={sessions.length > 0 ? sessions[0]?.session_number ?? 0 : 0} sub="ultima sessione" onClick={() => navigate('/sessioni')} color="text-sky-400" />
-            <QuickCard icon={<Bell className="w-6 h-6" />} label="Notifiche" value={unreadCount} sub={unreadCount > 0 ? 'non lette' : 'tutto letto'} color={unreadCount > 0 ? 'text-red-400' : 'text-green-400'} />
+            <QuickCard icon={<BookOpen className="w-6 h-6" />} label="Ultima sessione" value={sessions.length > 0 ? `#${sessions[0]?.session_number ?? 0}` : '—'} sub={sessions[0]?.title ?? ''} onClick={() => navigate('/sessioni')} color="text-sky-400" />
             <QuickCard icon={<Book className="w-6 h-6" />} label="Voci Lore" value={lore.length} sub="recenti" onClick={() => navigate('/lore')} color="text-purple-400" />
           </div>
 
@@ -141,31 +137,19 @@ export const PlayerDashboard: React.FC = () => {
               }
             </section>
 
-            {/* Notifiche recenti */}
+            {/* Diario del personaggio (anteprima) */}
             <section className="bg-slate-900/60 border border-slate-800 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="font-bold text-white flex items-center gap-2">
-                  <Bell className="w-4 h-4 text-red-400" /> Notifiche
-                  {unreadCount > 0 && <span className="text-xs bg-red-500 text-white px-1.5 py-0.5 rounded-full">{unreadCount}</span>}
-                </h2>
+                <h2 className="font-bold text-white flex items-center gap-2"><Book className="w-4 h-4 text-amber-400" /> Il tuo Diario</h2>
+                <button onClick={() => navigate('/diario')} className="text-xs text-amber-400 hover:text-amber-300 flex items-center gap-1">Apri <ChevronRight className="w-3 h-3" /></button>
               </div>
-              {recentNotifs.length === 0 ? <p className="text-slate-600 text-sm italic">Nessuna notifica.</p> :
-                <ul className="space-y-2">
-                  {recentNotifs.map(n => (
-                    <li key={n.id}>
-                      <button
-                        onClick={() => { void markRead(n.id); if (n.link) navigate(n.link); }}
-                        className={`w-full text-left flex items-center gap-2 text-sm p-2 rounded-lg transition hover:bg-slate-800 ${
-                          !n.read ? 'text-white' : 'text-slate-400'
-                        }`}
-                      >
-                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: n.read ? '#475569' : '#f59e0b' }} />
-                        <span className="truncate">{n.title}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              }
+              <p className="text-slate-500 text-sm">Scrivi i pensieri del tuo personaggio, ricordi di avventure e segreti che solo tu conosci.</p>
+              <button
+                onClick={() => navigate('/diario')}
+                className="mt-3 w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-sm px-4 py-2 rounded-xl transition"
+              >
+                📔 Apri il Diario
+              </button>
             </section>
 
           </div>
@@ -175,8 +159,8 @@ export const PlayerDashboard: React.FC = () => {
             {[
               { label: 'Mappa Mondo',  icon: '🗺️', path: '/mappa-mondo' },
               { label: 'Il mio PG',   icon: '🧝', path: '/personaggio' },
-              { label: 'Diario',      icon: '📔', path: '/diario'       },
               { label: 'Note',        icon: '📋', path: '/note'         },
+              { label: 'Sessioni',    icon: '📜', path: '/sessioni'     },
             ].map(l => (
               <button
                 key={l.path}

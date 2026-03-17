@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { it } from '../../content/texts';
 import { DiceRoller } from './DiceRoller';
 import { GlobalSearch } from './GlobalSearch';
-import { NotificationBell } from './NotificationBell';
 
 const EXPLORE_LINKS = [
   { label: 'Campagna',   href: '/#campaign',    icon: BookOpen },
@@ -97,7 +96,6 @@ export const Navigation: React.FC = () => {
           {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-2">
             <GlobalSearch />
-            {user && <NotificationBell />}
             <button onClick={() => setShowDice(v => !v)} className={`text-lg px-3 py-1.5 rounded-lg transition ${ showDice ? 'bg-amber-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-amber-300' }`}>🎲</button>
             {!user && (<button onClick={() => navigate('/auth/login')} className="bg-slate-700 hover:bg-slate-600 text-amber-100 px-3 py-1.5 rounded-lg text-sm transition">{it.nav.login}</button>)}
             {isAdmin && (<button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-sm transition"><Settings className="w-4 h-4" /> Admin</button>)}
@@ -107,7 +105,6 @@ export const Navigation: React.FC = () => {
           {/* Mobile actions */}
           <div className="flex md:hidden items-center gap-2">
             <GlobalSearch />
-            {user && <NotificationBell />}
             <button onClick={() => setShowDice(v => !v)} className={`text-lg px-2 py-1.5 rounded transition ${ showDice ? 'bg-amber-600 text-white' : 'bg-slate-800 text-amber-300' }`}>🎲</button>
             <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-amber-200 hover:bg-slate-800 rounded transition">{isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}</button>
           </div>
