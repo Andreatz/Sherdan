@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Navigation } from './components/shared/Navigation';
 import { Footer } from './components/shared/Footer';
@@ -23,11 +24,13 @@ import { FactionsPage } from './pages/public/Factions';
 import { TimelinePage } from './pages/public/Timeline';
 import { LorePage } from './pages/public/Lore';
 import { InteractiveMapPage } from './pages/public/InteractiveMap';
+import { CharacterProfilePage } from './pages/public/CharacterProfile';
 // Player
 import { MyCharacterPage } from './pages/player/MyCharacter';
 import { MissionsPage } from './pages/player/Missions';
 import { SessionNotesPage } from './pages/player/SessionNotes';
 import { CharacterDiaryPage } from './pages/player/CharacterDiary';
+import { PlayerDashboard } from './pages/player/Dashboard';
 // Admin
 import { DashboardPage } from './pages/admin/Dashboard';
 import { CharactersPage as AdminCharactersPage } from './pages/admin/Characters';
@@ -64,46 +67,50 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <ScrollToSection />
-        <Routes>
-          <Route path="/auth/login" element={<Login />} />
-          <Route path="/auth/signup" element={<Signup />} />
-          <Route path="/" element={
-            <><Navigation />
-            <div className="bg-slate-900">
-              <Home /><CampaignPage /><CharactersPage /><SessionsPreview /><MapPage /><GalleryPage />
-            </div>
-            <Footer /></>}
-          />
-          <Route path="/sessioni" element={<ProtectedRoute><Navigation /><SessionsPage /><Footer /></ProtectedRoute>} />
-          <Route path="/luoghi" element={<><Navigation /><LocationsPage /><Footer /></>} />
-          <Route path="/bestiario" element={<><Navigation /><BestiaryPage /><Footer /></>} />
-          <Route path="/npc" element={<><Navigation /><NpcPage /><Footer /></>} />
-          <Route path="/fazioni" element={<><Navigation /><FactionsPage /><Footer /></>} />
-          <Route path="/cronistoria" element={<><Navigation /><TimelinePage /><Footer /></>} />
-          <Route path="/mappa/:regionSlug" element={<><Navigation /><RegionPage /><Footer /></>} />
-          <Route path="/lore" element={<LorePage />} />
-          <Route path="/mappa-mondo" element={<InteractiveMapPage />} />
-          <Route path="/personaggio" element={<ProtectedRoute><Navigation /><MyCharacterPage /><Footer /></ProtectedRoute>} />
-          <Route path="/missioni" element={<ProtectedRoute><MissionsPage /></ProtectedRoute>} />
-          <Route path="/note" element={<ProtectedRoute><SessionNotesPage /></ProtectedRoute>} />
-          <Route path="/diario" element={<ProtectedRoute><CharacterDiaryPage /></ProtectedRoute>} />
-          <Route path="/admin" element={<ProtectedRoute requireAdmin><DashboardPage /></ProtectedRoute>} />
-          <Route path="/admin/characters" element={<ProtectedRoute requireAdmin><AdminCharactersPage /></ProtectedRoute>} />
-          <Route path="/admin/sessions" element={<ProtectedRoute requireAdmin><AdminSessionsPage /></ProtectedRoute>} />
-          <Route path="/admin/missions" element={<ProtectedRoute requireAdmin><MissionsAdminPage /></ProtectedRoute>} />
-          <Route path="/admin/locations" element={<ProtectedRoute requireAdmin><AdminLocationsPage /></ProtectedRoute>} />
-          <Route path="/admin/gallery" element={<ProtectedRoute requireAdmin><AdminGalleryPage /></ProtectedRoute>} />
-          <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><SettingsPage /></ProtectedRoute>} />
-          <Route path="/admin/bestiary" element={<ProtectedRoute requireAdmin><BestiaryAdminPage /></ProtectedRoute>} />
-          <Route path="/admin/npc" element={<ProtectedRoute requireAdmin><NpcAdminPage /></ProtectedRoute>} />
-          <Route path="/admin/factions" element={<ProtectedRoute requireAdmin><FactionAdminPage /></ProtectedRoute>} />
-          <Route path="/admin/timeline" element={<ProtectedRoute requireAdmin><TimelineAdminPage /></ProtectedRoute>} />
-          <Route path="/admin/diary" element={<ProtectedRoute requireAdmin><DiaryPage /></ProtectedRoute>} />
-          <Route path="/admin/lore" element={<ProtectedRoute requireAdmin><LoreAdminPage /></ProtectedRoute>} />
-          <Route path="/admin/map" element={<ProtectedRoute requireAdmin><MapAdminPage /></ProtectedRoute>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <NotificationProvider>
+          <ScrollToSection />
+          <Routes>
+            <Route path="/auth/login" element={<Login />} />
+            <Route path="/auth/signup" element={<Signup />} />
+            <Route path="/" element={
+              <><Navigation />
+              <div className="bg-slate-900">
+                <Home /><CampaignPage /><CharactersPage /><SessionsPreview /><MapPage /><GalleryPage />
+              </div>
+              <Footer /></>}
+            />
+            <Route path="/sessioni" element={<ProtectedRoute><Navigation /><SessionsPage /><Footer /></ProtectedRoute>} />
+            <Route path="/luoghi" element={<><Navigation /><LocationsPage /><Footer /></>} />
+            <Route path="/bestiario" element={<><Navigation /><BestiaryPage /><Footer /></>} />
+            <Route path="/npc" element={<><Navigation /><NpcPage /><Footer /></>} />
+            <Route path="/fazioni" element={<><Navigation /><FactionsPage /><Footer /></>} />
+            <Route path="/cronistoria" element={<><Navigation /><TimelinePage /><Footer /></>} />
+            <Route path="/mappa/:regionSlug" element={<><Navigation /><RegionPage /><Footer /></>} />
+            <Route path="/lore" element={<LorePage />} />
+            <Route path="/mappa-mondo" element={<InteractiveMapPage />} />
+            <Route path="/personaggi/:slug" element={<CharacterProfilePage />} />
+            <Route path="/personaggio" element={<ProtectedRoute><Navigation /><MyCharacterPage /><Footer /></ProtectedRoute>} />
+            <Route path="/missioni" element={<ProtectedRoute><MissionsPage /></ProtectedRoute>} />
+            <Route path="/note" element={<ProtectedRoute><SessionNotesPage /></ProtectedRoute>} />
+            <Route path="/diario" element={<ProtectedRoute><CharacterDiaryPage /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><PlayerDashboard /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute requireAdmin><DashboardPage /></ProtectedRoute>} />
+            <Route path="/admin/characters" element={<ProtectedRoute requireAdmin><AdminCharactersPage /></ProtectedRoute>} />
+            <Route path="/admin/sessions" element={<ProtectedRoute requireAdmin><AdminSessionsPage /></ProtectedRoute>} />
+            <Route path="/admin/missions" element={<ProtectedRoute requireAdmin><MissionsAdminPage /></ProtectedRoute>} />
+            <Route path="/admin/locations" element={<ProtectedRoute requireAdmin><AdminLocationsPage /></ProtectedRoute>} />
+            <Route path="/admin/gallery" element={<ProtectedRoute requireAdmin><AdminGalleryPage /></ProtectedRoute>} />
+            <Route path="/admin/settings" element={<ProtectedRoute requireAdmin><SettingsPage /></ProtectedRoute>} />
+            <Route path="/admin/bestiary" element={<ProtectedRoute requireAdmin><BestiaryAdminPage /></ProtectedRoute>} />
+            <Route path="/admin/npc" element={<ProtectedRoute requireAdmin><NpcAdminPage /></ProtectedRoute>} />
+            <Route path="/admin/factions" element={<ProtectedRoute requireAdmin><FactionAdminPage /></ProtectedRoute>} />
+            <Route path="/admin/timeline" element={<ProtectedRoute requireAdmin><TimelineAdminPage /></ProtectedRoute>} />
+            <Route path="/admin/diary" element={<ProtectedRoute requireAdmin><DiaryPage /></ProtectedRoute>} />
+            <Route path="/admin/lore" element={<ProtectedRoute requireAdmin><LoreAdminPage /></ProtectedRoute>} />
+            <Route path="/admin/map" element={<ProtectedRoute requireAdmin><MapAdminPage /></ProtectedRoute>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </NotificationProvider>
       </AuthProvider>
     </Router>
   );
