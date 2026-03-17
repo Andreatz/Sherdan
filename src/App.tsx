@@ -42,6 +42,7 @@ import { FactionAdminPage } from './pages/admin/Factions';
 import { TimelineAdminPage } from './pages/admin/Timeline';
 import { DiaryPage } from './pages/admin/Diary';
 import { LoreAdminPage } from './pages/admin/Lore';
+import { MapAdminPage } from './pages/admin/MapAdmin';
 
 const ScrollToSection: React.FC = () => {
   const location = useLocation();
@@ -100,6 +101,7 @@ function App() {
           <Route path="/admin/timeline" element={<ProtectedRoute requireAdmin><TimelineAdminPage /></ProtectedRoute>} />
           <Route path="/admin/diary" element={<ProtectedRoute requireAdmin><DiaryPage /></ProtectedRoute>} />
           <Route path="/admin/lore" element={<ProtectedRoute requireAdmin><LoreAdminPage /></ProtectedRoute>} />
+          <Route path="/admin/map" element={<ProtectedRoute requireAdmin><MapAdminPage /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>

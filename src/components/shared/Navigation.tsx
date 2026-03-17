@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, X, LogOut, Settings, Scroll, Sword, MapPin, Skull, ChevronDown, BookOpen, Map, Home, Image, Users, Shield } from 'lucide-react';
+import { Menu, X, LogOut, Settings, Scroll, Sword, MapPin, Skull, ChevronDown, BookOpen, Map, Home, Image, Users, Shield, BookMarked, Book } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { it } from '../../content/texts';
@@ -13,11 +13,12 @@ const EXPLORE_LINKS = [
   { label: 'Galleria',   href: '/#gallery',      icon: Image    },
 ];
 const WORLD_LINKS = [
-  { label: 'Mappa',     href: '/#map',       icon: Map    },
-  { label: 'Luoghi',    href: '/luoghi',     icon: MapPin },
-  { label: 'NPC',       href: '/npc',        icon: Users  },
-  { label: 'Bestiario', href: '/bestiario',  icon: Skull  },
-  { label: 'Fazioni',   href: '/fazioni',    icon: Shield },
+  { label: 'Mappa Interattiva', href: '/mappa-mondo', icon: Map       },
+  { label: 'Luoghi',            href: '/luoghi',      icon: MapPin    },
+  { label: 'Lore',              href: '/lore',        icon: BookMarked },
+  { label: 'NPC',               href: '/npc',         icon: Users     },
+  { label: 'Bestiario',         href: '/bestiario',   icon: Skull     },
+  { label: 'Fazioni',           href: '/fazioni',     icon: Shield    },
 ];
 
 const Dropdown: React.FC<{
@@ -47,7 +48,7 @@ const Dropdown: React.FC<{
         {label} <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+        <div className="absolute top-full left-0 mt-2 w-52 bg-slate-900 border border-slate-700 rounded-xl shadow-xl z-50 py-1 overflow-hidden">
           {links.map(l => { const Icon = l.icon; return (
             <button key={l.href} onClick={() => handleNav(l.href)} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-800 hover:text-amber-300 transition text-left">
               <Icon className="w-4 h-4" /> {l.label}
@@ -85,6 +86,7 @@ export const Navigation: React.FC = () => {
                 <button onClick={() => navigate('/personaggio')} className="flex items-center gap-1.5 text-sm text-amber-400 hover:text-amber-300 font-semibold transition"><Scroll className="w-4 h-4" /> Il mio PG</button>
                 <button onClick={() => navigate('/missioni')} className="flex items-center gap-1.5 text-sm text-amber-400 hover:text-amber-300 font-semibold transition"><Sword className="w-4 h-4" /> Missioni</button>
                 <button onClick={() => navigate('/note')} className="flex items-center gap-1.5 text-sm text-amber-400 hover:text-amber-300 font-semibold transition"><BookOpen className="w-4 h-4" /> Note</button>
+                <button onClick={() => navigate('/diario')} className="flex items-center gap-1.5 text-sm text-amber-400 hover:text-amber-300 font-semibold transition"><Book className="w-4 h-4" /> Diario</button>
               </>
             )}
           </div>
@@ -120,6 +122,7 @@ export const Navigation: React.FC = () => {
                 <button onClick={() => { navigate('/personaggio'); close(); }} className="w-full text-left flex items-center gap-2 px-4 py-2 text-amber-400 hover:bg-slate-800 rounded text-sm">Il mio PG</button>
                 <button onClick={() => { navigate('/missioni'); close(); }} className="w-full text-left flex items-center gap-2 px-4 py-2 text-amber-400 hover:bg-slate-800 rounded text-sm">Missioni</button>
                 <button onClick={() => { navigate('/note'); close(); }} className="w-full text-left flex items-center gap-2 px-4 py-2 text-amber-400 hover:bg-slate-800 rounded text-sm">Note</button>
+                <button onClick={() => { navigate('/diario'); close(); }} className="w-full text-left flex items-center gap-2 px-4 py-2 text-amber-400 hover:bg-slate-800 rounded text-sm">Diario</button>
               </>
             )}
             {!user && (<button onClick={() => { navigate('/auth/login'); close(); }} className="bg-slate-700 text-amber-100 px-4 py-2 rounded-lg text-sm">{it.nav.login}</button>)}

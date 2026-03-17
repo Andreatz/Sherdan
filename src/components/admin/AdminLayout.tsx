@@ -45,6 +45,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
     { id: 'factions',   label: 'Fazioni',           path: '/admin/factions' },
     { id: 'timeline',   label: 'Cronistoria',       path: '/admin/timeline' },
     { id: 'lore',       label: 'Lore',              path: '/admin/lore' },
+    { id: 'map',        label: 'Mappa (Pin)',        path: '/admin/map' },
     { id: 'diary',      label: 'Diario del DM',     path: '/admin/diary' },
     { id: 'settings',   label: it.admin.settings,   path: '/admin/settings' },
   ];
