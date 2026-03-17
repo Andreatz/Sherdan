@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, X, BookOpen, Users, MapPin, Skull, Shield, Clock, User, Map } from 'lucide-react';
+import { Search, X, BookOpen, Users, MapPin, Skull, Shield, Clock, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../utils/supabase';
 
@@ -11,16 +11,17 @@ interface SearchResult {
   href: string;
   icon: React.ElementType;
   color: string;
+  label: string;
 }
 
 const TYPE_META: Record<string, { label: string; icon: React.ElementType; color: string }> = {
-  character: { label: 'Personaggio',  icon: User,     color: 'text-blue-400' },
+  character: { label: 'Personaggio',  icon: User,     color: 'text-blue-400'   },
   npc:       { label: 'NPC',          icon: Users,    color: 'text-orange-400' },
   location:  { label: 'Luogo',        icon: MapPin,   color: 'text-purple-400' },
-  creature:  { label: 'Creatura',     icon: Skull,    color: 'text-red-400' },
-  faction:   { label: 'Fazione',      icon: Shield,   color: 'text-amber-400' },
-  session:   { label: 'Sessione',     icon: BookOpen, color: 'text-green-400' },
-  timeline:  { label: 'Cronistoria',  icon: Clock,    color: 'text-cyan-400' },
+  creature:  { label: 'Creatura',     icon: Skull,    color: 'text-red-400'    },
+  faction:   { label: 'Fazione',      icon: Shield,   color: 'text-amber-400'  },
+  session:   { label: 'Sessione',     icon: BookOpen, color: 'text-green-400'  },
+  timeline:  { label: 'Cronistoria',  icon: Clock,    color: 'text-cyan-400'   },
 };
 
 async function runSearch(q: string): Promise<SearchResult[]> {
@@ -28,13 +29,13 @@ async function runSearch(q: string): Promise<SearchResult[]> {
   const results: SearchResult[] = [];
 
   const [charRes, npcRes, locRes, creRes, facRes, sesRes, tlRes] = await Promise.all([
-    supabase.from('characters').select('id,name,class').ilike('name', term).limit(4),
-    supabase.from('npcs').select('id,name,role').ilike('name', term).limit(4),
-    supabase.from('world_locations').select('id,name,type').ilike('name', term).limit(4),
-    supabase.from('creatures').select('id,name,type').ilike('name', term).limit(4),
-    supabase.from('factions').select('id,name,alignment').ilike('name', term).limit(4),
+    supabase.from('characters').select('id,name,class').ilike('name', term).eq('revealed', true).limit(4),
+    supabase.from('npcs').select('id,name,role,faction').or(`name.ilike.${term},role.ilike.${term},faction.ilike.${term}`).eq('revealed', true).limit(4),
+    supabase.from('world_locations').select('id,name,region').ilike('name', term).limit(4),
+    supabase.from('creatures').select('id,name,type').ilike('name', term).eq('revealed', true).limit(4),
+    supabase.from('factions').select('id,name,subtitle').ilike('name', term).eq('revealed', true).limit(4),
     supabase.from('session_logs').select('id,title,session_number').ilike('title', term).limit(4),
-    supabase.from('campaign_events').select('id,title,type').ilike('title', term).limit(4),
+    supabase.from('campaign_events').select('id,title,kind').ilike('title', term).limit(4),
   ]);
 
   (charRes.data || []).forEach(r => results.push({
@@ -42,11 +43,11 @@ async function runSearch(q: string): Promise<SearchResult[]> {
     type: 'character', href: '/personaggi', ...TYPE_META.character,
   }));
   (npcRes.data || []).forEach(r => results.push({
-    id: r.id, title: r.name, subtitle: r.role,
+    id: r.id, title: r.name, subtitle: [r.role, r.faction].filter(Boolean).join(' · '),
     type: 'npc', href: '/npc', ...TYPE_META.npc,
   }));
   (locRes.data || []).forEach(r => results.push({
-    id: r.id, title: r.name, subtitle: r.type,
+    id: r.id, title: r.name, subtitle: r.region,
     type: 'location', href: '/luoghi', ...TYPE_META.location,
   }));
   (creRes.data || []).forEach(r => results.push({
@@ -54,15 +55,15 @@ async function runSearch(q: string): Promise<SearchResult[]> {
     type: 'creature', href: '/bestiario', ...TYPE_META.creature,
   }));
   (facRes.data || []).forEach(r => results.push({
-    id: r.id, title: r.name, subtitle: r.alignment,
+    id: r.id, title: r.name, subtitle: r.subtitle,
     type: 'faction', href: '/fazioni', ...TYPE_META.faction,
   }));
   (sesRes.data || []).forEach(r => results.push({
-    id: r.id, title: r.title, subtitle: `Sessione ${r.session_number}`,
+    id: r.id, title: r.title, subtitle: r.session_number ? `Sessione ${r.session_number}` : undefined,
     type: 'session', href: '/sessioni', ...TYPE_META.session,
   }));
   (tlRes.data || []).forEach(r => results.push({
-    id: r.id, title: r.title, subtitle: r.type,
+    id: r.id, title: r.title, subtitle: r.kind,
     type: 'timeline', href: '/cronistoria', ...TYPE_META.timeline,
   }));
 
@@ -78,13 +79,9 @@ export const GlobalSearch: React.FC = () => {
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
-  // Open with Ctrl+K or Cmd+K
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        setOpen(v => !v);
-      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); setOpen(v => !v); }
       if (e.key === 'Escape') setOpen(false);
     };
     window.addEventListener('keydown', handler);
@@ -133,8 +130,8 @@ export const GlobalSearch: React.FC = () => {
         title="Cerca (Ctrl+K)"
       >
         <Search className="w-3.5 h-3.5" />
-        <span className="hidden lg:inline">Cerca...</span>
-        <kbd className="hidden lg:inline text-[10px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded font-mono">Ctrl K</kbd>
+        <span className="hidden lg:inline text-slate-500">Cerca...</span>
+        <kbd className="hidden lg:inline text-[10px] bg-slate-700 text-slate-500 px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
       </button>
 
       {/* Modal overlay */}
@@ -143,12 +140,10 @@ export const GlobalSearch: React.FC = () => {
           className="fixed inset-0 z-[200] flex items-start justify-center pt-20 px-4"
           onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
         >
-          {/* Backdrop */}
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setOpen(false)} />
 
-          {/* Search panel */}
           <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden">
-            {/* Input row */}
+            {/* Input */}
             <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-800">
               {loading
                 ? <div className="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin shrink-0" />
@@ -157,7 +152,7 @@ export const GlobalSearch: React.FC = () => {
               <input
                 ref={inputRef}
                 type="text"
-                placeholder="Cerca personaggi, luoghi, creature, sessioni..."
+                placeholder="Cerca personaggi, NPC, luoghi, creature, sessioni..."
                 className="flex-1 bg-transparent text-white placeholder-slate-500 outline-none text-base"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
@@ -179,7 +174,6 @@ export const GlobalSearch: React.FC = () => {
 
               {results.length > 0 && (
                 <div className="py-2">
-                  {/* Group by type */}
                   {Object.entries(
                     results.reduce<Record<string, SearchResult[]>>((acc, r) => {
                       (acc[r.type] = acc[r.type] || []).push(r);
@@ -200,9 +194,7 @@ export const GlobalSearch: React.FC = () => {
                               key={item.id}
                               onClick={() => handleSelect(item)}
                               className={`w-full flex items-center gap-3 px-4 py-3 text-left transition ${
-                                idx === selected
-                                  ? 'bg-slate-800 text-white'
-                                  : 'text-slate-300 hover:bg-slate-800/60'
+                                idx === selected ? 'bg-slate-800 text-white' : 'text-slate-300 hover:bg-slate-800/60'
                               }`}
                               onMouseEnter={() => setSelected(idx)}
                             >
@@ -232,7 +224,6 @@ export const GlobalSearch: React.FC = () => {
               )}
             </div>
 
-            {/* Footer */}
             {results.length > 0 && (
               <div className="flex items-center justify-between px-4 py-2 border-t border-slate-800 text-[10px] text-slate-600">
                 <span>{results.length} risultati trovati</span>

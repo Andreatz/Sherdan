@@ -4,6 +4,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { it } from '../../content/texts';
 import { DiceRoller } from './DiceRoller';
+import { GlobalSearch } from './GlobalSearch';
+
 const EXPLORE_LINKS = [
   { label: 'Campagna',   href: '/#campaign',    icon: BookOpen },
   { label: 'Personaggi', href: '/#characters',   icon: Scroll   },
@@ -17,6 +19,7 @@ const WORLD_LINKS = [
   { label: 'Bestiario', href: '/bestiario',  icon: Skull  },
   { label: 'Fazioni',   href: '/fazioni',    icon: Shield },
 ];
+
 const Dropdown: React.FC<{
   label: string;
   links: { label: string; href: string; icon: React.ElementType }[];
@@ -55,6 +58,7 @@ const Dropdown: React.FC<{
     </div>
   );
 };
+
 export const Navigation: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showDice, setShowDice] = useState(false);
@@ -70,7 +74,8 @@ export const Navigation: React.FC = () => {
             <img src="/logo.png" alt="Sherdan" className="h-8 w-auto" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
             <span className="font-pirata text-xl text-amber-400 ml-2">Sherdan</span>
           </button>
-          {/* Desktop */}
+
+          {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-4">
             <button onClick={() => navigate('/')} className="flex items-center gap-1 text-sm text-slate-200 hover:text-amber-300 transition"><Home className="w-4 h-4" /> Home</button>
             <Dropdown label="Campagna" links={EXPLORE_LINKS} />
@@ -83,19 +88,25 @@ export const Navigation: React.FC = () => {
               </>
             )}
           </div>
+
+          {/* Desktop actions */}
           <div className="hidden md:flex items-center gap-2">
+            <GlobalSearch />
             <button onClick={() => setShowDice(v => !v)} className={`text-lg px-3 py-1.5 rounded-lg transition ${ showDice ? 'bg-amber-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-amber-300' }`}>🎲</button>
             {!user && (<button onClick={() => navigate('/auth/login')} className="bg-slate-700 hover:bg-slate-600 text-amber-100 px-3 py-1.5 rounded-lg text-sm transition">{it.nav.login}</button>)}
             {isAdmin && (<button onClick={() => navigate('/admin')} className="flex items-center gap-1.5 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-sm transition"><Settings className="w-4 h-4" /> Admin</button>)}
             {user && (<button onClick={handleSignOut} className="p-2 text-red-400 hover:bg-red-900/30 rounded-lg transition"><LogOut className="w-4 h-4" /></button>)}
           </div>
-          {/* Mobile */}
+
+          {/* Mobile actions */}
           <div className="flex md:hidden items-center gap-2">
+            <GlobalSearch />
             <button onClick={() => setShowDice(v => !v)} className={`text-lg px-2 py-1.5 rounded transition ${ showDice ? 'bg-amber-600 text-white' : 'bg-slate-800 text-amber-300' }`}>🎲</button>
             <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-amber-200 hover:bg-slate-800 rounded transition">{isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}</button>
           </div>
         </div>
       </nav>
+
       {isOpen && (
         <div className="fixed inset-0 z-30 bg-slate-950/98 pt-14 overflow-y-auto">
           <div className="px-4 py-6 space-y-2">
