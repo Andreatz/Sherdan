@@ -22,7 +22,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const location = useLocation();
   const { signOut } = useAuth();
 
-  // Derive currentPage from route if not provided
   const activePage = currentPage ?? location.pathname.split('/').pop() ?? 'dashboard';
 
   const handleSignOut = async () => {
@@ -35,18 +34,19 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   };
 
   const menuItems = [
-    { id: 'admin',     label: it.admin.dashboard,   path: '/admin' },
-    { id: 'characters',label: it.admin.characters,  path: '/admin/characters' },
-    { id: 'sessions',  label: it.admin.sessions,    path: '/admin/sessions' },
-    { id: 'missions',  label: 'Missioni',            path: '/admin/missions' },
-    { id: 'locations', label: it.admin.locations,   path: '/admin/locations' },
-    { id: 'gallery',   label: it.admin.gallery,     path: '/admin/gallery' },
-    { id: 'bestiary',  label: 'Bestiario',          path: '/admin/bestiary' },
-    { id: 'npc',       label: 'NPC',               path: '/admin/npc' },
-    { id: 'factions',  label: 'Fazioni',           path: '/admin/factions' },
-    { id: 'timeline',  label: 'Cronistoria',       path: '/admin/timeline' },
-    { id: 'diary',     label: 'Diario del DM',     path: '/admin/diary' },
-    { id: 'settings',  label: it.admin.settings,   path: '/admin/settings' },
+    { id: 'admin',      label: it.admin.dashboard,  path: '/admin' },
+    { id: 'characters', label: it.admin.characters, path: '/admin/characters' },
+    { id: 'sessions',   label: it.admin.sessions,   path: '/admin/sessions' },
+    { id: 'missions',   label: 'Missioni',           path: '/admin/missions' },
+    { id: 'locations',  label: it.admin.locations,  path: '/admin/locations' },
+    { id: 'gallery',    label: it.admin.gallery,    path: '/admin/gallery' },
+    { id: 'bestiary',   label: 'Bestiario',         path: '/admin/bestiary' },
+    { id: 'npc',        label: 'NPC',               path: '/admin/npc' },
+    { id: 'factions',   label: 'Fazioni',           path: '/admin/factions' },
+    { id: 'timeline',   label: 'Cronistoria',       path: '/admin/timeline' },
+    { id: 'lore',       label: 'Lore',              path: '/admin/lore' },
+    { id: 'diary',      label: 'Diario del DM',     path: '/admin/diary' },
+    { id: 'settings',   label: it.admin.settings,   path: '/admin/settings' },
   ];
 
   const isActive = (item: typeof menuItems[0]) =>
