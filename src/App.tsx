@@ -57,8 +57,11 @@ const ScrollToSection: React.FC = () => {
         else if (attempts < 10) { setTimeout(() => tryScroll(attempts + 1), 150); }
       };
       tryScroll();
+    } else {
+      // Scroll to top on every route change (unless scrollTo anchor is set)
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
-  }, [location.state]);
+  }, [location.pathname, location.state]);
   return null;
 };
 
@@ -77,6 +80,8 @@ function App() {
             </div>
             <Footer /></>}
           />
+          <Route path="/personaggi" element={<><Navigation /><div className="bg-slate-900 min-h-screen pt-14"><CharactersPage /></div><Footer /></>} />
+          <Route path="/galleria" element={<><Navigation /><div className="bg-slate-900 min-h-screen pt-14"><GalleryPage /></div><Footer /></>} />
           <Route path="/sessioni" element={<ProtectedRoute><Navigation /><SessionsPage /><Footer /></ProtectedRoute>} />
           <Route path="/luoghi" element={<><Navigation /><LocationsPage /><Footer /></>} />
           <Route path="/bestiario" element={<><Navigation /><BestiaryPage /><Footer /></>} />

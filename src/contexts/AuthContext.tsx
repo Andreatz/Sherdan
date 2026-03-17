@@ -6,6 +6,8 @@ interface AuthContextType {
   user: User | null;
   isAdmin: boolean;
   isLoading: boolean;
+  viewAsUser: boolean;
+  toggleViewMode: () => void;
   signIn: (email: string, password: string) => Promise<any>;
   signUp: (email: string, password: string) => Promise<any>;
   signOut: () => Promise<void>;
@@ -17,6 +19,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [viewAsUser, setViewAsUser] = useState(false);
+
+  const toggleViewMode = () => setViewAsUser(v => !v);
 
   useEffect(() => {
     let mounted = true;
@@ -35,12 +40,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (mounted) setIsAdmin(adminStatus);
         } else {
           if (mounted) setIsAdmin(false);
+          if (mounted) setViewAsUser(false);
         }
       } catch (error) {
         console.error('Error syncing auth state:', error);
         if (mounted) {
           setUser(null);
           setIsAdmin(false);
+          setViewAsUser(false);
         }
       } finally {
         if (mounted) setIsLoading(false);
@@ -110,6 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setUser(null);
     setIsAdmin(false);
+    setViewAsUser(false);
     setIsLoading(false);
   };
 
@@ -119,6 +127,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user,
         isAdmin,
         isLoading,
+        viewAsUser,
+        toggleViewMode,
         signIn,
         signUp,
         signOut,

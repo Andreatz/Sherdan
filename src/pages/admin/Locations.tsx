@@ -16,10 +16,7 @@ interface Location {
   history?: string | null;
 }
 
-type AdminTab = 'map' | 'db';
-
 export const LocationsPage: React.FC = () => {
-  const [tab, setTab] = useState<AdminTab>('map');
   const [locations, setLocations] = useState<Location[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -110,12 +107,19 @@ export const LocationsPage: React.FC = () => {
     }
   };
 
+  // Unione luoghi mappa statica + luoghi database
+  const mapLocationNames = new Set(MAP_LOCATIONS.map(l => l.name.toLowerCase()));
+  const isFromMap = (name: string) => mapLocationNames.has(name.toLowerCase());
+
   return (
     <AdminLayout>
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h1 className="text-3xl font-bold text-amber-300">{it.adminLocations.title}</h1>
-          {tab === 'db' && !showForm && (
+          <div>
+            <h1 className="text-3xl font-bold text-amber-300">{it.adminLocations.title}</h1>
+            <p className="text-slate-400 text-sm mt-1">Tutti i luoghi del mondo di Sherdan — mappa e database unificati.</p>
+          </div>
+          {!showForm && (
             <button
               onClick={() => setShowForm(true)}
               className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg transition"
@@ -126,153 +130,112 @@ export const LocationsPage: React.FC = () => {
           )}
         </div>
 
-        {/* Tab switcher */}
-        <div className="flex gap-2 border-b border-amber-700/20 pb-2">
-          <button
-            onClick={() => setTab('map')}
-            className={`px-4 py-2 rounded-t-lg text-sm font-semibold transition ${
-              tab === 'map' ? 'bg-amber-600 text-white' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            🗺️ Luoghi della Mappa
-          </button>
-          <button
-            onClick={() => setTab('db')}
-            className={`px-4 py-2 rounded-t-lg text-sm font-semibold transition ${
-              tab === 'db' ? 'bg-amber-600 text-white' : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            🗄️ Luoghi del Database
-          </button>
+        {/* Luoghi dalla mappa (mapData.ts) — sola lettura */}
+        <div className="space-y-3">
+          <h2 className="text-lg font-bold text-amber-400 flex items-center gap-2">🗺️ Luoghi della Mappa <span className="text-xs font-normal text-slate-500">({MAP_LOCATIONS.length} totali — sola lettura)</span></h2>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {MAP_LOCATIONS.map((loc) => (
+              <div key={loc.id} className="bg-slate-800/50 border border-slate-700 rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className={`w-2 h-2 rounded-full ${loc.type === 'region' ? 'bg-amber-400' : 'bg-sky-300'}`} />
+                  <span className="font-bold text-amber-200 text-sm">{loc.name}</span>
+                  <span className="ml-auto text-xs text-slate-600">{loc.type === 'region' ? 'Regione' : 'Città'}</span>
+                </div>
+                <p className="text-slate-400 text-xs italic">{loc.shortDescription}</p>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* TAB: Luoghi dalla mappa (mapData.ts) */}
-        {tab === 'map' && (
-          <div className="space-y-4">
-            <p className="text-slate-400 text-sm">Questi luoghi provengono da <code className="text-amber-400">mapData.ts</code> e sono visualizzati nella mappa interattiva e nella pagina pubblica /luoghi.</p>
+        <div className="border-t border-slate-700/50 pt-4 space-y-4">
+          <h2 className="text-lg font-bold text-amber-400 flex items-center gap-2">🗄️ Luoghi del Database <span className="text-xs font-normal text-slate-500">({locations.length} registrati)</span></h2>
 
-            {/* Regioni */}
-            <h2 className="text-xl font-bold text-amber-400 mt-4">Regioni ({MAP_LOCATIONS.filter(l => l.type === 'region').length})</h2>
-            <div className="grid gap-3">
-              {MAP_LOCATIONS.filter(l => l.type === 'region').map((loc) => (
-                <div key={loc.id} className="bg-slate-800 border border-amber-700/20 rounded-xl p-5">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="w-2 h-2 rounded-full bg-amber-400" />
-                    <h3 className="text-lg font-bold text-amber-300">{loc.name}</h3>
-                    {loc.regionSlug && (
-                      <span className="ml-auto text-xs text-slate-500 font-mono">/mappa/{loc.regionSlug}</span>
-                    )}
-                  </div>
-                  <p className="text-slate-400 text-sm mt-1 italic">{loc.shortDescription}</p>
-                  <p className="text-slate-300 text-sm mt-2 leading-6">{loc.fullDescription}</p>
-                  <p className="text-slate-600 text-xs mt-3">x: {loc.x} — y: {loc.y}</p>
+          {showForm && (
+            <div className="bg-slate-800 border border-amber-700/20 rounded-xl p-6">
+              <h2 className="text-2xl font-bold text-amber-300 mb-5">
+                {editingId ? it.adminLocations.edit : it.adminLocations.addNew}
+              </h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input type="text" placeholder={it.adminLocations.fields.name} value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })} required
+                  className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400" />
+                <textarea placeholder={it.adminLocations.fields.description} value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })} required rows={4}
+                  className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400" />
+                <div className="grid md:grid-cols-2 gap-4">
+                  <select value={formData.location_type}
+                    onChange={(e) => setFormData({ ...formData, location_type: e.target.value as Location['location_type'] })}
+                    className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white">
+                    <option value="port">{it.adminLocations.types.port}</option>
+                    <option value="island">{it.adminLocations.types.island}</option>
+                    <option value="territory">{it.adminLocations.types.territory}</option>
+                    <option value="landmark">{it.adminLocations.types.landmark}</option>
+                  </select>
+                  <select value={formData.control_status}
+                    onChange={(e) => setFormData({ ...formData, control_status: e.target.value as Location['control_status'] })}
+                    className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white">
+                    <option value="neutral">{it.adminLocations.statuses.neutral}</option>
+                    <option value="player_controlled">{it.adminLocations.statuses.player_controlled}</option>
+                    <option value="enemy_controlled">{it.adminLocations.statuses.enemy_controlled}</option>
+                    <option value="allied">{it.adminLocations.statuses.allied}</option>
+                  </select>
                 </div>
-              ))}
-            </div>
-
-            {/* Città */}
-            <h2 className="text-xl font-bold text-sky-400 mt-6">Città ({MAP_LOCATIONS.filter(l => l.type === 'city').length})</h2>
-            <div className="grid gap-3">
-              {MAP_LOCATIONS.filter(l => l.type === 'city').map((loc) => (
-                <div key={loc.id} className="bg-slate-800 border border-sky-900/20 rounded-xl p-5">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="w-2 h-2 rounded-full bg-sky-300" />
-                    <h3 className="text-lg font-bold text-sky-200">{loc.name}</h3>
-                  </div>
-                  <p className="text-slate-400 text-sm mt-1 italic">{loc.shortDescription}</p>
-                  <p className="text-slate-300 text-sm mt-2 leading-6">{loc.fullDescription}</p>
-                  <p className="text-slate-600 text-xs mt-3">x: {loc.x} — y: {loc.y}</p>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <input type="number" placeholder={it.adminLocations.fields.x} value={formData.x_coordinate}
+                    onChange={(e) => setFormData({ ...formData, x_coordinate: parseFloat(e.target.value) || 0 })}
+                    step="0.1" required className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400" />
+                  <input type="number" placeholder={it.adminLocations.fields.y} value={formData.y_coordinate}
+                    onChange={(e) => setFormData({ ...formData, y_coordinate: parseFloat(e.target.value) || 0 })}
+                    step="0.1" required className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400" />
                 </div>
-              ))}
+                <textarea placeholder={it.adminLocations.fields.history} value={formData.history}
+                  onChange={(e) => setFormData({ ...formData, history: e.target.value })} rows={3}
+                  className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400" />
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-4 rounded transition">
+                    {editingId ? it.adminLocations.actions.update : it.adminLocations.actions.create}
+                  </button>
+                  <button type="button" onClick={resetForm} className="bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded transition">
+                    {it.adminLocations.actions.cancel}
+                  </button>
+                </div>
+              </form>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* TAB: Luoghi dal database (world_locations) */}
-        {tab === 'db' && (
-          <div className="space-y-4">
-            {showForm && (
-              <div className="bg-slate-800 border border-amber-700/20 rounded-xl p-6">
-                <h2 className="text-2xl font-bold text-amber-300 mb-5">
-                  {editingId ? it.adminLocations.edit : it.adminLocations.addNew}
-                </h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <input type="text" placeholder={it.adminLocations.fields.name} value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })} required
-                    className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400" />
-                  <textarea placeholder={it.adminLocations.fields.description} value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })} required rows={4}
-                    className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400" />
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <select value={formData.location_type}
-                      onChange={(e) => setFormData({ ...formData, location_type: e.target.value as Location['location_type'] })}
-                      className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white">
-                      <option value="port">{it.adminLocations.types.port}</option>
-                      <option value="island">{it.adminLocations.types.island}</option>
-                      <option value="territory">{it.adminLocations.types.territory}</option>
-                      <option value="landmark">{it.adminLocations.types.landmark}</option>
-                    </select>
-                    <select value={formData.control_status}
-                      onChange={(e) => setFormData({ ...formData, control_status: e.target.value as Location['control_status'] })}
-                      className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white">
-                      <option value="neutral">{it.adminLocations.statuses.neutral}</option>
-                      <option value="player_controlled">{it.adminLocations.statuses.player_controlled}</option>
-                      <option value="enemy_controlled">{it.adminLocations.statuses.enemy_controlled}</option>
-                      <option value="allied">{it.adminLocations.statuses.allied}</option>
-                    </select>
-                  </div>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <input type="number" placeholder={it.adminLocations.fields.x} value={formData.x_coordinate}
-                      onChange={(e) => setFormData({ ...formData, x_coordinate: parseFloat(e.target.value) || 0 })}
-                      step="0.1" required className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400" />
-                    <input type="number" placeholder={it.adminLocations.fields.y} value={formData.y_coordinate}
-                      onChange={(e) => setFormData({ ...formData, y_coordinate: parseFloat(e.target.value) || 0 })}
-                      step="0.1" required className="px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400" />
-                  </div>
-                  <textarea placeholder={it.adminLocations.fields.history} value={formData.history}
-                    onChange={(e) => setFormData({ ...formData, history: e.target.value })} rows={3}
-                    className="w-full px-4 py-2 bg-slate-700 border border-amber-700/30 rounded text-white placeholder-slate-400" />
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <button type="submit" className="bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 px-4 rounded transition">
-                      {editingId ? it.adminLocations.actions.update : it.adminLocations.actions.create}
-                    </button>
-                    <button type="button" onClick={resetForm} className="bg-slate-600 hover:bg-slate-500 text-white font-semibold py-2 px-4 rounded transition">
-                      {it.adminLocations.actions.cancel}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
-
-            {isLoading ? (
-              <div className="text-center text-amber-300 py-8">{it.adminLocations.loading}</div>
-            ) : locations.length === 0 ? (
-              <div className="text-center text-slate-300 py-10 bg-slate-800 rounded-xl border border-amber-700/20">{it.adminLocations.empty}</div>
-            ) : (
-              <div className="grid gap-4">
-                {locations.map((location) => (
-                  <div key={location.id} className="bg-slate-800 border border-amber-700/20 rounded-xl p-5 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                    <div className="flex-1">
+          {isLoading ? (
+            <div className="text-center text-amber-300 py-8">{it.adminLocations.loading}</div>
+          ) : locations.length === 0 ? (
+            <div className="text-center text-slate-300 py-10 bg-slate-800 rounded-xl border border-amber-700/20">{it.adminLocations.empty}</div>
+          ) : (
+            <div className="grid gap-4">
+              {locations.map((location) => (
+                <div key={location.id} className="bg-slate-800 border border-amber-700/20 rounded-xl p-5 flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-xl font-bold text-amber-300">{location.name}</h3>
-                      <p className="text-slate-300 text-sm mt-1">
-                        {it.adminLocations.types[location.location_type]} •{' '}
-                        <span className={getStatusColor(location.control_status)}>
-                          {it.adminLocations.statuses[location.control_status]}
-                        </span>
-                      </p>
-                      <p className="text-slate-400 text-sm mt-2">{it.adminLocations.coords}: ({location.x_coordinate}, {location.y_coordinate})</p>
-                      <p className="text-slate-300 text-sm mt-3 line-clamp-3">{location.description}</p>
+                      {isFromMap(location.name) && (
+                        <span className="text-xs bg-amber-900/30 text-amber-500 border border-amber-700/30 rounded px-2 py-0.5">🗺️ Anche in mappa</span>
+                      )}
                     </div>
-                    <div className="flex gap-2">
-                      <button onClick={() => handleEdit(location)} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition"><Pencil size={18} /></button>
-                      <button onClick={() => handleDelete(location.id)} className="bg-red-600 hover:bg-red-700 text-white p-2 rounded transition"><Trash2 size={18} /></button>
-                    </div>
+                    <p className="text-slate-300 text-sm mt-1">
+                      {it.adminLocations.types[location.location_type]} •{' '}
+                      <span className={getStatusColor(location.control_status)}>
+                        {it.adminLocations.statuses[location.control_status]}
+                      </span>
+                    </p>
+                    <p className="text-slate-400 text-sm mt-2">{it.adminLocations.coords}: ({location.x_coordinate}, {location.y_coordinate})</p>
+                    <p className="text-slate-300 text-sm mt-3 line-clamp-3">{location.description}</p>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                  <div className="flex gap-2">
+                    <button onClick={() => handleEdit(location)} className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded transition"><Pencil size={18} /></button>
+                    <button onClick={() => handleDelete(location.id)} className="bg-red-600 hover:bg-red-700 text-white p-2 rounded transition"><Trash2 size={18} /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </AdminLayout>
   );

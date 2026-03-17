@@ -67,7 +67,6 @@ export const MapAdminPage: React.FC = () => {
     await load();
   };
 
-  // Click sulla mappa per posizionare il pin
   const handleMapClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!placing) return;
     const rect = e.currentTarget.getBoundingClientRect();
@@ -89,8 +88,8 @@ export const MapAdminPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
           <p className="text-slate-400 text-sm">
             {placing
-              ? '📍 <strong>Clicca sulla mappa</strong> per posizionare il nuovo pin.'
-              : 'Clicca su “Nuovo Pin”, poi clicca sulla mappa per posizionarlo.'
+              ? '📍 Clicca sulla mappa per posizionare il nuovo pin.'
+              : 'Clicca su "Nuovo Pin", poi clicca sulla mappa per posizionarlo.'
             }
           </p>
           <button
@@ -101,12 +100,11 @@ export const MapAdminPage: React.FC = () => {
           </button>
         </div>
 
-        {/* Mappa cliccabile */}
+        {/* Mappa cliccabile — altezza completa senza ritaglio */}
         <div
-          className={`relative w-full overflow-hidden rounded-2xl border ${
+          className={`relative w-full rounded-2xl border ${
             placing ? 'border-amber-500 cursor-crosshair ring-2 ring-amber-500/40' : 'border-slate-700'
-          } bg-slate-900`}
-          style={{ maxHeight: '60vh' }}
+          } bg-slate-900 overflow-hidden`}
           onClick={handleMapClick}
         >
           <img
@@ -259,7 +257,7 @@ export const MapAdminPage: React.FC = () => {
           ) : pins.length === 0 ? (
             <div className="text-center py-16 bg-slate-900/50 rounded-2xl border border-dashed border-slate-700">
               <MapPin className="w-10 h-10 text-slate-700 mx-auto mb-3" />
-              <p className="text-slate-500 italic">Nessun pin ancora. Clicca “Nuovo Pin” e poi sulla mappa!</p>
+              <p className="text-slate-500 italic">Nessun pin ancora. Clicca "Nuovo Pin" e poi sulla mappa!</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
